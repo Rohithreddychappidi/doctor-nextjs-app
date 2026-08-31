@@ -1,17 +1,19 @@
+"use client";
+
 import Link from "next/link";
+import { useSiteData } from "@/lib/DataContext";
 import { EDUCATION_TRAINING_SUBPAGES } from "@/lib/defaultData";
 
 export default function EducationTrainingPage() {
+  const { content } = useSiteData();
+  const c = content.educationTraining;
   return (
     <>
       <section className="hero" style={{ paddingBottom: 40 }}>
         <div className="container">
-          <div className="eyebrow">Education &amp; Training</div>
-          <h1 style={{ maxWidth: 720 }}>All learning services, in one place</h1>
-          <p className="lede" style={{ marginTop: 16 }}>
-            Live Learning, Question Banks, Tele-Rotations, and Physical Rotations —
-            review eligibility, schedules, and requirements, and apply or log in from here.
-          </p>
+          <div className="eyebrow">{c.eyebrow}</div>
+          <h1 style={{ maxWidth: 720 }}>{c.heading}</h1>
+          <p className="lede" style={{ marginTop: 16 }}>{c.body}</p>
         </div>
       </section>
 

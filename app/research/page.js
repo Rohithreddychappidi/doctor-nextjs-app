@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useSiteData } from "@/lib/DataContext";
 import StatStrip from "@/components/StatStrip";
 
 const ONGOING = [
@@ -18,18 +21,15 @@ const PUBLICATIONS = [
 const statusLabel = { done: "Published", progress: "Under review", new: "In progress" };
 
 export default function ResearchPage() {
+  const { content } = useSiteData();
+  const c = content.research;
   return (
     <>
       <section className="hero" style={{ paddingBottom: 40 }}>
         <div className="container">
-          <div className="eyebrow">Research</div>
-          <h1 style={{ maxWidth: 720 }}>Neonatology &amp; pediatrics research — the only areas we work in</h1>
-          <p className="lede" style={{ marginTop: 16 }}>
-            Every study here is focused on newborn and child health. If you&apos;re a
-            student looking for a research opportunity outside neonatology or pediatrics,
-            this isn&apos;t the right fit — and we&apos;ll say so honestly during your
-            free consultation.
-          </p>
+          <div className="eyebrow">{c.eyebrow}</div>
+          <h1 style={{ maxWidth: 720 }}>{c.heading}</h1>
+          <p className="lede" style={{ marginTop: 16 }}>{c.body}</p>
         </div>
       </section>
 

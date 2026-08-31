@@ -1,17 +1,18 @@
+"use client";
+
 import Link from "next/link";
+import { useSiteData } from "@/lib/DataContext";
 
 export default function CommunityImpactPage() {
+  const { content } = useSiteData();
+  const c = content.communityImpact;
   return (
     <>
       <section className="hero" style={{ paddingBottom: 40 }}>
         <div className="container">
-          <div className="eyebrow">Community Impact</div>
-          <h1 style={{ maxWidth: 720 }}>Community health, outreach, and global initiatives</h1>
-          <p className="lede" style={{ marginTop: 16 }}>
-            From India to communities around the world — outreach work, volunteer
-            opportunities, and partnerships that sit alongside the clinical and
-            educational sides of this practice.
-          </p>
+          <div className="eyebrow">{c.eyebrow}</div>
+          <h1 style={{ maxWidth: 720 }}>{c.heading}</h1>
+          <p className="lede" style={{ marginTop: 16 }}>{c.body}</p>
         </div>
       </section>
 

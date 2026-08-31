@@ -2,20 +2,19 @@
 
 import { useState } from "react";
 import { CONTACT_CATEGORIES } from "@/lib/defaultData";
+import { useSiteData } from "@/lib/DataContext";
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const { content } = useSiteData();
+  const c = content.contact;
   return (
     <>
       <section className="hero" style={{ paddingBottom: 40 }}>
         <div className="container">
-          <div className="eyebrow">Contact</div>
-          <h1 style={{ maxWidth: 640 }}>One form for every kind of inquiry</h1>
-          <p className="lede" style={{ marginTop: 16 }}>
-            Education &amp; Training, Clinical Services, Advisory Services, Research,
-            Community Impact, or a general question — select the category that fits and
-            we&apos;ll route it appropriately.
-          </p>
+          <div className="eyebrow">{c.eyebrow}</div>
+          <h1 style={{ maxWidth: 640 }}>{c.heading}</h1>
+          <p className="lede" style={{ marginTop: 16 }}>{c.body}</p>
         </div>
       </section>
 

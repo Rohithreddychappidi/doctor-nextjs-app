@@ -2,59 +2,50 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useSiteData } from "@/lib/DataContext";
 
-const SLIDES = [
-  {
-    tag: "Free Consultations · Phone Call Based",
-    title: "From India, to students and families everywhere.",
-    body: "Every consultation is free. This site is our record book — a way to track and share how many people we've been able to help, one phone call at a time.",
-    cta: { href: "/clinical-services", label: "Request a Free Consultation" },
-  },
-  {
-    tag: "Neonatology & Pediatrics",
-    title: "Mentorship focused on one thing, done well.",
-    body: "Research, rotations and question bank content are all built around neonatology and pediatrics — not a general catalog.",
-    cta: { href: "/research", label: "See Research Opportunities" },
-  },
-  {
-    tag: "Support the Work",
-    title: "Help keep this practice free for the next student.",
-    body: "Donations go toward website maintenance, mentorship resources and keeping every consultation free of charge.",
-    cta: { href: "/community-impact", label: "See Community Impact" },
-  },
+const SLIDE_LINKS = [
+  "/clinical-services",
+  "/research",
+  "/community-impact",
 ];
 
 export default function HomeBanner() {
+  const { content } = useSiteData();
+  const slides = content?.home?.bannerSlides || [];
   const [i, setI] = useState(0);
   const timer = useRef(null);
 
   useEffect(() => {
-    timer.current = setInterval(() => setI((v) => (v + 1) % SLIDES.length), 6000);
+    if (slides.length < 2) return;
+    timer.current = setInterval(() => setI((v) => (v + 1) % slides.length), 6000);
     return () => clearInterval(timer.current);
-  }, []);
+  }, [slides.length]);
 
   const go = (idx) => {
-    setI((idx + SLIDES.length) % SLIDES.length);
+    setI((idx + slides.length) % slides.length);
     clearInterval(timer.current);
-    timer.current = setInterval(() => setI((v) => (v + 1) % SLIDES.length), 6000);
+    timer.current = setInterval(() => setI((v) => (v + 1) % slides.length), 6000);
   };
 
+  if (slides.length === 0) return null;
+
   return (
-    <div className="banner">
-      {SLIDES.map((s, idx) => (
-        <div key={s.title} className={`banner-slide${idx === i ? " active" : ""}`}>
+    <div className="banner banner-hero-bg">
+      {slides.map((s, idx) => (
+        <div key={s.heading} className={`banner-slide${idx === i ? " active" : ""}`}>
           <div>
             <span className="tag">{s.tag}</span>
-            <h2>{s.title}</h2>
+            <h2>{s.heading}</h2>
             <p>{s.body}</p>
-            <Link href={s.cta.href} className="btn btn-primary">{s.cta.label}</Link>
+            <Link href={SLIDE_LINKS[idx] || "/clinical-services"} className="btn btn-primary">{s.ctaLabel}</Link>
           </div>
         </div>
       ))}
       <div className="banner-dots">
-        {SLIDES.map((s, idx) => (
+        {slides.map((s, idx) => (
           <button
-            key={s.title}
+            key={s.heading}
             className={idx === i ? "active" : ""}
             aria-label={`Show slide ${idx + 1}`}
             onClick={() => go(idx)}

@@ -47,6 +47,9 @@ export default function Navbar() {
           <Link href="/student-login" className={`nav-login-mobile${isActive("/student-login") ? " active" : ""}`}>
             Student Login
           </Link>
+          <Link href="/community-impact" className="nav-cta-mobile" style={{ background: "var(--gold)" }}>
+            Donate
+          </Link>
           <Link href="/clinical-services" className="nav-cta-mobile">
             Free Consultation
           </Link>
@@ -54,6 +57,7 @@ export default function Navbar() {
 
         <div className="nav-cta">
           <Link href="/student-login" className="btn btn-outline btn-sm">Student Login</Link>
+          <Link href="/community-impact" className="btn btn-gold btn-sm">Donate</Link>
           <Link href="/clinical-services" className="btn btn-primary btn-sm">Free Consultation</Link>
           <button
             className="nav-toggle"

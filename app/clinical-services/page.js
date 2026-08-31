@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useSiteData } from "@/lib/DataContext";
 
 export default function ClinicalServicesPage() {
-  const { addRequest } = useSiteData();
+  const { addRequest, content } = useSiteData();
+  const c = content.clinicalServices;
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({ name: "", contact: "", reason: "", preferredTime: "" });
 
@@ -19,12 +20,9 @@ export default function ClinicalServicesPage() {
     <>
       <section className="hero" style={{ paddingBottom: 30 }}>
         <div className="container">
-          <div className="eyebrow">Clinical Services</div>
-          <h1 style={{ maxWidth: 720 }}>Pediatric &amp; neonatal consultations through approved clinical pathways</h1>
-          <p className="lede" style={{ marginTop: 16 }}>
-            Every consultation offered here is a free phone call — no cost, no obligation.
-            This page explains how scheduling works, who is eligible, and what to do in an emergency.
-          </p>
+          <div className="eyebrow">{c.eyebrow}</div>
+          <h1 style={{ maxWidth: 720 }}>{c.heading}</h1>
+          <p className="lede" style={{ marginTop: 16 }}>{c.body}</p>
         </div>
       </section>
 

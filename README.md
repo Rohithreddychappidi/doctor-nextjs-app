@@ -46,9 +46,33 @@ Visit `http://localhost:3000`.
 - `/contact` — single form routing by category (Education & Training, Clinical Services, Advisory Services, Research, Community Impact, General)
 - `/student-login` — front-end preview only, no real auth
 - `/admin` — stats editor + quick links
+- `/admin/content` — edit hero/intro text across every page (Home banner slides, Home service cards, and every other page's eyebrow/heading/intro paragraph)
 - `/admin/meetings` — add/edit/delete Live Learning session cards (title, description, date, image URL, free/paid + price)
 - `/admin/testimonials` — add/delete testimonials
 - `/admin/requests` — consultation request record book, with status + notes
+
+## Content editing architecture
+
+Every page's hero/intro text (and Home's banner slides + service cards) now
+lives in `lib/defaultData.js` as `DEFAULT_CONTENT`, managed through
+`DataContext`'s `content` state and edited via one generic admin screen
+(`/admin/content`) — not a bespoke form per page. To add a new editable
+field anywhere on the site:
+
+1. Add the field to the relevant page's object in `DEFAULT_CONTENT`.
+2. Read it in the page component via `const { content } = useSiteData(); const c = content.pageKey;` and render `{c.fieldName}`.
+3. Add one line to the `SIMPLE_PAGES` schema (or a bespoke panel, for arrays like `bannerSlides`/`cards`) in `app/admin/content/page.js`.
+
+Structured/repeatable content (About's accordion entries, the Tele-Rotation
+curriculum, Question Bank topics) intentionally stays in code for now —
+it's less likely to need frequent editing than page copy, and moving it to
+the admin UI is a natural next step once real content from the client
+shows which fields actually change often.
+
+Meeting/event cards (`/admin/meetings`) now also support an optional
+**join link** field (Zoom/Google Meet URL) — stored but not rendered
+publicly, since exposing a live meeting link to anyone visiting the
+public site would let uninvited people join.
 
 ## What changed in this restructure
 

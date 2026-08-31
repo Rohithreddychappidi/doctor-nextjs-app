@@ -5,24 +5,23 @@ import ImagePlaceholder from "@/components/ImagePlaceholder";
 import StatStrip from "@/components/StatStrip";
 import { Accordion, AccordionItem } from "@/components/Accordion";
 import { PROFILE_SECTIONS } from "@/lib/defaultData";
+import { useSiteData } from "@/lib/DataContext";
 
 export default function AboutPage() {
+  const { content } = useSiteData();
+  const c = content.about;
   return (
     <>
       <section className="hero" style={{ paddingBottom: 40 }}>
         <div className="container hero-grid" style={{ gridTemplateColumns: "0.85fr 1.15fr" }}>
           <ImagePlaceholder label="Doctor photo — to be added" height={320} />
           <div>
-            <div className="eyebrow">About</div>
-            <h1 style={{ marginBottom: 14 }}>Dr. Doctor Name</h1>
+            <div className="eyebrow">{c.eyebrow}</div>
+            <h1 style={{ marginBottom: 14 }}>{c.heading}</h1>
             <p className="lede" style={{ marginBottom: 10 }}>
-              <strong>From India, to the world.</strong> Neonatology &amp; Pediatrics —
-              mission, credentials, leadership, teaching, and research behind this practice.
+              <strong>{c.tagline}</strong> {c.intro}
             </p>
-            <p style={{ fontSize: 14, marginBottom: 26 }}>
-              Every number below is a real record of this practice&apos;s work — click any
-              section further down the page to see the detail behind it.
-            </p>
+            <p style={{ fontSize: 14, marginBottom: 26 }}>{c.note}</p>
             <div className="hero-actions">
               <Link href="/clinical-services" className="btn btn-primary">Clinical Services</Link>
               <Link href="/research" className="btn btn-outline">View Research</Link>

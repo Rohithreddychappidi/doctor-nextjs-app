@@ -5,7 +5,7 @@ import AdminShell from "@/components/AdminShell";
 import MeetingCard from "@/components/MeetingCard";
 import { useSiteData } from "@/lib/DataContext";
 
-const EMPTY_FORM = { title: "", description: "", date: "", imageUrl: "", isFree: true, price: 0 };
+const EMPTY_FORM = { title: "", description: "", date: "", imageUrl: "", joinLink: "", isFree: true, price: 0 };
 
 export default function AdminMeetingsPage() {
   const { meetings, addMeeting, updateMeeting, deleteMeeting } = useSiteData();
@@ -36,7 +36,7 @@ export default function AdminMeetingsPage() {
   const startEdit = (m) => {
     setForm({
       title: m.title, description: m.description, date: m.date,
-      imageUrl: m.imageUrl || "", isFree: m.isFree, price: m.price,
+      imageUrl: m.imageUrl || "", joinLink: m.joinLink || "", isFree: m.isFree, price: m.price,
     });
     setEditingId(m.id);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -75,6 +75,13 @@ export default function AdminMeetingsPage() {
             <div className="field">
               <label htmlFor="imageUrl">Image URL (optional)</label>
               <input id="imageUrl" name="imageUrl" value={form.imageUrl} onChange={handleChange} placeholder="https://... (leave blank for a placeholder)" />
+            </div>
+          </div>
+          <div className="form-row single">
+            <div className="field">
+              <label htmlFor="joinLink">Meeting join link (Zoom / Google Meet)</label>
+              <input id="joinLink" name="joinLink" value={form.joinLink} onChange={handleChange} placeholder="https://zoom.us/j/... or https://meet.google.com/..." />
+              <span className="hint">Only shown to students once they're logged in — never posted publicly on the site.</span>
             </div>
           </div>
           <div className="form-row">

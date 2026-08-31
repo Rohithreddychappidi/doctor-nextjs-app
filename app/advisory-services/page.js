@@ -1,17 +1,19 @@
+"use client";
+
 import Link from "next/link";
+import { useSiteData } from "@/lib/DataContext";
 import { ADVISORY_SERVICES_SUBPAGES } from "@/lib/defaultData";
 
 export default function AdvisoryServicesPage() {
+  const { content } = useSiteData();
+  const c = content.advisoryServices;
   return (
     <>
       <section className="hero" style={{ paddingBottom: 40 }}>
         <div className="container">
-          <div className="eyebrow">Advisory Services</div>
-          <h1 style={{ maxWidth: 720 }}>Professional guidance for hospitals &amp; educational institutions</h1>
-          <p className="lede" style={{ marginTop: 16 }}>
-            NICU development and expansion, and pediatrics/neonatology curriculum
-            development — advisory work for institutions, not individual patient care.
-          </p>
+          <div className="eyebrow">{c.eyebrow}</div>
+          <h1 style={{ maxWidth: 720 }}>{c.heading}</h1>
+          <p className="lede" style={{ marginTop: 16 }}>{c.body}</p>
         </div>
       </section>
 
