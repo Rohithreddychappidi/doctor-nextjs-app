@@ -34,7 +34,7 @@ export default function AdminOverviewPage() {
           <div className="eyebrow" style={{ marginBottom: 6 }}>Admin · Overview</div>
           <h2>Site Stats &amp; Snapshot</h2>
         </div>
-        <a href="/doctor-profile" className="btn btn-outline btn-sm">View public profile page</a>
+        <a href="/about" className="btn btn-outline btn-sm">View public profile page</a>
       </div>
 
       <div className="panel">
@@ -63,7 +63,7 @@ export default function AdminOverviewPage() {
           </div>
         </div>
         <p style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 16 }}>
-          These numbers power the stat strip on the Home and Doctor Profile pages. Update
+          These numbers power the stat strip on the Home and About pages. Update
           them any time — changes save to this browser (a real backend will replace this
           storage later).
         </p>

@@ -1,23 +1,22 @@
-# Dr. Doctor Name — Free Consultation & Mentorship Site (Next.js)
+# Dr. Doctor Name — Free Consultation, Education & Advisory Practice (Next.js)
 
-A front-end prototype rebuild of the practice website, focused on free
-phone consultations, neonatology/pediatrics mentorship, and an
-NGO-style donation/record-keeping model.
+A front-end prototype of the practice website, restructured to match the
+client-supplied "Website Front End V2" information architecture, with
+real curriculum content from the "Pediatrics & Neonatology Tele-Rotation
+Curriculum" document integrated into the Tele-Rotations page.
 
 ## What this is
 
 This is a **Next.js 16 (App Router)** app. All content is placeholder —
 doctor bio, photos, exact numbers, meetings and testimonials — ready to
-be replaced once the client shares real material.
+be replaced once the client shares real material (the doctor's profile
+is expected next, to update the About page).
 
 There is **no real backend yet**. Admin-editable content (site stats,
 meeting/event cards, testimonials, consultation request records) is
 stored in the browser's `localStorage` via a React Context
-(`lib/DataContext.js`), so the admin panel is fully interactive for a
-demo but **does not persist across different browsers/devices** and
-resets if the user clears site data. This is intentional for this
-stage — swap `lib/DataContext.js`'s functions for real API calls once
-a backend/database is ready.
+(`lib/DataContext.js`). Swap its functions for real API calls once a
+backend/database is ready — the client has indicated this is a later phase.
 
 ## Running locally
 
@@ -28,43 +27,52 @@ npm run dev
 
 Visit `http://localhost:3000`.
 
-## Pages
+## Site structure (per client's V2 document)
 
 - `/` — Home
-- `/doctor-profile` — tagline, stats, click-to-expand accordion (Employment, Education, Research, Publications, Helping Students)
-- `/research` — neonatology/pediatrics research only
-- `/question-bank` — 6 topics, each with sub-topics
-- `/tele-rotation` and `/physical-rotation` — separate dedicated pages
-- `/meetings` — public event/meeting cards (admin-managed)
-- `/donate` — NGO-style donation page (front-end only, no real payment processing yet)
-- `/consultation` — free consultation request form (record-keeping, not booking)
+- `/about` — profile, mission, credentials, leadership, teaching, research (accordion sections)
+- `/education-training` — hub page linking to:
+  - `/education-training/live-learning` — lectures, meetings, case discussions, OSCE prep
+  - `/education-training/question-banks` — Shelf/USMLE/pediatrics/neonatology boards, 6 topics
+  - `/education-training/tele-rotations` — full 6-week curriculum (schedule, outcomes, assessment, safety/privacy)
+  - `/education-training/physical-rotations` — institution-approved in-person placements
+- `/clinical-services` — free phone consultation request (scheduling, telehealth eligibility, privacy, emergency guidance)
+- `/advisory-services` — hub page linking to:
+  - `/advisory-services/nicu-development` — NICU development & expansion consulting
+  - `/advisory-services/curriculum-development` — pediatrics/neonatology curriculum design consulting
+- `/research` — neonatology/pediatrics research and publications
+- `/community-impact` — outreach, volunteering, partnerships (donation CTA marked pending legal confirmation, per client's note)
 - `/testimonials`
-- `/contact`
+- `/contact` — single form routing by category (Education & Training, Clinical Services, Advisory Services, Research, Community Impact, General)
 - `/student-login` — front-end preview only, no real auth
 - `/admin` — stats editor + quick links
-- `/admin/meetings` — add/edit/delete meeting cards (title, description, date, image URL, free/paid + price)
+- `/admin/meetings` — add/edit/delete Live Learning session cards (title, description, date, image URL, free/paid + price)
 - `/admin/testimonials` — add/delete testimonials
 - `/admin/requests` — consultation request record book, with status + notes
 
-## Deploying to Vercel
+## What changed in this restructure
 
-This app needs zero configuration for Vercel:
+- Nav simplified from 11 items to 9 top-level items, matching the client's diagram exactly (Student Login moved to a utility button, out of the main nav).
+- Old routes (`/doctor-profile`, `/question-bank`, `/tele-rotation`, `/physical-rotation`, `/meetings`, `/donate`, `/consultation`) were removed and replaced by the new nested structure above — no redirects were added since the site isn't live/indexed yet.
+- Tele-Rotations page now contains the actual curriculum: 6-week schedule table, learning outcomes, purpose statements, assessment weighting, completion standards, and safety/privacy disclosures — sourced from the client's curriculum document.
+- Community Impact replaces the standalone Donate page. Per the client's note, the donation CTA is shown but explicitly marked as pending "the practice's legal donation process" — nothing is collected yet.
+- Fixed a real CSS bug: headings inside dark-background cards (`.card.dark`, `.section.navy`, `.hero-card`) were rendering in dark text, nearly invisible against the navy background. Now explicitly set to white.
 
-1. Push this folder to a GitHub repo (or drag-and-drop via the Vercel dashboard's "Import" flow if you don't want to use git).
-2. In Vercel, "Add New Project" → import the repo → it will auto-detect Next.js → Deploy.
-3. No environment variables are required for this front-end-only version.
+## Deploying to Vercel / Cloudflare Pages
+
+Standard Next.js app, no special configuration needed. See prior conversation for a
+cost comparison between Vercel, Cloudflare Pages, and self-hosting on a Chicago VPS.
 
 ## Known limitations (by design, at this stage)
 
 - No real backend/database — everything admin-editable lives in `localStorage`.
-- No real authentication for Student Login or Admin — both are open, unauthenticated front-end previews.
-- No real payment processing on the Donate page.
-- Doctor photo and meeting/event images use placeholder blocks until real images are supplied (or a URL is pasted into the admin form's "Image URL" field).
-- Google Fonts (Fraunces, Public Sans, IBM Plex Mono) load from Google's CDN — this requires the deployed site to have normal internet access, which Vercel provides by default.
+- No real authentication for Student Login or Admin.
+- No real payment processing anywhere (Community Impact's donation CTA is explicitly inactive).
+- Doctor photo and meeting/event images use placeholder blocks until real images are supplied.
+- Doctor's real bio/credentials are still placeholder text on `/about` — pending the client's profile document.
 
-## Next steps toward a real backend
+## Next steps
 
-- Replace `lib/DataContext.js`'s in-memory/localStorage logic with real API routes (Next.js API routes or a separate backend) backed by a database (e.g., Postgres via Supabase/Neon).
-- Add real authentication for `/admin` and `/student-login` (e.g., NextAuth or Clerk).
-- Wire the Donate page to a real payment processor (e.g., Stripe or PayPal Giving Fund).
-- Replace placeholder doctor bio/stats/photos with real content once supplied.
+- Swap in the doctor's real profile content once shared (goes into `/about` and `lib/defaultData.js`'s `PROFILE_SECTIONS`).
+- Build the real backend (database, auth, payments) per the earlier infrastructure cost documents.
+- Confirm the practice's legal donation process, then activate the Community Impact donation flow.

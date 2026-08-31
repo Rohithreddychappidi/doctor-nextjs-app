@@ -88,7 +88,7 @@ export default function ResearchPage() {
               Students on rotation or in the mentorship track can request a seat on an
               active study — always in neonatology or pediatrics.
             </p>
-            <Link href="/consultation" className="btn btn-primary">Request a Free Consultation</Link>
+            <Link href="/clinical-services" className="btn btn-primary">Request a Free Consultation</Link>
           </div>
           <div className="card dark">
             <div className="icon">Rs</div>

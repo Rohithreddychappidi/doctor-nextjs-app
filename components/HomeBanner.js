@@ -8,7 +8,7 @@ const SLIDES = [
     tag: "Free Consultations · Phone Call Based",
     title: "From India, to students and families everywhere.",
     body: "Every consultation is free. This site is our record book — a way to track and share how many people we've been able to help, one phone call at a time.",
-    cta: { href: "/consultation", label: "Request a Free Consultation" },
+    cta: { href: "/clinical-services", label: "Request a Free Consultation" },
   },
   {
     tag: "Neonatology & Pediatrics",
@@ -20,7 +20,7 @@ const SLIDES = [
     tag: "Support the Work",
     title: "Help keep this practice free for the next student.",
     body: "Donations go toward website maintenance, mentorship resources and keeping every consultation free of charge.",
-    cta: { href: "/donate", label: "Donate to Support This Work" },
+    cta: { href: "/community-impact", label: "See Community Impact" },
   },
 ];
 

@@ -47,14 +47,14 @@ export default function Navbar() {
           <Link href="/student-login" className={`nav-login-mobile${isActive("/student-login") ? " active" : ""}`}>
             Student Login
           </Link>
-          <Link href="/consultation" className="nav-cta-mobile">
-            Request Free Consultation
+          <Link href="/clinical-services" className="nav-cta-mobile">
+            Free Consultation
           </Link>
         </nav>
 
         <div className="nav-cta">
           <Link href="/student-login" className="btn btn-outline btn-sm">Student Login</Link>
-          <Link href="/consultation" className="btn btn-primary btn-sm">Free Consultation</Link>
+          <Link href="/clinical-services" className="btn btn-primary btn-sm">Free Consultation</Link>
           <button
             className="nav-toggle"
             aria-label="Toggle menu"

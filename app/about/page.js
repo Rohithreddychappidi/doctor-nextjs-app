@@ -6,25 +6,25 @@ import StatStrip from "@/components/StatStrip";
 import { Accordion, AccordionItem } from "@/components/Accordion";
 import { PROFILE_SECTIONS } from "@/lib/defaultData";
 
-export default function DoctorProfilePage() {
+export default function AboutPage() {
   return (
     <>
       <section className="hero" style={{ paddingBottom: 40 }}>
         <div className="container hero-grid" style={{ gridTemplateColumns: "0.85fr 1.15fr" }}>
           <ImagePlaceholder label="Doctor photo — to be added" height={320} />
           <div>
-            <div className="eyebrow">Doctor Profile</div>
+            <div className="eyebrow">About</div>
             <h1 style={{ marginBottom: 14 }}>Dr. Doctor Name</h1>
             <p className="lede" style={{ marginBottom: 10 }}>
               <strong>From India, to the world.</strong> Neonatology &amp; Pediatrics —
-              free consultations, mentorship and research guidance for students and families everywhere.
+              mission, credentials, leadership, teaching, and research behind this practice.
             </p>
             <p style={{ fontSize: 14, marginBottom: 26 }}>
               Every number below is a real record of this practice&apos;s work — click any
               section further down the page to see the detail behind it.
             </p>
-            <div className="hero-actions" style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-              <Link href="/consultation" className="btn btn-primary">Request a Free Consultation</Link>
+            <div className="hero-actions">
+              <Link href="/clinical-services" className="btn btn-primary">Clinical Services</Link>
               <Link href="/research" className="btn btn-outline">View Research</Link>
             </div>
           </div>
@@ -38,7 +38,7 @@ export default function DoctorProfilePage() {
           <div className="section-head">
             <div>
               <div className="eyebrow">The record</div>
-              <h2>Employment, education, research &amp; more</h2>
+              <h2>Employment, education, leadership &amp; more</h2>
             </div>
             <p className="lede">Click any section to expand it — this page is designed to
               hold a lot of detail without overwhelming the page at first glance.</p>
@@ -69,7 +69,7 @@ export default function DoctorProfilePage() {
         <div className="container">
           <div className="eyebrow on-dark" style={{ justifyContent: "center" }}>Talk to Dr. Doctor Name directly</div>
           <h2 style={{ marginBottom: 24 }}>Every consultation is a free phone call — no cost, ever</h2>
-          <Link href="/consultation" className="btn btn-primary">Request a Free Consultation</Link>
+          <Link href="/clinical-services" className="btn btn-primary">View Clinical Services</Link>
         </div>
       </section>
     </>

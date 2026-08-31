@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CONTACT_CATEGORIES } from "@/lib/defaultData";
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -9,10 +10,11 @@ export default function ContactPage() {
       <section className="hero" style={{ paddingBottom: 40 }}>
         <div className="container">
           <div className="eyebrow">Contact</div>
-          <h1 style={{ maxWidth: 640 }}>Have a question that isn&apos;t about a consultation?</h1>
+          <h1 style={{ maxWidth: 640 }}>One form for every kind of inquiry</h1>
           <p className="lede" style={{ marginTop: 16 }}>
-            For a free consultation, use the dedicated request page — it keeps our records
-            straight. For everything else — donations, partnerships, press — reach out here.
+            Education &amp; Training, Clinical Services, Advisory Services, Research,
+            Community Impact, or a general question — select the category that fits and
+            we&apos;ll route it appropriately.
           </p>
         </div>
       </section>
@@ -28,21 +30,27 @@ export default function ContactPage() {
                 </div>
                 <div className="form-row single">
                   <div className="field">
-                    <label htmlFor="cSubject">Subject</label>
+                    <label htmlFor="cSubject">Category</label>
                     <select id="cSubject" required defaultValue="">
                       <option value="" disabled>Select one</option>
-                      <option>General inquiry</option>
-                      <option>Donation / sponsorship</option>
-                      <option>Press / media</option>
-                      <option>Partnership / collaboration</option>
-                      <option>Technical issue with the website</option>
+                      {CONTACT_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
                     </select>
                   </div>
                 </div>
                 <div className="form-row single">
-                  <div className="field"><label htmlFor="cMessage">Message</label><textarea id="cMessage" required placeholder="How can we help?" /></div>
+                  <div className="field">
+                    <label htmlFor="cMessage">Message</label>
+                    <textarea id="cMessage" required placeholder="How can we help?" />
+                  </div>
                 </div>
                 <button type="submit" className="btn btn-primary btn-block">Send Message</button>
+                <div className="form-note" style={{ marginTop: 16 }}>
+                  <span>&#9432;</span>
+                  <span>This general form is not for urgent concerns or confidential
+                    patient records. In an emergency, contact local emergency services
+                    directly. For a free clinical consultation, use the form on the
+                    Clinical Services page instead.</span>
+                </div>
               </form>
             ) : (
               <div style={{ textAlign: "center", padding: "26px 10px" }}>
@@ -60,10 +68,10 @@ export default function ContactPage() {
             </div>
             <div className="card dark">
               <div className="icon">Cn</div>
-              <h3>Need a free consultation?</h3>
-              <p style={{ marginBottom: 16 }}>Use the dedicated page so your request is
-                logged in our records properly.</p>
-              <a href="/consultation" className="btn btn-ghost-light btn-sm">Go to Free Consultation</a>
+              <h3>Need a free clinical consultation?</h3>
+              <p style={{ marginBottom: 16 }}>Use the dedicated Clinical Services page so
+                your request is logged correctly.</p>
+              <a href="/clinical-services" className="btn btn-ghost-light btn-sm">Go to Clinical Services</a>
             </div>
           </div>
         </div>

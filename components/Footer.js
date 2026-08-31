@@ -21,22 +21,24 @@ export default function Footer() {
             </p>
           </div>
           <div>
-            <h4>Explore</h4>
-            <Link href="/doctor-profile">Doctor Profile</Link>
-            <Link href="/research">Research</Link>
-            <Link href="/question-bank">Question Bank</Link>
-            <Link href="/meetings">Meetings</Link>
+            <h4>Learn &amp; Train</h4>
+            <Link href="/education-training">Education &amp; Training</Link>
+            <Link href="/education-training/live-learning">Live Learning</Link>
+            <Link href="/education-training/question-banks">Question Banks</Link>
+            <Link href="/education-training/tele-rotations">Tele-Rotations</Link>
+            <Link href="/education-training/physical-rotations">Physical Rotations</Link>
           </div>
           <div>
-            <h4>Programs</h4>
-            <Link href="/tele-rotation">Tele-Rotation</Link>
-            <Link href="/physical-rotation">Physical Rotation</Link>
-            <Link href="/consultation">Free Consultation</Link>
+            <h4>Services</h4>
+            <Link href="/clinical-services">Clinical Services</Link>
+            <Link href="/advisory-services">Advisory Services</Link>
+            <Link href="/research">Research</Link>
             <Link href="/student-login">Student Login</Link>
           </div>
           <div>
-            <h4>Support the Work</h4>
-            <Link href="/donate">Donate</Link>
+            <h4>About &amp; Support</h4>
+            <Link href="/about">About</Link>
+            <Link href="/community-impact">Community Impact</Link>
             <Link href="/testimonials">Testimonials</Link>
             <Link href="/contact">Contact</Link>
           </div>

@@ -21,7 +21,7 @@ export default function MeetingCard({ meeting }) {
         <div className="meeting-meta">
           <span>{date}</span>
         </div>
-        <a href="/consultation" className="btn btn-outline btn-sm" style={{ marginTop: 8, alignSelf: "flex-start" }}>
+        <a href="/clinical-services" className="btn btn-outline btn-sm" style={{ marginTop: 8, alignSelf: "flex-start" }}>
           {isFree ? "Join this session" : "Reserve a spot"}
         </a>
       </div>

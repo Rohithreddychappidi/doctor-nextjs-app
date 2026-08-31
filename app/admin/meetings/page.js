@@ -46,10 +46,10 @@ export default function AdminMeetingsPage() {
     <AdminShell>
       <div className="dash-top">
         <div>
-          <div className="eyebrow" style={{ marginBottom: 6 }}>Admin · Meetings &amp; Events</div>
+          <div className="eyebrow" style={{ marginBottom: 6 }}>Admin · Education &amp; Training · Live Learning</div>
           <h2>Manage Meeting &amp; Event Cards</h2>
         </div>
-        <a href="/meetings" className="btn btn-outline btn-sm">View public meetings page</a>
+        <a href="/education-training/live-learning" className="btn btn-outline btn-sm">View public meetings page</a>
       </div>
 
       <div className="panel">
