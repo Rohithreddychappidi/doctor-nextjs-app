@@ -5,19 +5,15 @@ import MeetingCard from "@/components/MeetingCard";
 import { useSiteData } from "@/lib/DataContext";
 
 export default function LiveLearningPage() {
-  const { meetings } = useSiteData();
+  const { meetings, content } = useSiteData();
+  const c = content.liveLearning;
   return (
     <>
       <section className="hero" style={{ paddingBottom: 40 }}>
         <div className="container">
-          <div className="eyebrow">Education &amp; Training · Live Learning</div>
-          <h1 style={{ maxWidth: 720 }}>Lectures, meetings, case discussions &amp; OSCE prep</h1>
-          <p className="lede" style={{ marginTop: 16 }}>
-            All live sessions run on one secure platform — Zoom or Google Meet. Most
-            sessions are free; some — like small-group workshops — carry a price set by
-            the admin, shown clearly on each card. Live sessions are never recorded
-            without explicit program approval and participant consent.
-          </p>
+          <div className="eyebrow">{c.eyebrow}</div>
+          <h1 style={{ maxWidth: 720 }}>{c.heading}</h1>
+          <p className="lede" style={{ marginTop: 16 }}>{c.body}</p>
         </div>
       </section>
 

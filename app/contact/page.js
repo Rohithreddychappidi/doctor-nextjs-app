@@ -63,7 +63,7 @@ export default function ContactPage() {
             <div className="card" style={{ marginBottom: 20 }}>
               <div className="icon">@</div>
               <h3>Email</h3>
-              <p><a href="mailto:care@example.com" style={{ color: "var(--accent)" }}>care@example.com</a></p>
+              <p><a href={`mailto:${c.email}`} style={{ color: "var(--accent)" }}>{c.email}</a></p>
             </div>
             <div className="card dark">
               <div className="icon">Cn</div>

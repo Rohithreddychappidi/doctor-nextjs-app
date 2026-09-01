@@ -4,12 +4,12 @@ import Link from "next/link";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 import StatStrip from "@/components/StatStrip";
 import { Accordion, AccordionItem } from "@/components/Accordion";
-import { PROFILE_SECTIONS } from "@/lib/defaultData";
 import { useSiteData } from "@/lib/DataContext";
 
 export default function AboutPage() {
   const { content } = useSiteData();
   const c = content.about;
+
   return (
     <>
       <section className="hero" style={{ paddingBottom: 40 }}>
@@ -23,7 +23,7 @@ export default function AboutPage() {
             </p>
             <p style={{ fontSize: 14, marginBottom: 26 }}>{c.note}</p>
             <div className="hero-actions">
-              <Link href="/clinical-services" className="btn btn-primary">Clinical Services</Link>
+              <Link href="/clinical-services" className="btn btn-primary">Request a Free Consultation</Link>
               <Link href="/research" className="btn btn-outline">View Research</Link>
             </div>
           </div>
@@ -43,7 +43,7 @@ export default function AboutPage() {
               hold a lot of detail without overwhelming the page at first glance.</p>
           </div>
 
-          {PROFILE_SECTIONS.map((section, idx) => (
+          {c.sections.map((section, idx) => (
             <Accordion
               key={section.key}
               index={idx + 1}
@@ -68,7 +68,7 @@ export default function AboutPage() {
         <div className="container">
           <div className="eyebrow on-dark" style={{ justifyContent: "center" }}>Talk to Dr. Doctor Name directly</div>
           <h2 style={{ marginBottom: 24 }}>Every consultation is a free phone call — no cost, ever</h2>
-          <Link href="/clinical-services" className="btn btn-primary">View Clinical Services</Link>
+          <Link href="/clinical-services" className="btn btn-primary">Request a Free Consultation</Link>
         </div>
       </section>
     </>

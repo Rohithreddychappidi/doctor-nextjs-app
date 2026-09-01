@@ -1,18 +1,20 @@
+"use client";
+
 import Link from "next/link";
-import { TELE_ROTATION_CURRICULUM as C } from "@/lib/defaultData";
+import { useSiteData } from "@/lib/DataContext";
 
 export default function TeleRotationsPage() {
+  const { content } = useSiteData();
+  const C = content.teleRotations;
+
   return (
     <>
       <section className="hero" style={{ paddingBottom: 40 }}>
         <div className="container hero-grid">
           <div>
-            <div className="eyebrow">Education &amp; Training · Tele-Rotations</div>
-            <h1>A structured, 6-week remote rotation in pediatrics &amp; neonatology</h1>
-            <p className="lede">Live teaching, case-based discussion, simulated
-              documentation, de-identified EMR orientation, research education, and
-              exam-focused review — built around real clinical reasoning, not passive
-              lectures.</p>
+            <div className="eyebrow">{C.eyebrow}</div>
+            <h1>{C.heading}</h1>
+            <p className="lede">{C.body}</p>
             <div className="hero-actions">
               <Link href="/contact" className="btn btn-primary">Apply via Contact</Link>
               <Link href="/education-training/physical-rotations" className="btn btn-outline">See Physical Rotations</Link>

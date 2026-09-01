@@ -1,57 +1,46 @@
+"use client";
+
 import Link from "next/link";
+import { useSiteData } from "@/lib/DataContext";
 
 export default function PhysicalRotationsPage() {
+  const { content } = useSiteData();
+  const c = content.physicalRotations;
   return (
     <>
       <section className="hero" style={{ paddingBottom: 40 }}>
         <div className="container">
-          <div className="eyebrow">Education &amp; Training · Physical Rotations</div>
-          <h1 style={{ maxWidth: 720 }}>Institution-approved, in-person pediatric &amp; neonatal learning</h1>
-          <p className="lede" style={{ marginTop: 16 }}>
-            Every placement clearly states whether it is observational or hands-on, along
-            with required documents, health clearance, privacy expectations, fees, dates,
-            and supervision arrangements.
-          </p>
+          <div className="eyebrow">{c.eyebrow}</div>
+          <h1 style={{ maxWidth: 720 }}>{c.heading}</h1>
+          <p className="lede" style={{ marginTop: 16 }}>{c.body}</p>
         </div>
       </section>
 
       <section className="section tight">
         <div className="container">
           <div className="grid grid-3" style={{ marginBottom: 40 }}>
-            <div className="card">
-              <div className="pill accent">Observational</div>
-              <h3 style={{ marginTop: 16 }}>NICU Shadowing</h3>
-              <p>Observed rounds and bedside teaching in a neonatal intensive care setting, under direct supervision.</p>
-            </div>
-            <div className="card">
-              <div className="pill accent">Institution-dependent</div>
-              <h3 style={{ marginTop: 16 }}>Pediatric Outpatient Clinic</h3>
-              <p>Continuity clinic exposure — well-child visits, growth monitoring and follow-up care, per the host institution's policy on hands-on involvement.</p>
-            </div>
-            <div className="card">
-              <div className="pill accent">By arrangement</div>
-              <h3 style={{ marginTop: 16 }}>Elective Placement</h3>
-              <p>A focused elective within neonatology or pediatrics, arranged with an approved host institution.</p>
-            </div>
+            {c.tracks.map((t) => (
+              <div className="card" key={t.heading}>
+                <div className="pill accent">{t.pill}</div>
+                <h3 style={{ marginTop: 16 }}>{t.heading}</h3>
+                <p>{t.body}</p>
+              </div>
+            ))}
           </div>
 
           <div className="grid grid-2">
             <div>
               <h3 style={{ marginBottom: 16 }}>What to expect</h3>
               <div className="steps">
-                <div className="step"><h4>Documents &amp; health clearance</h4><p>Required paperwork, immunization records, and any host-institution health clearance are confirmed before placement begins.</p></div>
-                <div className="step"><h4>Supervision</h4><p>Every placement has a named supervising physician and clearly defined scope — observational vs. hands-on is stated up front, never assumed.</p></div>
-                <div className="step"><h4>Privacy</h4><p>Patient privacy and institutional policy apply throughout — no identifiable patient information leaves the clinical setting.</p></div>
+                {c.whatToExpect.map((w) => (
+                  <div className="step" key={w.heading}><h4>{w.heading}</h4><p>{w.body}</p></div>
+                ))}
               </div>
             </div>
             <div className="card dark">
               <div className="icon">Ph</div>
-              <h3>Eligibility &amp; fees</h3>
-              <p style={{ marginBottom: 14 }}>Open to medical students (clinical years) and
-                IMGs preparing for residency applications, subject to the host
-                institution&apos;s requirements. Any applicable fees, dates, and
-                documentation requirements are confirmed during the application process —
-                nothing is charged without being stated upfront.</p>
+              <h3>{c.eligibilityHeading}</h3>
+              <p style={{ marginBottom: 14 }}>{c.eligibilityBody}</p>
               <Link href="/contact" className="btn btn-ghost-light btn-sm">Apply via Contact</Link>
             </div>
           </div>

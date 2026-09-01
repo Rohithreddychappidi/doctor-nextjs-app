@@ -29,29 +29,18 @@ export default function ClinicalServicesPage() {
       <section className="section tight">
         <div className="container">
           <div className="grid grid-3" style={{ marginBottom: 40 }}>
-            <div className="card">
-              <div className="icon">1</div>
-              <h3>Scheduling</h3>
-              <p>Consultations are arranged by phone call, at a time that works for you — submit the form below and we&apos;ll call you back, usually within a few days.</p>
-            </div>
-            <div className="card">
-              <div className="icon">2</div>
-              <h3>Telehealth Eligibility</h3>
-              <p>Phone consultations are available to students, families, and clinicians anywhere — no geographic restriction for an educational or advisory conversation.</p>
-            </div>
-            <div className="card dark">
-              <div className="icon">!</div>
-              <h3>Emergency Guidance</h3>
-              <p>This is not an emergency service. If this is a medical emergency, contact your local emergency services or nearest emergency department immediately — do not wait for a callback.</p>
-            </div>
+            {c.features.map((f, idx) => (
+              <div className={`card${idx === 2 ? " dark" : ""}`} key={f.heading}>
+                <div className="icon">{idx === 2 ? "!" : idx + 1}</div>
+                <h3>{f.heading}</h3>
+                <p>{f.body}</p>
+              </div>
+            ))}
           </div>
 
           <div className="card" style={{ marginBottom: 40 }}>
-            <h3 style={{ marginBottom: 10 }}>Privacy</h3>
-            <p>Details shared during a consultation request are used only to arrange and
-              follow up on that consultation, and are kept as an internal record of the
-              practice&apos;s outreach. No identifiable patient information is shared
-              beyond what is needed to provide the consultation itself.</p>
+            <h3 style={{ marginBottom: 10 }}>{c.privacyHeading}</h3>
+            <p>{c.privacyBody}</p>
           </div>
         </div>
       </section>

@@ -1,19 +1,21 @@
+"use client";
+
 import Link from "next/link";
 import { Accordion } from "@/components/Accordion";
-import { QUESTION_BANK_TOPICS } from "@/lib/defaultData";
+import { useSiteData } from "@/lib/DataContext";
 
 export default function QuestionBanksPage() {
-  const total = QUESTION_BANK_TOPICS.reduce((sum, t) => sum + t.count, 0);
+  const { content } = useSiteData();
+  const c = content.questionBanks;
+  const total = c.topics.reduce((sum, t) => sum + Number(t.count || 0), 0);
   return (
     <>
       <section className="hero" style={{ paddingBottom: 40 }}>
         <div className="container hero-grid">
           <div>
-            <div className="eyebrow">Education &amp; Training · Question Banks</div>
-            <h1>Shelf, USMLE, pediatrics &amp; neonatology boards — organized by topic</h1>
-            <p className="lede">Six focused topic areas, each broken into sub-topics —
-              built around real neonatal and pediatric case presentations, mapped to the
-              Pediatrics Shelf and USMLE Step 2 CK content outlines.</p>
+            <div className="eyebrow">{c.eyebrow}</div>
+            <h1>{c.heading}</h1>
+            <p className="lede">{c.body}</p>
             <div className="hero-actions">
               <Link href="/student-login" className="btn btn-primary">Log in to Practice</Link>
               <Link href="/education-training" className="btn btn-outline">Back to Education &amp; Training</Link>
@@ -23,7 +25,7 @@ export default function QuestionBanksPage() {
             <span className="tag">Bank Snapshot</span>
             {[
               ["Total items", `${total}+`],
-              ["Topic areas", QUESTION_BANK_TOPICS.length],
+              ["Topic areas", c.topics.length],
               ["Focus", "Neonatology & Pediatrics only"],
               ["New this month", "24 items"],
             ].map(([k, v]) => (
@@ -42,8 +44,8 @@ export default function QuestionBanksPage() {
             <div><div className="eyebrow">Browse by topic</div><h2>Click a topic to see its sub-topics</h2></div>
           </div>
 
-          {QUESTION_BANK_TOPICS.map((topic, idx) => (
-            <Accordion key={topic.key} index={idx + 1} label={topic.label} count={topic.count} defaultOpen={idx === 0}>
+          {c.topics.map((topic, idx) => (
+            <Accordion key={topic.label} index={idx + 1} label={topic.label} count={topic.count} defaultOpen={idx === 0}>
               <p style={{ fontSize: 13.5, marginBottom: 10 }}>{topic.count} practice items across the following sub-topics:</p>
               <div className="subtopic-list">
                 {topic.subtopics.map((s) => (

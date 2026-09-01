@@ -51,7 +51,37 @@ Visit `http://localhost:3000`.
 - `/admin/testimonials` — add/delete testimonials
 - `/admin/requests` — consultation request record book, with status + notes
 
-## Content editing architecture
+## Content editing architecture (complete CMS)
+
+Every page's text is admin-editable from **`/admin/content`** — not just
+hero sections. This includes:
+
+- Every page's eyebrow/heading/intro paragraph
+- Home's 3 banner slides and 6 service cards
+- About's full accordion (Employment, Education, Leadership & Teaching,
+  Research, Publications, Helping Students) — add/edit/delete individual
+  entries within each section
+- Education & Training and Advisory Services hub cards
+- The complete Tele-Rotation curriculum: purpose bullets, learning
+  outcomes, the 6-week schedule table, assessment weighting, completion
+  standards, and safety/privacy disclosures — every row independently
+  editable
+- Question Bank topics and their sub-topics
+- Physical Rotations track cards and "what to expect" steps
+- Clinical Services feature cards and privacy text
+- NICU Development and Curriculum Development service cards
+- Community Impact initiative cards and the (inactive) support/donation text
+- Research's ongoing studies and publications table
+
+The admin screen is organized as one page-per-accordion-section so it stays
+navigable despite covering the whole site. It's built from three reusable
+generic editor components in `components/AdminEditors.js`:
+
+- `ObjectArrayEditor` — any array of flat objects (cards, schedule rows, etc.)
+- `StringArrayEditor` — any array of plain strings (bullet lists)
+- `NestedGroupEditor` — two-level nesting (About's sections → items)
+
+All original page/data architecture notes below still apply.
 
 Every page's hero/intro text (and Home's banner slides + service cards) now
 lives in `lib/defaultData.js` as `DEFAULT_CONTENT`, managed through

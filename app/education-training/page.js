@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useSiteData } from "@/lib/DataContext";
-import { EDUCATION_TRAINING_SUBPAGES } from "@/lib/defaultData";
 
 export default function EducationTrainingPage() {
   const { content } = useSiteData();
@@ -20,8 +19,8 @@ export default function EducationTrainingPage() {
       <section className="section tight">
         <div className="container">
           <div className="grid grid-2">
-            {EDUCATION_TRAINING_SUBPAGES.map((sub) => (
-              <Link href={sub.href} key={sub.key} className="card" style={{ display: "block" }}>
+            {c.subpages.map((sub) => (
+              <Link href={sub.href} key={sub.href} className="card" style={{ display: "block" }}>
                 <h3 style={{ marginBottom: 10 }}>{sub.label}</h3>
                 <p>{sub.blurb}</p>
                 <span style={{ display: "inline-block", marginTop: 14, fontSize: 13, fontWeight: 600, color: "var(--accent)" }}>
