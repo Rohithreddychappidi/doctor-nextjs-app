@@ -33,7 +33,7 @@ export default function Navbar() {
         <Link href="/" className="brand">
           <span className="mark">DR</span>
           <span>
-            Dr. Doctor Name
+            Dr. Janardhan Mydam
             <small>Neonatology &amp; Pediatrics · India to the World</small>
           </span>
         </Link>

@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export const metadata = {
-  title: "Dr. Doctor Name — Free Consultations · Neonatology & Pediatrics Mentorship",
+  title: "Dr. Janardhan Mydam — Free Consultations · Neonatology & Pediatrics Mentorship",
   description:
     "Free phone consultations, student mentorship, research and rotations in neonatology and pediatrics — from India to the world.",
 };

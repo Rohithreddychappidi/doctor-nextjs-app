@@ -9,7 +9,7 @@ export default function Footer() {
             <div className="brand" style={{ color: "#fff", marginBottom: 16 }}>
               <span className="mark">DR</span>
               <span>
-                Dr. Doctor Name
+                Dr. Janardhan Mydam
                 <br />
                 <small style={{ color: "rgba(255,255,255,.5)" }}>Neonatology &amp; Pediatrics</small>
               </span>
@@ -44,7 +44,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="footer-bottom">
-          <span>&copy; 2026 Dr. Doctor Name — Free Consultation &amp; Mentorship Practice. All rights reserved.</span>
+          <span>&copy; 2026 Dr. Janardhan Mydam — Free Consultation &amp; Mentorship Practice. All rights reserved.</span>
           <span>
             Privacy Policy &nbsp;·&nbsp; Terms of Use &nbsp;·&nbsp;{" "}
             <Link href="/admin" style={{ color: "rgba(255,255,255,.45)" }}>Admin Panel (preview)</Link>

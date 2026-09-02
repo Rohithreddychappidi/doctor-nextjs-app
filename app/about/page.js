@@ -58,15 +58,15 @@ export default function AboutPage() {
           ))}
 
           <p style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 18 }}>
-            All entries above are placeholder content, structured to hold the full record
-            once the client shares complete employment, education, research and publication history.
+            Selected highlights from Dr. Mydam&apos;s full CV — the complete record, including
+            the full publication and presentation history, is available on request.
           </p>
         </div>
       </section>
 
       <section className="section navy center">
         <div className="container">
-          <div className="eyebrow on-dark" style={{ justifyContent: "center" }}>Talk to Dr. Doctor Name directly</div>
+          <div className="eyebrow on-dark" style={{ justifyContent: "center" }}>Talk to Dr. Janardhan Mydam directly</div>
           <h2 style={{ marginBottom: 24 }}>Every consultation is a free phone call — no cost, ever</h2>
           <Link href="/clinical-services" className="btn btn-primary">Request a Free Consultation</Link>
         </div>
