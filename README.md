@@ -104,6 +104,28 @@ Meeting/event cards (`/admin/meetings`) now also support an optional
 publicly, since exposing a live meeting link to anyone visiting the
 public site would let uninvited people join.
 
+## Tele-Rotation Learning Hub + Sign Up pages
+
+The Tele-Rotations page is now a real "Learning Hub" — each of the 6
+curriculum weeks is its own module card showing the clinical focus,
+required products, a session date, and either a live "Join Live Session"
+button (if a link is set) or a placeholder ("Session link auto-generates
+closer to the date") if not. Session date and join link are both
+admin-editable per week under `/admin/content` → Tele-Rotations.
+
+**Important limitation to flag to the client:** the join links are
+currently just a text field an admin fills in manually — they do not
+yet call the Zoom API to generate real meeting links automatically.
+Real automation requires backend work: a Zoom Server-to-Server OAuth
+app (needs Zoom Pro) and backend code that calls Zoom's API to create
+a meeting and store the returned link. The front-end structure here is
+built to support that once the backend exists — the `joinLink` field
+just needs to be populated by that API call instead of by hand.
+
+Two new pages support the enrollment flow:
+- `/education-training/tele-rotations/apply` — program enrollment form (logs to the same consultation-records system as a distinct request type)
+- `/student-signup` — general account creation (front-end preview, no real auth yet), linked from `/student-login`
+
 ## What changed in this restructure
 
 - Nav simplified from 11 items to 9 top-level items, matching the client's diagram exactly (Student Login moved to a utility button, out of the main nav).

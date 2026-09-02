@@ -16,7 +16,7 @@ export default function TeleRotationsPage() {
             <h1>{C.heading}</h1>
             <p className="lede">{C.body}</p>
             <div className="hero-actions">
-              <Link href="/contact" className="btn btn-primary">Apply via Contact</Link>
+              <Link href="/education-training/tele-rotations/apply" className="btn btn-primary">Apply for This Program</Link>
               <Link href="/education-training/physical-rotations" className="btn btn-outline">See Physical Rotations</Link>
             </div>
           </div>
@@ -67,23 +67,29 @@ export default function TeleRotationsPage() {
       <section className="section soft">
         <div className="container">
           <div className="section-head">
-            <div><div className="eyebrow">Six-week schedule</div><h2>Week by week</h2></div>
-          </div>
-          <div className="panel" style={{ padding: 0 }}>
-            <div className="table-scroll">
-              <table className="data-table">
-                <thead><tr><th>Week</th><th>Clinical Focus</th><th>Skills / Products</th></tr></thead>
-                <tbody>
-                  {C.schedule.map((w) => (
-                    <tr key={w.week}>
-                      <td className="strong">{w.week}</td>
-                      <td>{w.focus}</td>
-                      <td>{w.products}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div>
+              <div className="eyebrow">Learning Hub</div>
+              <h2>Your 6-week program, module by module</h2>
             </div>
+            <p className="lede">Each module unlocks its live session link automatically as
+              the date approaches — no manual scheduling on your end.</p>
+          </div>
+          <div className="grid grid-2">
+            {C.schedule.map((w, idx) => (
+              <div className="card" key={w.week}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                  <div className="pill accent">{w.week}</div>
+                  {w.sessionDate && <span style={{ fontSize: 12, color: "var(--muted)", fontFamily: "var(--font-mono)" }}>{w.sessionDate}</span>}
+                </div>
+                <h3 style={{ marginBottom: 8 }}>{w.focus}</h3>
+                <p style={{ marginBottom: 14 }}><strong style={{ color: "var(--ink)" }}>Products: </strong>{w.products}</p>
+                {w.joinLink ? (
+                  <a href={w.joinLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm">Join Live Session</a>
+                ) : (
+                  <span className="pill muted">Session link auto-generates closer to the date</span>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -132,8 +138,8 @@ export default function TeleRotationsPage() {
       <section className="section soft center">
         <div className="container">
           <div className="eyebrow" style={{ justifyContent: "center" }}>Ready to apply?</div>
-          <h2 style={{ marginBottom: 16 }}>Contact us to check eligibility and apply</h2>
-          <Link href="/contact" className="btn btn-primary">Go to Contact</Link>
+          <h2 style={{ marginBottom: 16 }}>Check eligibility and apply for the next cohort</h2>
+          <Link href="/education-training/tele-rotations/apply" className="btn btn-primary">Apply Now</Link>
         </div>
       </section>
     </>

@@ -186,8 +186,14 @@ function renderExtra(key) {
     case "tele-outcomes":
       return <StringArrayEditor key={key} pageKey="teleRotations" arrayKey="outcomes" label="Learning Outcomes" />;
     case "tele-schedule":
-      return <ObjectArrayEditor key={key} pageKey="teleRotations" arrayKey="schedule" label="6-Week Schedule Rows" columns={3}
-        fields={[{ key: "week", label: "Week" }, { key: "focus", label: "Clinical Focus", type: "textarea" }, { key: "products", label: "Skills / Products", type: "textarea" }]} />;
+      return <ObjectArrayEditor key={key} pageKey="teleRotations" arrayKey="schedule" label="6-Week Learning Hub Modules" columns={2}
+        fields={[
+          { key: "week", label: "Week" },
+          { key: "focus", label: "Clinical Focus", type: "textarea" },
+          { key: "products", label: "Skills / Products", type: "textarea" },
+          { key: "sessionDate", label: "Live session date/time (e.g. Tue Sept 9 · 7:00 PM IST)" },
+          { key: "joinLink", label: "Join link (auto-filled by Zoom integration once backend is live — leave blank for now)" },
+        ]} />;
     case "tele-assessment":
       return <ObjectArrayEditor key={key} pageKey="teleRotations" arrayKey="assessment" label="Assessment Weighting" columns={3}
         fields={[{ key: "component", label: "Component" }, { key: "weight", label: "Weight (e.g. 10%)" }]} />;

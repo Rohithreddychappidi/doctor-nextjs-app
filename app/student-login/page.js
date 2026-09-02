@@ -30,7 +30,7 @@ export default function StudentLoginPage() {
             </form>
             {note && <div className="form-note" style={{ marginTop: 18 }}>{note}</div>}
             <p style={{ textAlign: "center", fontSize: 13, color: "var(--muted)", marginTop: 18 }}>
-              No account yet? <a href="/clinical-services" style={{ color: "var(--accent)", fontWeight: 600 }}>Request a free consultation</a> to get started.
+              No account yet? <a href="/student-signup" style={{ color: "var(--accent)", fontWeight: 600 }}>Sign up here</a> if you've already been accepted into a program.
             </p>
           </div>
         </div>
