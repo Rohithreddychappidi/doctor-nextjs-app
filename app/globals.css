@@ -374,6 +374,10 @@ p{ margin:0; color: var(--ink-soft); }
 .form-note{ display:flex; gap:10px; align-items:flex-start; font-size: 13px; color: var(--muted); background: var(--bg-soft); border-radius: var(--radius-sm); padding: 14px 16px; margin-top: 6px; }
 @media (max-width: 480px){ .form-card{ padding: 20px; } }
 
+/* ---------- Awards & Honors: image + timeline layout ---------- */
+.awards-grid{ display:grid; grid-template-columns: 0.8fr 1.2fr; gap: 48px; align-items: start; }
+@media (max-width: 900px){ .awards-grid{ grid-template-columns: 1fr; gap: 28px; } }
+
 /* ---------- Hero card (Question Bank snapshot panel) ---------- */
 .hero-card{ background: var(--bg-navy); border-radius: var(--radius); padding: 30px; color:#fff; position:relative; }
 .hero-card h1, .hero-card h2, .hero-card h3, .hero-card h4{ color:#fff; }

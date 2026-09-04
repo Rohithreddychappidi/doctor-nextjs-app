@@ -104,6 +104,44 @@ Meeting/event cards (`/admin/meetings`) now also support an optional
 publicly, since exposing a live meeting link to anyone visiting the
 public site would let uninvited people join.
 
+## About Page — Full CV CMS with Google Drive links
+
+The About page now has **18 accordion sections** covering the doctor's complete
+academic CV: Employment, Education, Post-Graduate Training, Certifications &
+Licensure, Memberships & Committees, Judge of Work of Others (peer review),
+Publications, Work Cited by Others, Oral Presentations, Poster Presentations,
+Education Curriculum, Teaching, Research & Funded Projects, Overall
+Contribution to Science, Research Skills, Critical Roles in Established
+Organizations, Community & Mentorship, and Languages.
+
+Each section shows a tightened, curated set of highlight entries (not the
+full exhaustive CV — some of his lists run 20-75 items long, which would
+make the page unusable). **Each section can also carry an admin-set Google
+Drive link** — when set, a "View Full Document ↗" button appears at the
+bottom of that section on the public page, so the full un-tightened detail
+(e.g., the complete 75-review peer-review list, or all 24 publications with
+abstracts) can live in a Google Doc/PDF the admin manages separately,
+without needing code changes. Set these under `/admin/content` → About →
+each section's "Google Drive link" field.
+
+**Awards & Honors** gets a distinct layout instead of an accordion: a
+sticky photo on the left (stays in view while scrolling) alongside a
+vertical timeline of awards on the right, placed after all the accordion
+sections. Admin-editable under `/admin/content` → About → "Awards & Honors
+Timeline."
+
+The page ends with a **"By the Numbers" counts strip** (publications, oral
+presentations, poster presentations, manuscript reviews, journals reviewed
+for, cited-by count) — also admin-editable as plain numbers.
+
+**Architecture for the Drive-link CMS:** `about.sections` items now each
+carry a `driveLink` field (empty string by default). `DataContext.js` has
+a dedicated `updateNestedGroupMeta()` function for editing a section's own
+metadata (label, driveLink) separately from its list of entries — see
+`components/AdminEditors.js`'s `NestedGroupEditor`/`GroupBlock` for the
+admin UI, and `app/about/page.js` for how the public page conditionally
+renders the button.
+
 ## Tele-Rotation Learning Hub + Sign Up pages
 
 The Tele-Rotations page is now a real "Learning Hub" — each of the 6

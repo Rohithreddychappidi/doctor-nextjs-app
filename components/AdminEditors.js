@@ -127,7 +127,7 @@ export function StringArrayEditor({ pageKey, arrayKey, label }) {
 // each containing a list of employment/education/etc. entries).
 // ---------------------------------------------------------------------
 export function NestedGroupEditor({ pageKey, arrayKey, itemArrayKey, fields }) {
-  const { content, updateNestedArrayItem, addNestedArrayItem, deleteNestedArrayItem } = useSiteData();
+  const { content, updateNestedArrayItem, addNestedArrayItem, deleteNestedArrayItem, updateNestedGroupMeta } = useSiteData();
   const groups = content[pageKey]?.[arrayKey] || [];
 
   return (
@@ -138,8 +138,10 @@ export function NestedGroupEditor({ pageKey, arrayKey, itemArrayKey, fields }) {
           key={group.key || gIdx}
           label={group.label}
           items={group.items || []}
+          driveLink={group.driveLink || ""}
           fields={fields}
           onSave={(iIdx, updates) => updateNestedArrayItem(pageKey, arrayKey, gIdx, itemArrayKey, iIdx, updates)}
+          onSaveDriveLink={(link) => updateNestedGroupMeta(pageKey, arrayKey, gIdx, { driveLink: link })}
           onAdd={() => {
             const blank = {};
             fields.forEach((f) => { blank[f.key] = ""; });
@@ -152,11 +154,14 @@ export function NestedGroupEditor({ pageKey, arrayKey, itemArrayKey, fields }) {
   );
 }
 
-function GroupBlock({ label, items, fields, onSave, onAdd, onDelete }) {
+function GroupBlock({ label, items, driveLink, fields, onSave, onSaveDriveLink, onAdd, onDelete }) {
   const [forms, setForms] = useState(items);
   const [savedIdx, setSavedIdx] = useState(null);
+  const [linkValue, setLinkValue] = useState(driveLink);
+  const [linkSaved, setLinkSaved] = useState(false);
 
   useEffect(() => { setForms(items); }, [items]);
+  useEffect(() => { setLinkValue(driveLink); }, [driveLink]);
 
   const handleChange = (idx, key) => (e) => {
     const next = [...forms];
@@ -169,6 +174,24 @@ function GroupBlock({ label, items, fields, onSave, onAdd, onDelete }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
         <h4 style={{ fontSize: "1rem", fontWeight: 700 }}>{label} ({forms.length} entries)</h4>
         <button className="btn btn-outline btn-sm" onClick={onAdd}>+ Add entry</button>
+      </div>
+      <div className="field" style={{ marginBottom: 16, maxWidth: 560 }}>
+        <label style={{ fontSize: 12 }}>Google Drive link for the full document (shown as a &quot;View Full Document&quot; button on the public page — leave blank to hide it)</label>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            type="text"
+            style={{ flex: 1 }}
+            value={linkValue}
+            onChange={(e) => setLinkValue(e.target.value)}
+            placeholder="https://drive.google.com/..."
+          />
+          <button
+            className="btn btn-outline btn-sm"
+            onClick={() => { onSaveDriveLink(linkValue); setLinkSaved(true); setTimeout(() => setLinkSaved(false), 1500); }}
+          >
+            {linkSaved ? "Saved ✓" : "Save Link"}
+          </button>
+        </div>
       </div>
       <div className="grid grid-3">
         {forms.map((item, idx) => (
@@ -259,6 +282,47 @@ export function QuestionTopicsEditor() {
                 Delete
               </button>
             </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------
+// Small flat-number editor for content[pageKey].counts (e.g. About's
+// publication/presentation/review counts shown at the bottom of the page).
+// ---------------------------------------------------------------------
+export function CountsEditor({ pageKey, fields, label }) {
+  const { content, updateContent } = useSiteData();
+  const counts = content[pageKey]?.counts || {};
+  const [form, setForm] = useState(counts);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => { setForm(counts); }, [content, pageKey]);
+
+  const handleChange = (key) => (e) => {
+    setForm((f) => ({ ...f, [key]: Number(e.target.value) || 0 }));
+    setSaved(false);
+  };
+
+  const handleSave = () => {
+    updateContent(pageKey, { counts: form });
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1500);
+  };
+
+  return (
+    <div className="panel">
+      <div className="panel-head">
+        <h3>{label}</h3>
+        <button className="btn btn-primary btn-sm" onClick={handleSave}>{saved ? "Saved ✓" : "Save"}</button>
+      </div>
+      <div className="kpi-row" style={{ marginBottom: 0 }}>
+        {fields.map((f) => (
+          <div className="kpi" key={f.key}>
+            <div className="lbl">{f.label}</div>
+            <input type="number" value={form[f.key] ?? 0} onChange={handleChange(f.key)} />
           </div>
         ))}
       </div>
