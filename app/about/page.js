@@ -3,6 +3,7 @@
 import Link from "next/link";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 import StatStrip from "@/components/StatStrip";
+import JourneyTimeline from "@/components/JourneyTimeline";
 import { Accordion, AccordionItem } from "@/components/Accordion";
 import { useSiteData } from "@/lib/DataContext";
 
@@ -40,6 +41,21 @@ export default function AboutPage() {
       </section>
 
       <StatStrip />
+
+      <section className="section soft">
+        <div className="container">
+          <div className="section-head">
+            <div>
+              <div className="eyebrow">The journey</div>
+              <h2>From India, to the world — year by year</h2>
+            </div>
+            <p className="lede">Scroll to follow the path from medical school in India
+              through specialist training in the UK to neonatology practice and research
+              leadership in Chicago.</p>
+          </div>
+          <JourneyTimeline items={c.journey} />
+        </div>
+      </section>
 
       <section className="section">
         <div className="container">
@@ -89,8 +105,15 @@ export default function AboutPage() {
             </div>
           </div>
           <div className="awards-grid">
-            <div style={{ position: "sticky", top: 90 }}>
-              <ImagePlaceholder label="Awards &amp; honors photo — to be added" height={340} />
+            <div className="awards-gallery">
+              {c.awardsGallery.map((img, idx) => (
+                <ImagePlaceholder
+                  key={idx}
+                  label={img.caption || "Awards photo — to be added"}
+                  imageUrl={img.imageUrl}
+                  height="auto"
+                />
+              ))}
             </div>
             <div className="steps">
               {c.awards.map((award) => (

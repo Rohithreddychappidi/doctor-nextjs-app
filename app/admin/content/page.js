@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import AdminShell from "@/components/AdminShell";
 import { Accordion } from "@/components/Accordion";
 import { useSiteData } from "@/lib/DataContext";
-import { ObjectArrayEditor, StringArrayEditor, NestedGroupEditor, QuestionTopicsEditor, CountsEditor } from "@/components/AdminEditors";
+import { ObjectArrayEditor, StringArrayEditor, QuestionTopicsEditor } from "@/components/AdminEditors";
 
 // Flat-field schema for every "simple" page (hero eyebrow/heading/body
 // and similar). Adding a new flat editable field anywhere = add it to
@@ -23,13 +23,6 @@ const SIMPLE_FIELDS = {
     { key: "closingEyebrow", label: "Closing CTA — eyebrow", type: "input" },
     { key: "closingHeading", label: "Closing CTA — heading", type: "input" },
     { key: "closingBody", label: "Closing CTA — body", type: "textarea" },
-  ],
-  about: [
-    { key: "eyebrow", label: "Eyebrow label", type: "input" },
-    { key: "heading", label: "Heading", type: "input" },
-    { key: "tagline", label: "Tagline (bold lead-in)", type: "input" },
-    { key: "intro", label: "Intro sentence", type: "textarea" },
-    { key: "note", label: "Note under intro", type: "textarea" },
   ],
   educationTraining: [
     { key: "eyebrow", label: "Eyebrow label", type: "input" },
@@ -148,7 +141,6 @@ function FlatFieldsPanel({ pageKey, fields }) {
 function usePageGroups() {
   return [
     { key: "home", label: "Home", extra: ["home-banner", "home-cards"] },
-    { key: "about", label: "About", extra: ["about-sections", "about-awards", "about-counts"] },
     { key: "educationTraining", label: "Education & Training (hub)", extra: ["education-subpages"] },
     { key: "liveLearning", label: "Live Learning" },
     { key: "questionBanks", label: "Question Banks", extra: ["question-topics"] },
@@ -173,22 +165,6 @@ function renderExtra(key) {
     case "home-cards":
       return <ObjectArrayEditor key={key} pageKey="home" arrayKey="cards" label='"What this practice offers" Cards' columns={3}
         fields={[{ key: "heading", label: "Heading" }, { key: "body", label: "Body", type: "textarea" }]} />;
-    case "about-sections":
-      return <NestedGroupEditor key={key} pageKey="about" arrayKey="sections" itemArrayKey="items"
-        fields={[{ key: "title", label: "Title" }, { key: "meta", label: "Meta (date/context)" }, { key: "body", label: "Body", type: "textarea" }]} />;
-    case "about-awards":
-      return <ObjectArrayEditor key={key} pageKey="about" arrayKey="awards" label="Awards & Honors Timeline (shown after all dropdowns, image + timeline layout)" columns={3}
-        fields={[{ key: "year", label: "Year" }, { key: "title", label: "Award Title" }, { key: "description", label: "Description", type: "textarea" }]} />;
-    case "about-counts":
-      return <CountsEditor key={key} pageKey="about" label="End-of-Page Counts Strip"
-        fields={[
-          { key: "publications", label: "PUBLICATIONS" },
-          { key: "oralPresentations", label: "ORAL PRESENTATIONS" },
-          { key: "posterPresentations", label: "POSTER PRESENTATIONS" },
-          { key: "manuscriptReviews", label: "MANUSCRIPT REVIEWS" },
-          { key: "journalsReviewed", label: "JOURNALS REVIEWED FOR" },
-          { key: "citedByInvestigators", label: "CITED BY INVESTIGATORS" },
-        ]} />;
     case "education-subpages":
       return <ObjectArrayEditor key={key} pageKey="educationTraining" arrayKey="subpages" label="Hub Cards (Live Learning, Question Banks, etc.)" columns={2}
         fields={[{ key: "label", label: "Label" }, { key: "blurb", label: "Blurb", type: "textarea" }]} />;

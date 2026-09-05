@@ -46,7 +46,8 @@ Visit `http://localhost:3000`.
 - `/contact` — single form routing by category (Education & Training, Clinical Services, Advisory Services, Research, Community Impact, General)
 - `/student-login` — front-end preview only, no real auth
 - `/admin` — stats editor + quick links
-- `/admin/content` — edit hero/intro text across every page (Home banner slides, Home service cards, and every other page's eyebrow/heading/intro paragraph)
+- `/admin/about` — dedicated editor for the doctor's full CV: hero text, all 18 CV sections (each individually collapsible), the Awards & Honors timeline, and the end-of-page counts. Split out from Site Content since it holds far more data than any other page.
+- `/admin/content` — edit hero/intro text across every OTHER page (Home banner slides, Home service cards, and every remaining page's eyebrow/heading/intro paragraph)
 - `/admin/meetings` — add/edit/delete Live Learning session cards (title, description, date, image URL, free/paid + price)
 - `/admin/testimonials` — add/delete testimonials
 - `/admin/requests` — consultation request record book, with status + notes
@@ -103,6 +104,33 @@ Meeting/event cards (`/admin/meetings`) now also support an optional
 **join link** field (Zoom/Google Meet URL) — stored but not rendered
 publicly, since exposing a live meeting link to anyone visiting the
 public site would let uninvited people join.
+
+## About Page — Journey Timeline & Awards Gallery
+
+Right after the stats strip, the About page now shows an **animated career
+journey timeline** — 11 milestones from 1998 (MBBS in India) to present,
+alternating left/right on desktop and collapsing to a single left-aligned
+column on mobile. Each milestone has a circular mini-photo (placeholder
+until real photos are supplied) that pops in via a scroll-triggered
+IntersectionObserver animation, plus a vertical line that visually fills
+as the page scrolls (implemented in `components/JourneyTimeline.js` with
+plain CSS + IntersectionObserver — no animation library dependency added).
+Fully admin-editable (add/edit/delete milestones, including the photo URL)
+under `/admin/about` → "Career Journey Timeline."
+
+**Awards & Honors** — the single placeholder photo was replaced with a
+responsive 4-photo gallery grid (`awardsGallery` in the content schema)
+that naturally matches the height of the awards timeline much better than
+one image could, and stays sticky in view while scrolling through the
+timeline on desktop. Admin-editable under `/admin/about` → "Awards &
+Honors Photo Gallery."
+
+**Note on localStorage versioning:** this update bumped the storage key
+again (now `v5`) since the content schema changed (new `journey` and
+`awardsGallery` arrays). See the note further down about why this matters
+— browsers with older cached data need this bump to pick up new fields
+cleanly. If you add new content-schema fields in the future, bump
+`STORAGE_KEY` in `lib/DataContext.js` again.
 
 ## About Page — Full CV CMS with Google Drive links
 

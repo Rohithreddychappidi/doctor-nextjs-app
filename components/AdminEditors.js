@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSiteData } from "@/lib/DataContext";
+import { Accordion } from "@/components/Accordion";
 
 // ---------------------------------------------------------------------
 // Generic editor for an array of flat objects (e.g. cards, service
@@ -131,11 +132,11 @@ export function NestedGroupEditor({ pageKey, arrayKey, itemArrayKey, fields }) {
   const groups = content[pageKey]?.[arrayKey] || [];
 
   return (
-    <div className="panel">
-      <div className="panel-head"><h3>About — Accordion Sections</h3></div>
+    <>
       {groups.map((group, gIdx) => (
         <GroupBlock
           key={group.key || gIdx}
+          index={gIdx + 1}
           label={group.label}
           items={group.items || []}
           driveLink={group.driveLink || ""}
@@ -150,11 +151,11 @@ export function NestedGroupEditor({ pageKey, arrayKey, itemArrayKey, fields }) {
           onDelete={(iIdx) => { if (confirm("Remove this entry?")) deleteNestedArrayItem(pageKey, arrayKey, gIdx, itemArrayKey, iIdx); }}
         />
       ))}
-    </div>
+    </>
   );
 }
 
-function GroupBlock({ label, items, driveLink, fields, onSave, onSaveDriveLink, onAdd, onDelete }) {
+function GroupBlock({ index, label, items, driveLink, fields, onSave, onSaveDriveLink, onAdd, onDelete }) {
   const [forms, setForms] = useState(items);
   const [savedIdx, setSavedIdx] = useState(null);
   const [linkValue, setLinkValue] = useState(driveLink);
@@ -170,12 +171,8 @@ function GroupBlock({ label, items, driveLink, fields, onSave, onSaveDriveLink, 
   };
 
   return (
-    <div style={{ marginBottom: 28, borderBottom: "1px solid var(--border)", paddingBottom: 20 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-        <h4 style={{ fontSize: "1rem", fontWeight: 700 }}>{label} ({forms.length} entries)</h4>
-        <button className="btn btn-outline btn-sm" onClick={onAdd}>+ Add entry</button>
-      </div>
-      <div className="field" style={{ marginBottom: 16, maxWidth: 560 }}>
+    <Accordion index={index} label={label} count={forms.length} defaultOpen={false}>
+      <div className="field" style={{ marginBottom: 16 }}>
         <label style={{ fontSize: 12 }}>Google Drive link for the full document (shown as a &quot;View Full Document&quot; button on the public page — leave blank to hide it)</label>
         <div style={{ display: "flex", gap: 8 }}>
           <input
@@ -192,6 +189,9 @@ function GroupBlock({ label, items, driveLink, fields, onSave, onSaveDriveLink, 
             {linkSaved ? "Saved ✓" : "Save Link"}
           </button>
         </div>
+      </div>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}>
+        <button className="btn btn-outline btn-sm" onClick={onAdd}>+ Add entry</button>
       </div>
       <div className="grid grid-3">
         {forms.map((item, idx) => (
@@ -215,7 +215,7 @@ function GroupBlock({ label, items, driveLink, fields, onSave, onSaveDriveLink, 
           </div>
         ))}
       </div>
-    </div>
+    </Accordion>
   );
 }
 

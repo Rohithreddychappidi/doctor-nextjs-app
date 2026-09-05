@@ -79,6 +79,7 @@ export default function AdminOverviewPage() {
       <div className="panel">
         <div className="panel-head"><h3>Quick links</h3></div>
         <div className="grid grid-3">
+          <a href="/admin/about" className="card"><h3>Edit About Page</h3><p>The doctor&apos;s full CV — 18 sections, awards timeline, and career counts.</p></a>
           <a href="/admin/meetings" className="card"><h3>Manage Meetings</h3><p>Add, edit or remove event cards — image, description and price.</p></a>
           <a href="/admin/testimonials" className="card"><h3>Manage Testimonials</h3><p>Add or remove student and family testimonials.</p></a>
           <a href="/admin/requests" className="card"><h3>Consultation Records</h3><p>{requests.length} logged requests — your record book of who we&apos;ve helped.</p></a>
