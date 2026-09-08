@@ -105,6 +105,29 @@ Meeting/event cards (`/admin/meetings`) now also support an optional
 publicly, since exposing a live meeting link to anyone visiting the
 public site would let uninvited people join.
 
+## About Page — Citation Chart & Google Scholar Card
+
+Right after the Journey Timeline, centered on the page: an animated
+**Citations-by-Year bar chart** (bars grow on scroll into view, hover any
+bar for an exact count tooltip) followed by a premium **Google Scholar
+profile card** — citations, h-index, and i10-index at a glance, the whole
+card clickable through to the real Scholar profile (opens in a new tab).
+
+**No official Google Scholar API exists**, and scraping it violates their
+Terms of Service — so these numbers are admin-entered, not auto-synced.
+Update them periodically (e.g. quarterly) under `/admin/about` → "Google
+Scholar Profile Card" (citations/h-index/i10-index/URL) and "Citations by
+Year" (the bar chart data, add/edit/delete any year).
+
+**Mobile handling:** with 14 years of data, forcing all bars onto a 375px
+screen would make them illegibly thin. Instead the chart scrolls
+horizontally on mobile (`.citation-scroll`), with a "Swipe to see all
+years →" hint — the same pattern Google Scholar's own citation chart
+uses for this exact problem. This was verified by measuring actual
+rendered element widths, not just the page-level overflow check, after
+that check gave a false "clean" reading on a real overflow bug the CSS
+safety net was silently masking.
+
 ## About Page — Journey Timeline & Awards Gallery
 
 Right after the stats strip, the About page now shows an **animated career

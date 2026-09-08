@@ -51,6 +51,52 @@ function AboutHeroPanel() {
   );
 }
 
+function ScholarProfilePanel() {
+  const { content, updateContent } = useSiteData();
+  const [form, setForm] = useState(content.about.scholarProfile);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => { setForm(content.about.scholarProfile); }, [content]);
+
+  const handleChange = (key, isNumber) => (e) => {
+    setForm((f) => ({ ...f, [key]: isNumber ? Number(e.target.value) || 0 : e.target.value }));
+    setSaved(false);
+  };
+
+  const handleSave = () => {
+    updateContent("about", { scholarProfile: form });
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1500);
+  };
+
+  return (
+    <div className="panel">
+      <div className="panel-head">
+        <h3>Google Scholar Profile Card</h3>
+        <button className="btn btn-primary btn-sm" onClick={handleSave}>{saved ? "Saved ✓" : "Save"}</button>
+      </div>
+      <div className="field" style={{ marginBottom: 14 }}>
+        <label>Google Scholar profile URL</label>
+        <input type="text" value={form?.url || ""} onChange={handleChange("url")} placeholder="https://scholar.google.com/citations?..." />
+      </div>
+      <div className="kpi-row" style={{ marginBottom: 0 }}>
+        <div className="kpi">
+          <div className="lbl">CITATIONS</div>
+          <input type="number" value={form?.citations ?? 0} onChange={handleChange("citations", true)} />
+        </div>
+        <div className="kpi">
+          <div className="lbl">H-INDEX</div>
+          <input type="number" value={form?.hIndex ?? 0} onChange={handleChange("hIndex", true)} />
+        </div>
+        <div className="kpi">
+          <div className="lbl">I10-INDEX</div>
+          <input type="number" value={form?.i10Index ?? 0} onChange={handleChange("i10Index", true)} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminAboutPage() {
   const { resetAllContent } = useSiteData();
 
@@ -91,6 +137,19 @@ export default function AdminAboutPage() {
           { key: "title", label: "Title" },
           { key: "description", label: "Description", type: "textarea" },
           { key: "imageUrl", label: "Mini photo URL (optional)" },
+        ]}
+      />
+
+      <ScholarProfilePanel />
+
+      <ObjectArrayEditor
+        pageKey="about"
+        arrayKey="citationsByYear"
+        label="Citations by Year (animated bar chart)"
+        columns={4}
+        fields={[
+          { key: "year", label: "Year" },
+          { key: "count", label: "Citation count", type: "number" },
         ]}
       />
 

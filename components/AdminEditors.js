@@ -19,9 +19,9 @@ export function ObjectArrayEditor({ pageKey, arrayKey, label, fields, columns = 
 
   useEffect(() => { setForms(items); }, [items]);
 
-  const handleChange = (idx, key) => (e) => {
+  const handleChange = (idx, key, type) => (e) => {
     const next = [...forms];
-    next[idx] = { ...next[idx], [key]: e.target.value };
+    next[idx] = { ...next[idx], [key]: type === "number" ? Number(e.target.value) || 0 : e.target.value };
     setForms(next);
   };
 
@@ -54,9 +54,11 @@ export function ObjectArrayEditor({ pageKey, arrayKey, label, fields, columns = 
               <div className="field" key={f.key} style={{ marginBottom: 12 }}>
                 <label>{f.label}</label>
                 {f.type === "textarea" ? (
-                  <textarea value={item[f.key] || ""} onChange={handleChange(idx, f.key)} />
+                  <textarea value={item[f.key] || ""} onChange={handleChange(idx, f.key, f.type)} />
+                ) : f.type === "number" ? (
+                  <input type="number" value={item[f.key] ?? 0} onChange={handleChange(idx, f.key, f.type)} />
                 ) : (
-                  <input type="text" value={item[f.key] || ""} onChange={handleChange(idx, f.key)} />
+                  <input type="text" value={item[f.key] || ""} onChange={handleChange(idx, f.key, f.type)} />
                 )}
               </div>
             ))}

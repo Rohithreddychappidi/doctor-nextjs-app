@@ -4,6 +4,8 @@ import Link from "next/link";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 import StatStrip from "@/components/StatStrip";
 import JourneyTimeline from "@/components/JourneyTimeline";
+import CitationChart from "@/components/CitationChart";
+import ScholarCard from "@/components/ScholarCard";
 import { Accordion, AccordionItem } from "@/components/Accordion";
 import { useSiteData } from "@/lib/DataContext";
 
@@ -54,6 +56,18 @@ export default function AboutPage() {
               leadership in Chicago.</p>
           </div>
           <JourneyTimeline items={c.journey} />
+        </div>
+      </section>
+
+      <section className="section center">
+        <div className="container">
+          <div className="eyebrow" style={{ justifyContent: "center" }}>Academic Record</div>
+          <h2 style={{ marginBottom: 12 }}>Citations by year</h2>
+          <p className="lede mx-auto" style={{ marginBottom: 40 }}>
+            Growth in research impact over time, as tracked on Google Scholar.
+          </p>
+          <CitationChart data={c.citationsByYear} />
+          <ScholarCard profile={c.scholarProfile} />
         </div>
       </section>
 
