@@ -20,6 +20,11 @@ export async function GET() {
     const rotation = memoryStore.rotation_enrollments.find((r) => r.student_id === session.id);
     const applications = memoryStore.rotation_applications.filter((a) => a.student_id === session.id);
     const programs = memoryStore.rotation_programs;
+    const meetings = rotation
+      ? (memoryStore.rotation_meetings || []).filter(
+          (m) => m.rotation_enrollment_id === rotation.id || (m.attendee_scope === "cohort" && m.cohort_id === "cohort_fall_2026")
+        )
+      : [];
 
     return NextResponse.json({
       success: true,
@@ -27,6 +32,7 @@ export async function GET() {
       rotation: rotation || null,
       applications,
       programs,
+      meetings,
     });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });

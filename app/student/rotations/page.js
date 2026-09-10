@@ -168,31 +168,162 @@ export default function StudentRotationsPage() {
               </div>
             </div>
 
-            {/* Live Rounds Schedule Box */}
-            <div className="p-5 bg-indigo-50/60 rounded-xl border border-indigo-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 mt-0.5">
-                  <svg width="20" height="20" style={{ width: 20, height: 20 }} className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19.5 5h-15C3.12 5 2 6.12 2 7.5v9C2 17.88 3.12 19 4.5 19h15c1.38 0 2.5-1.12 2.5-2.5v-9C22 6.12 20.88 5 19.5 5zm-3.5 9h-8v-1.5h8V14zm0-3h-8V9.5h8V11z"/>
-                  </svg>
-                </div>
+            {/* SECTION: Flexible Multi-Meeting Clinical Schedule */}
+            <div className="space-y-4 pt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h4 className="font-bold text-slate-900 text-sm">Multidisciplinary Neonatal Morning Rounds</h4>
-                  <p className="text-xs text-slate-600 mt-0.5">{rotation.schedule_summary}</p>
-                  <p className="text-[11px] text-indigo-700 font-semibold mt-1">
-                    Platform: Microsoft Teams (Meeting link active during rounds)
+                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse"></span>
+                    Live Clinical Sessions &amp; Examine Calls
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Multiple scheduled rounds, graded oral examine calls, and faculty check-ins per week.
                   </p>
+                </div>
+                <div className="inline-flex rounded-lg border border-slate-200 p-1 bg-slate-50 text-xs">
+                  <span className="px-2.5 py-1 rounded-md font-semibold text-slate-700 bg-white shadow-xs">
+                    {data?.meetings?.length || 0} Scheduled Sessions
+                  </span>
                 </div>
               </div>
 
-              <a
-                href="https://teams.microsoft.com/l/meetup-join/jva-medical-neonatology-week1"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-xs hover:bg-indigo-700 shadow-sm transition inline-flex items-center justify-center gap-1.5 shrink-0"
-              >
-                Join Teams Meeting
-              </a>
+              {/* Meetings List */}
+              <div className="grid grid-cols-1 gap-3.5">
+                {(data?.meetings || []).map((meet) => {
+                  const isExamine = meet.meeting_type === "Examine Call";
+                  const isCompleted = meet.status === "Completed";
+                  const typeColors = {
+                    "Live Teaching Session": "bg-blue-50 text-blue-700 border-blue-200",
+                    "Examine Call": "bg-amber-50 text-amber-800 border-amber-200 font-bold",
+                    "Mentor Check-in": "bg-teal-50 text-teal-700 border-teal-200",
+                    "Make-up Session": "bg-indigo-50 text-indigo-700 border-indigo-200",
+                    "Orientation Call": "bg-emerald-50 text-emerald-700 border-emerald-200",
+                  };
+                  const badgeColor = typeColors[meet.meeting_type] || "bg-slate-100 text-slate-700 border-slate-200";
+
+                  return (
+                    <div
+                      key={meet.id}
+                      className={`p-4 sm:p-5 rounded-xl border transition-all ${
+                        isExamine
+                          ? "bg-amber-50/40 border-amber-200 shadow-xs"
+                          : "bg-white border-slate-200 hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                        <div className="flex items-start gap-3.5 flex-1 min-w-0">
+                          <div
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                              isExamine ? "bg-amber-600 text-white" : "bg-indigo-600 text-white"
+                            }`}
+                          >
+                            {isExamine ? (
+                              <span style={{ fontSize: 18 }}>⚖️</span>
+                            ) : (
+                              <svg width="18" height="18" style={{ width: 18, height: 18 }} viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19.5 5h-15C3.12 5 2 6.12 2 7.5v9C2 17.88 3.12 19 4.5 19h15c1.38 0 2.5-1.12 2.5-2.5v-9C22 6.12 20.88 5 19.5 5zm-3.5 9h-8v-1.5h8V14zm0-3h-8V9.5h8V11z" />
+                              </svg>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-bold border ${badgeColor}`}>
+                                {meet.meeting_type}
+                              </span>
+                              <span className="text-[11px] text-slate-500 font-medium">
+                                ⏱️ {meet.duration_minutes} mins
+                              </span>
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                                  isCompleted
+                                    ? "bg-slate-100 text-slate-600"
+                                    : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                }`}
+                              >
+                                {meet.status}
+                              </span>
+                            </div>
+
+                            <h4 className="font-bold text-slate-900 text-sm sm:text-base leading-snug">
+                              {meet.title}
+                            </h4>
+                            <p className="text-xs text-slate-600 mt-1">
+                              <strong>Date &amp; Time:</strong>{" "}
+                              {new Date(meet.scheduled_at).toLocaleString("en-US", {
+                                weekday: "short",
+                                month: "short",
+                                day: "numeric",
+                                hour: "numeric",
+                                minute: "2-digit",
+                                timeZoneName: "short",
+                              })}
+                            </p>
+                            {meet.notes && (
+                              <p className="text-xs text-slate-500 mt-1 leading-relaxed bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                <strong>Topic &amp; Clinical Syllabus:</strong> {meet.notes}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-col sm:flex-row md:flex-col gap-2 shrink-0 items-end">
+                          {meet.teams_join_url && (
+                            <a
+                              href={meet.teams_join_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition inline-flex items-center gap-1.5 justify-center w-full md:w-auto ${
+                                isCompleted
+                                  ? "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
+                                  : "bg-indigo-600 text-white hover:bg-indigo-700"
+                              }`}
+                            >
+                              <svg width="15" height="15" style={{ width: 15, height: 15 }} viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19.5 5h-15C3.12 5 2 6.12 2 7.5v9C2 17.88 3.12 19 4.5 19h15c1.38 0 2.5-1.12 2.5-2.5v-9C22 6.12 20.88 5 19.5 5zm-3.5 9h-8v-1.5h8V14zm0-3h-8V9.5h8V11z" />
+                              </svg>
+                              {isCompleted ? "Teams Recording / Room" : "Join Teams Meeting"}
+                            </a>
+                          )}
+                          {meet.materials_url && (
+                            <a
+                              href={meet.materials_url}
+                              download
+                              className="px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition inline-flex items-center gap-1"
+                            >
+                              📄 Session Materials
+                            </a>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* If Graded Examine Call: Detailed Assessment Breakdown */}
+                      {isExamine && meet.score !== null && (
+                        <div className="mt-4 pt-3.5 border-t border-amber-200/70 bg-white p-3.5 rounded-xl border">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                                Oral Examine Evaluation Result:
+                              </span>
+                              <span className="px-2 py-0.5 rounded text-xs font-extrabold bg-emerald-100 text-emerald-800">
+                                Score: {meet.score}/100 ({meet.pass_fail || "Pass"})
+                              </span>
+                            </div>
+                            <span className="text-[11px] text-slate-500">
+                              Evaluator: {meet.physician}
+                            </span>
+                          </div>
+                          {meet.grader_notes && (
+                            <p className="text-xs text-slate-700 mt-2 italic bg-amber-50/50 p-2.5 rounded-lg border border-amber-100">
+                              &ldquo;{meet.grader_notes}&rdquo;
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Evaluation & Faculty Notes */}
@@ -202,22 +333,27 @@ export default function StudentRotationsPage() {
                   <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                   Clinical Evaluation Status
                 </h4>
-                <p className="text-sm font-semibold text-emerald-700">{rotation.evaluation_status}</p>
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-sm font-bold text-emerald-700">{rotation.evaluation_status}</p>
+                  <span className="text-xs font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                    Grade: Honors (92%)
+                  </span>
+                </div>
                 <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                  Attending feedback: Active participant in differential diagnoses during morning rounds. Case presentation on surfactant administration received top marks.
+                  Attending feedback: Outstanding presentation on exchange transfusion indications. Active participant in differential diagnoses during morning rounds. Surfactant administration presentation received top marks.
                 </p>
               </div>
 
               <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50">
                 <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-teal-500"></span>
-                  Certificate of Completion
+                  Certificate &amp; US LOR Issuance
                 </h4>
                 <p className="text-sm font-semibold text-slate-700">
                   {rotation.certificate_issued ? "Issued" : "Pending Week 6 Clinical Exit Exam"}
                 </p>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                  Upon completion of Week 6 and evaluation sign-off by Dr. Janardhan Mydam, your verifiable digital credential and LOR will be generated in Certificates.
+                  Upon completion of Week 6 and evaluation sign-off by Dr. Janardhan Mydam, your verifiable digital credential and clinical Letter of Recommendation (LOR) will be generated in Certificates.
                 </p>
               </div>
             </div>

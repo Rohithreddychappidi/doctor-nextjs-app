@@ -14,6 +14,10 @@ export default function AdminTestsPage() {
   // Question Form
   const [qData, setQData] = useState({
     subject: "Neonatology",
+    module: "Neonatal Resuscitation & Intensive Care",
+    section: "Respiratory Distress Syndrome & Surfactant",
+    system: "Respiratory",
+    exam: "USMLE Step 2 CK / Board Prep",
     level: 2,
     stem: "",
     optionA: "",
@@ -24,6 +28,9 @@ export default function AdminTestsPage() {
     explanation_correct: "",
     explanation_incorrect: "",
   });
+
+  const [qSearch, setQSearch] = useState("");
+  const [qSubjectFilter, setQSubjectFilter] = useState("ALL");
 
   // Test Form
   const [tData, setTData] = useState({
@@ -86,6 +93,10 @@ export default function AdminTestsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           subject: qData.subject,
+          module: qData.module,
+          section: qData.section,
+          system: qData.system,
+          exam: qData.exam,
           level: Number(qData.level),
           stem: qData.stem,
           options,
@@ -100,6 +111,10 @@ export default function AdminTestsPage() {
       setMsg("Question added to question bank successfully!");
       setQData({
         subject: "Neonatology",
+        module: "Neonatal Resuscitation & Intensive Care",
+        section: "Respiratory Distress Syndrome & Surfactant",
+        system: "Respiratory",
+        exam: "USMLE Step 2 CK / Board Prep",
         level: 2,
         stem: "",
         optionA: "",
@@ -115,6 +130,22 @@ export default function AdminTestsPage() {
       setErr(e.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteQuestion = async (qId) => {
+    if (!confirm("Are you sure you want to delete this question from the Question Bank?")) return;
+    try {
+      const res = await fetch(`/api/questions?id=${qId}`, { method: "DELETE" });
+      if (res.ok) {
+        setMsg("Question deleted successfully.");
+        setQuestions((prev) => prev.filter((q) => q.id !== qId));
+      } else {
+        const errJson = await res.json();
+        setErr(errJson.error || "Failed to delete question");
+      }
+    } catch (e) {
+      setErr("Failed to delete question");
     }
   };
 
@@ -377,7 +408,7 @@ export default function AdminTestsPage() {
               <div className="form-row">
                 <div className="field">
                   <label>
-                    Subject <MandatoryStar />
+                    Subject Focus <MandatoryStar />
                   </label>
                   <select
                     value={qData.subject}
@@ -386,19 +417,63 @@ export default function AdminTestsPage() {
                     <option value="Neonatology">Neonatology</option>
                     <option value="Pediatrics">Pediatrics</option>
                     <option value="Biostatistics">Biostatistics</option>
+                    <option value="Cardiology">Cardiology</option>
+                    <option value="Neurology">Neurology</option>
                   </select>
                 </div>
                 <div className="field">
-                  <label>Learning Level</label>
+                  <label>Learning &amp; Board Level</label>
                   <select
                     value={qData.level}
                     onChange={(e) => setQData({ ...qData, level: Number(e.target.value) })}
                   >
                     <option value={1}>Level 1: Medical School &amp; Shelf</option>
-                    <option value={2}>Level 2: USMLE Clinical Reasoning</option>
-                    <option value={3}>Level 3: Pediatrics Board Preparation</option>
-                    <option value={4}>Level 4: Neonatal-Perinatal Boards</option>
+                    <option value={2}>Level 2: USMLE Step 2 CK</option>
+                    <option value={3}>Level 3: General Pediatrics Board</option>
+                    <option value={4}>Level 4: Neonatal-Perinatal Subspecialty Boards</option>
                   </select>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="field">
+                  <label>Curricular Module / Unit</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Neonatal Resuscitation &amp; Delivery Room Management"
+                    value={qData.module}
+                    onChange={(e) => setQData({ ...qData, module: e.target.value })}
+                  />
+                </div>
+                <div className="field">
+                  <label>Section / Specific Topic</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Respiratory Distress Syndrome &amp; Surfactant Replacement"
+                    value={qData.section}
+                    onChange={(e) => setQData({ ...qData, section: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="field">
+                  <label>Organ System</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Respiratory, Cardiovascular, Neurology"
+                    value={qData.system}
+                    onChange={(e) => setQData({ ...qData, system: e.target.value })}
+                  />
+                </div>
+                <div className="field">
+                  <label>Target Exam</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. USMLE Step 2 CK / ABP Pediatric Shelf"
+                    value={qData.exam}
+                    onChange={(e) => setQData({ ...qData, exam: e.target.value })}
+                  />
                 </div>
               </div>
 
@@ -515,23 +590,155 @@ export default function AdminTestsPage() {
             </form>
           </div>
 
-          {/* Questions List */}
-          <h3>Question Bank Catalog ({questions.length})</h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 14 }}>
-            {questions.map((q, idx) => (
-              <div key={q.id} className="dash-card">
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                  <span className="pill accent">Item #{idx + 1} · {q.subject} (Level {q.level})</span>
-                  <span style={{ fontSize: 13, color: "var(--green)", fontWeight: 600 }}>
-                    Correct: Option {String.fromCharCode(65 + Number(q.correct_index))}
-                  </span>
-                </div>
-                <p style={{ fontSize: 14.5, color: "var(--ink)", margin: "8px 0" }}>{q.stem}</p>
-                <div style={{ fontSize: 13, color: "var(--ink-soft)", backgroundColor: "#F7F4EE", padding: 10, borderRadius: 6 }}>
-                  <strong>Correct Rationale:</strong> {q.explanation_correct}
-                </div>
+          {/* Questions List & Dynamic Filters */}
+          <div style={{ marginTop: 24 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 14 }}>
+              <div>
+                <h3 style={{ margin: 0 }}>Question Bank Catalog ({questions.length} Items)</h3>
+                <p style={{ fontSize: 12, color: "var(--ink-soft)", margin: "4px 0 0" }}>
+                  Filter clinical vignettes by subject, curricular module, or search by diagnostic keywords.
+                </p>
               </div>
-            ))}
+
+              {/* Filters */}
+              <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <input
+                  type="text"
+                  placeholder="🔍 Search questions, stem, rationales..."
+                  value={qSearch}
+                  onChange={(e) => setQSearch(e.target.value)}
+                  style={{
+                    padding: "7px 12px",
+                    borderRadius: "7px",
+                    border: "1px solid var(--border)",
+                    fontSize: "13px",
+                    width: "220px",
+                  }}
+                />
+                <select
+                  value={qSubjectFilter}
+                  onChange={(e) => setQSubjectFilter(e.target.value)}
+                  style={{
+                    padding: "7px 10px",
+                    borderRadius: "7px",
+                    border: "1px solid var(--border)",
+                    fontSize: "13px",
+                    backgroundColor: "#FFFFFF",
+                  }}
+                >
+                  <option value="ALL">All Subjects</option>
+                  <option value="Neonatology">Neonatology</option>
+                  <option value="Pediatrics">Pediatrics</option>
+                  <option value="Biostatistics">Biostatistics</option>
+                  <option value="Cardiology">Cardiology</option>
+                  <option value="Neurology">Neurology</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Questions Catalog */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {questions
+                .filter((q) => {
+                  const matchesSearch =
+                    !qSearch ||
+                    q.stem.toLowerCase().includes(qSearch.toLowerCase()) ||
+                    (q.explanation_correct && q.explanation_correct.toLowerCase().includes(qSearch.toLowerCase())) ||
+                    (q.module && q.module.toLowerCase().includes(qSearch.toLowerCase())) ||
+                    (q.section && q.section.toLowerCase().includes(qSearch.toLowerCase()));
+                  const matchesSubject = qSubjectFilter === "ALL" || q.subject.toLowerCase() === qSubjectFilter.toLowerCase();
+                  return matchesSearch && matchesSubject;
+                })
+                .map((q, idx) => (
+                  <div key={q.id} className="dash-card" style={{ borderLeft: "4px solid #1E3A8A" }}>
+                    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 8 }}>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+                        <span className="pill accent">Item #{idx + 1} · {q.subject} (Level {q.level})</span>
+                        {q.module && (
+                          <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 4, backgroundColor: "#E0F2FE", color: "#0369A1" }}>
+                            📚 {q.module}
+                          </span>
+                        )}
+                        {q.section && (
+                          <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 4, backgroundColor: "#FEF3C7", color: "#92400E" }}>
+                            🔖 {q.section}
+                          </span>
+                        )}
+                        {q.system && (
+                          <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 8px", borderRadius: 4, backgroundColor: "#F1F5F9", color: "#475569" }}>
+                            🩺 {q.system}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <span style={{ fontSize: 12, color: "var(--green)", fontWeight: 700, backgroundColor: "#DCFCE7", padding: "3px 8px", borderRadius: 5 }}>
+                          Correct: Option {String.fromCharCode(65 + Number(q.correct_index))}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteQuestion(q.id)}
+                          style={{
+                            padding: "3px 8px",
+                            borderRadius: "5px",
+                            border: "1px solid #FECACA",
+                            backgroundColor: "#FEF2F2",
+                            color: "#DC2626",
+                            fontSize: "11.5px",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                          }}
+                        >
+                          🗑 Delete
+                        </button>
+                      </div>
+                    </div>
+
+                    <p style={{ fontSize: 14.5, color: "var(--ink)", margin: "8px 0 12px", lineHeight: 1.5 }}>{q.stem}</p>
+
+                    {/* Options Preview */}
+                    {Array.isArray(q.options) && (
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 6, marginBottom: 12 }}>
+                        {q.options.map((opt, optIdx) => {
+                          const isCorrect = optIdx === Number(q.correct_index);
+                          return (
+                            <div
+                              key={optIdx}
+                              style={{
+                                padding: "6px 10px",
+                                borderRadius: 6,
+                                fontSize: 12.5,
+                                backgroundColor: isCorrect ? "#DCFCE7" : "#F8FAFC",
+                                border: isCorrect ? "1px solid #86EFAC" : "1px solid #E2E8F0",
+                                color: isCorrect ? "#166534" : "#334155",
+                                fontWeight: isCorrect ? 700 : 400,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                              }}
+                            >
+                              <span>{String.fromCharCode(65 + optIdx)}.</span>
+                              <span style={{ flex: 1 }}>{opt}</span>
+                              {isCorrect && <span>✓</span>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Explanations */}
+                    <div style={{ fontSize: 13, color: "var(--ink-soft)", backgroundColor: "#F7F4EE", padding: 12, borderRadius: 6, display: "flex", flexDirection: "column", gap: 6 }}>
+                      <div>
+                        <strong style={{ color: "#166534" }}>Guideline Rationale:</strong> {q.explanation_correct}
+                      </div>
+                      {q.explanation_incorrect && (
+                        <div style={{ marginTop: 4, paddingTop: 4, borderTop: "1px dashed #D1D5DB", fontSize: 12.5, color: "#475569" }}>
+                          <strong style={{ color: "#991B1B" }}>Distractor Rationales:</strong> {q.explanation_incorrect}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+            </div>
           </div>
         </div>
       )}

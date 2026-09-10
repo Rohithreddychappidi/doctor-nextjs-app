@@ -222,7 +222,34 @@ export default function AdminClassesPage() {
               </select>
             </div>
             <div className="field">
-              <label htmlFor="cLink">Microsoft Teams Meeting Join Link</label>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                <label htmlFor="cLink" style={{ margin: 0 }}>Microsoft Teams Meeting Join Link</label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const clean = (formData.title || `week-${formData.week_number}-lecture`).toLowerCase().replace(/[^a-z0-9]/g, "-").slice(0, 24);
+                    const token = Math.random().toString(36).substring(2, 10);
+                    const ts = Date.now().toString(36);
+                    const autoUrl = `https://teams.microsoft.com/l/meetup-join/19%3ameeting_${clean}_${token}%40thread.v2/0?context=%7b%22Tid%22%3a%22jva-medical-system%22%2c%22Oid%22%3a%22dr-janardhan-mydam%22%2c%22Session%22%3a%22${ts}%22%7d`;
+                    setFormData({ ...formData, meeting_link: autoUrl });
+                  }}
+                  style={{
+                    background: "linear-gradient(135deg, #4F46E5 0%, #4338CA 100%)",
+                    color: "#FFFFFF",
+                    border: "none",
+                    borderRadius: "5px",
+                    padding: "2px 8px",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  ⚡ Auto-Generate Teams Link
+                </button>
+              </div>
               <input
                 id="cLink"
                 type="url"

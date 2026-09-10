@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSiteData } from "@/lib/DataContext";
 
@@ -7,22 +8,80 @@ export default function TeleRotationsPage() {
   const { content } = useSiteData();
   const C = content.teleRotations;
 
+  const [livePricing, setLivePricing] = useState({
+    pricing_type: "Paid",
+    price: "$1,200",
+    pricing_note: "per 6-week cohort"
+  });
+
+  useEffect(() => {
+    async function fetchPricing() {
+      try {
+        const res = await fetch("/api/programs");
+        if (res.ok) {
+          const json = await res.json();
+          const tele = (json.programs || []).find(p => p.key === "tele_rotation");
+          if (tele) {
+            setLivePricing({
+              pricing_type: tele.pricing_type || (tele.price === "Free" ? "Free" : "Paid"),
+              price: tele.price || "$1,200",
+              pricing_note: tele.pricing_note || "per 6-week cohort"
+            });
+          }
+        }
+      } catch (e) {
+        console.error("Pricing fetch error:", e);
+      }
+    }
+    fetchPricing();
+  }, []);
+
+  const isFree = livePricing.pricing_type === "Free" || livePricing.price === "Free";
+
   return (
     <>
       <section className="hero" style={{ paddingBottom: 40 }}>
         <div className="container hero-grid">
           <div>
-            <div className="eyebrow">{C.eyebrow}</div>
+            <div className="eyebrow" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span>{C.eyebrow}</span>
+              <span
+                style={{
+                  backgroundColor: isFree ? "#2E7D3A" : "#B4832A",
+                  color: "#FFFFFF",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  padding: "3px 10px",
+                  borderRadius: "20px",
+                  letterSpacing: "0.5px"
+                }}
+              >
+                {isFree ? "Free Program" : `Tuition: ${livePricing.price}`}
+              </span>
+            </div>
             <h1>{C.heading}</h1>
             <p className="lede">{C.body}</p>
             <div className="hero-actions">
-              <Link href="/education-training/tele-rotations/apply" className="btn btn-primary">Apply for Learning Hub</Link>
+              <Link href="/education-training/tele-rotations/apply" className="btn btn-primary">
+                Apply for Tele-Rotation {isFree ? "(Free)" : `(${livePricing.price})`}
+              </Link>
               <Link href="/student-dashboard" className="btn btn-gold">Student Portal &rarr;</Link>
               <Link href="/education-training/physical-rotations" className="btn btn-outline">Physical Rotations</Link>
             </div>
           </div>
           <div className="hero-card">
-            <span className="tag">Program Overview</span>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <span className="tag">Program Overview</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: isFree ? "#4ADE80" : "#E9C989" }}>
+                {isFree ? "Free Enrollment" : `${livePricing.price}`}
+              </span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.14)", fontSize: 14 }}>
+              <span style={{ color: "rgba(255,255,255,0.6)" }}>Tuition &amp; Fees</span>
+              <span style={{ fontWeight: 700, color: isFree ? "#4ADE80" : "#FFFFFF" }}>
+                {isFree ? "Free (No Fee)" : `${livePricing.price} (${livePricing.pricing_note})`}
+              </span>
+            </div>
             <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.14)", fontSize: 14 }}>
               <span style={{ color: "rgba(255,255,255,0.6)" }}>Duration</span><span style={{ fontWeight: 600 }}>{C.overview.duration}</span>
             </div>
