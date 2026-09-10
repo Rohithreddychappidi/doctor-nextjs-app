@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSiteData } from "@/lib/DataContext";
+import SectionDisclaimer from "@/components/SectionDisclaimer";
 
 export default function TeleRotationsPage() {
   const { content } = useSiteData();
@@ -100,6 +101,8 @@ export default function TeleRotationsPage() {
 
       <section className="section soft tight">
         <div className="container">
+          <SectionDisclaimer sectionKey="tele_rotations" />
+
           <div className="section-head">
             <div><div className="eyebrow">Purpose</div><h2>What this rotation is built to do</h2></div>
           </div>

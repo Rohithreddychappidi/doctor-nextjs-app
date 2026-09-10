@@ -3,6 +3,7 @@
 import Link from "next/link";
 import MeetingCard from "@/components/MeetingCard";
 import { useSiteData } from "@/lib/DataContext";
+import SectionDisclaimer from "@/components/SectionDisclaimer";
 
 export default function LiveLearningPage() {
   const { meetings, content } = useSiteData();
@@ -19,6 +20,8 @@ export default function LiveLearningPage() {
 
       <section className="section tight">
         <div className="container">
+          <SectionDisclaimer sectionKey="live_classes" />
+
           {meetings.length === 0 ? (
             <p>No sessions are scheduled right now — check back soon.</p>
           ) : (

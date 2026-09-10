@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import EnrollmentGate from "@/components/EnrollmentGate";
+import SectionDisclaimer from "@/components/SectionDisclaimer";
 
 export default function StudentQBankPage() {
   const [data, setData] = useState(null);
@@ -73,6 +74,9 @@ export default function StudentQBankPage() {
             </Link>
           </div>
         </div>
+
+        {/* Section Compliance Disclaimer (Admin Controlled) */}
+        <SectionDisclaimer sectionKey="question_bank" />
 
         {/* SECTION I: QBank Home Hero Row (Continue Previous Test / Performance) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

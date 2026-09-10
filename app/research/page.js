@@ -3,6 +3,7 @@
 import Link from "next/link";
 import StatStrip from "@/components/StatStrip";
 import { useSiteData } from "@/lib/DataContext";
+import SectionDisclaimer from "@/components/SectionDisclaimer";
 
 const statusLabel = { done: "Published", progress: "Under review", new: "In progress" };
 
@@ -20,7 +21,10 @@ export default function ResearchPage() {
       </section>
 
       <section className="section soft tight">
-        <div className="container"><StatStrip /></div>
+        <div className="container">
+          <SectionDisclaimer sectionKey="research" />
+          <StatStrip />
+        </div>
       </section>
 
       <section className="section">

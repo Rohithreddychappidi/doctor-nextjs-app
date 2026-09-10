@@ -22,6 +22,9 @@ export default function AdminClassesPage() {
     duration_minutes: 90,
     meeting_platform: "Microsoft Teams",
     meeting_link: "",
+    recording_url: "",
+    meeting_passcode: "",
+    teams_meeting_id: "",
     notes_url: "",
     notes_title: "",
     assignment_title: "",
@@ -257,6 +260,49 @@ export default function AdminClassesPage() {
                 value={formData.meeting_link}
                 onChange={(e) => setFormData({ ...formData, meeting_link: e.target.value })}
               />
+            </div>
+          </div>
+
+          {/* Microsoft Teams Pro Extras */}
+          <div style={{ backgroundColor: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: "8px", padding: "14px", margin: "16px 0" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+              <span style={{ fontSize: "12.5px", fontWeight: 800, color: "#166534" }}>
+                🛡️ Microsoft Teams Pro Integration
+              </span>
+              <span style={{ fontSize: "10px", fontWeight: 700, padding: "1px 6px", borderRadius: "4px", backgroundColor: "#DCFCE7", color: "#15803D" }}>
+                Cloud Playback
+              </span>
+            </div>
+            <div className="form-row">
+              <div className="field">
+                <label>Teams Room ID</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 291 049 2038"
+                  value={formData.teams_meeting_id}
+                  onChange={(e) => setFormData({ ...formData, teams_meeting_id: e.target.value })}
+                />
+              </div>
+              <div className="field">
+                <label>Meeting Passcode</label>
+                <input
+                  type="text"
+                  placeholder="e.g. NICU2026"
+                  value={formData.meeting_passcode}
+                  onChange={(e) => setFormData({ ...formData, meeting_passcode: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="form-row single" style={{ marginTop: "8px" }}>
+              <div className="field">
+                <label>Cloud Recording URL (Teams Pro Recording / Stream Link)</label>
+                <input
+                  type="url"
+                  placeholder="https://teams.microsoft.com/l/recording/..."
+                  value={formData.recording_url}
+                  onChange={(e) => setFormData({ ...formData, recording_url: e.target.value })}
+                />
+              </div>
             </div>
           </div>
 

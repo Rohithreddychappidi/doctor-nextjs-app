@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Accordion } from "@/components/Accordion";
 import { useSiteData } from "@/lib/DataContext";
+import SectionDisclaimer from "@/components/SectionDisclaimer";
 
 export default function QuestionBanksPage() {
   const { content } = useSiteData();
@@ -40,6 +41,8 @@ export default function QuestionBanksPage() {
 
       <section className="section soft">
         <div className="container">
+          <SectionDisclaimer sectionKey="question_bank" />
+
           <div className="section-head">
             <div><div className="eyebrow">Browse by topic</div><h2>Click a topic to see its sub-topics</h2></div>
           </div>

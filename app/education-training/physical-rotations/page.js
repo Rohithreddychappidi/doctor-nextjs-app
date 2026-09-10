@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useSiteData } from "@/lib/DataContext";
+import SectionDisclaimer from "@/components/SectionDisclaimer";
 
 export default function PhysicalRotationsPage() {
   const { content } = useSiteData();
@@ -18,6 +19,8 @@ export default function PhysicalRotationsPage() {
 
       <section className="section tight">
         <div className="container">
+          <SectionDisclaimer sectionKey="physical_rotations" />
+
           <div className="grid grid-3" style={{ marginBottom: 40 }}>
             {c.tracks.map((t) => (
               <div className="card" key={t.heading}>

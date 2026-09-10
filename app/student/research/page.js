@@ -6,6 +6,7 @@ import EnrollmentGate from "@/components/EnrollmentGate";
 import StatusTimeline from "@/components/StatusTimeline";
 import DocumentList from "@/components/DocumentList";
 import DocumentUploader from "@/components/DocumentUploader";
+import SectionDisclaimer from "@/components/SectionDisclaimer";
 
 export default function StudentResearchPage() {
   const [data, setData] = useState(null);
@@ -121,6 +122,9 @@ export default function StudentResearchPage() {
             </button>
           </div>
         </div>
+
+        {/* Section Compliance Disclaimer (Admin Controlled) */}
+        <SectionDisclaimer sectionKey="research" />
 
         {/* Projects List & Detail */}
         <div className="space-y-6">

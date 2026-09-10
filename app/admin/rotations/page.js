@@ -42,6 +42,11 @@ export default function AdminRotationsPage() {
     physician: "Dr. Janardhan Mydam, MD, FAAP",
     attendee_scope: "cohort",
     teams_join_url: "",
+    teams_meeting_id: "",
+    teams_passcode: "",
+    recording_url: "",
+    ai_summary: "",
+    is_pro: true,
     materials_url: "",
     notes: "",
     repeat_weeks: 1,
@@ -868,6 +873,63 @@ export default function AdminRotationsPage() {
                     onChange={(e) => setNewMeeting({ ...newMeeting, teams_join_url: e.target.value })}
                     style={{ width: "100%", padding: "9px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", boxSizing: "border-box" }}
                   />
+                </div>
+
+                {/* Microsoft Teams Pro Advanced Features */}
+                <div style={{ backgroundColor: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: "8px", padding: "12px", marginBottom: "14px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                    <span style={{ fontSize: "12px", fontWeight: 800, color: "#166534", display: "flex", alignItems: "center", gap: "5px" }}>
+                      <span>🛡️</span> Microsoft Teams Pro Features
+                    </span>
+                    <span style={{ fontSize: "10px", fontWeight: 700, padding: "1px 6px", borderRadius: "4px", backgroundColor: "#DCFCE7", color: "#15803D" }}>
+                      Cloud Recording &amp; AI
+                    </span>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "8px" }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#374151", marginBottom: "3px" }}>Teams Room ID</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 284 194 0921"
+                        value={newMeeting.teams_meeting_id}
+                        onChange={(e) => setNewMeeting({ ...newMeeting, teams_meeting_id: e.target.value })}
+                        style={{ width: "100%", padding: "7px 9px", borderRadius: "6px", border: "1px solid #CBD5E1", fontSize: "12px", boxSizing: "border-box" }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#374151", marginBottom: "3px" }}>Room Passcode</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. NICU2026"
+                        value={newMeeting.teams_passcode}
+                        onChange={(e) => setNewMeeting({ ...newMeeting, teams_passcode: e.target.value })}
+                        style={{ width: "100%", padding: "7px 9px", borderRadius: "6px", border: "1px solid #CBD5E1", fontSize: "12px", boxSizing: "border-box" }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: "8px" }}>
+                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#374151", marginBottom: "3px" }}>Cloud Recording URL (Teams Pro Playback)</label>
+                    <input
+                      type="url"
+                      placeholder="https://teams.microsoft.com/l/recording/..."
+                      value={newMeeting.recording_url}
+                      onChange={(e) => setNewMeeting({ ...newMeeting, recording_url: e.target.value })}
+                      style={{ width: "100%", padding: "7px 9px", borderRadius: "6px", border: "1px solid #CBD5E1", fontSize: "12px", boxSizing: "border-box" }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#374151", marginBottom: "3px" }}>AI Clinical Summary &amp; Transcript Notes</label>
+                    <textarea
+                      rows={2}
+                      placeholder="AI-synthesized diagnostic decisions, key differential diagnoses, and preceptor takeaways..."
+                      value={newMeeting.ai_summary}
+                      onChange={(e) => setNewMeeting({ ...newMeeting, ai_summary: e.target.value })}
+                      style={{ width: "100%", padding: "7px 9px", borderRadius: "6px", border: "1px solid #CBD5E1", fontSize: "12px", boxSizing: "border-box" }}
+                    />
+                  </div>
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", borderTop: "1px solid #E2E8F0", paddingTop: "16px" }}>

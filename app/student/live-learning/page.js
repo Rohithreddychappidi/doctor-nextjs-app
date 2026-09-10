@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import EnrollmentGate from "@/components/EnrollmentGate";
 import MeetingCard from "@/components/MeetingCard";
+import SectionDisclaimer from "@/components/SectionDisclaimer";
 
 export default function StudentLiveLearningPage() {
   const [data, setData] = useState(null);
@@ -94,6 +95,9 @@ export default function StudentLiveLearningPage() {
             </span>
           </div>
         </div>
+
+        {/* Section Compliance Disclaimer (Admin Controlled) */}
+        <SectionDisclaimer sectionKey="live_classes" />
 
         {/* Section I: Tabs (Upcoming, Today, Completed, Recorded) */}
         <div className="flex items-center gap-2 border-b border-slate-200 overflow-x-auto pb-px">

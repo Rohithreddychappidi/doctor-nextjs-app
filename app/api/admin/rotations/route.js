@@ -141,7 +141,12 @@ export async function POST(request) {
         student_id = null,
         teams_join_url,
         materials_url = "",
-        notes = ""
+        notes = "",
+        teams_meeting_id = "",
+        teams_passcode = "",
+        recording_url = "",
+        ai_summary = "",
+        is_pro = true
       } = body;
 
       const newMeeting = {
@@ -156,9 +161,14 @@ export async function POST(request) {
         attendee_scope,
         student_id,
         teams_join_url: teams_join_url || `https://teams.microsoft.com/l/meetup-join/jva-session-${Date.now()}`,
+        teams_meeting_id: teams_meeting_id || "",
+        teams_passcode: teams_passcode || "",
+        recording_url: recording_url || "",
+        ai_summary: ai_summary || "",
+        is_pro: Boolean(is_pro),
         materials_url,
         notes,
-        status: "Scheduled",
+        status: recording_url ? "Completed" : "Scheduled",
         score: null,
         pass_fail: null,
         grader_notes: null
@@ -168,6 +178,20 @@ export async function POST(request) {
       memoryStore.rotation_meetings.push(newMeeting);
 
       return NextResponse.json({ success: true, meeting: newMeeting });
+    }
+
+    // 3b. Update Meeting (e.g., attach Cloud Recording URL, AI summary, or update schedule)
+    if (action === "update_meeting") {
+      const { meeting_id, ...updates } = body;
+      const meet = (memoryStore.rotation_meetings || []).find(m => m.id === meeting_id);
+      if (!meet) return NextResponse.json({ error: "Meeting not found" }, { status: 404 });
+
+      Object.assign(meet, updates);
+      if (updates.recording_url && meet.status !== "Completed") {
+        meet.status = "Completed";
+      }
+
+      return NextResponse.json({ success: true, meeting: meet });
     }
 
     // 4. Duplicate / Recurrence Generator ("Repeat weekly for N weeks")

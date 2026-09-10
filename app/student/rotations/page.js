@@ -6,6 +6,7 @@ import EnrollmentGate from "@/components/EnrollmentGate";
 import StatusTimeline from "@/components/StatusTimeline";
 import DocumentList from "@/components/DocumentList";
 import DocumentUploader from "@/components/DocumentUploader";
+import SectionDisclaimer from "@/components/SectionDisclaimer";
 
 export default function StudentRotationsPage() {
   const [data, setData] = useState(null);
@@ -130,6 +131,9 @@ export default function StudentRotationsPage() {
             </a>
           </div>
         </div>
+
+        {/* Section Compliance Disclaimer (Admin Controlled) */}
+        <SectionDisclaimer sectionKey="tele_rotations" />
 
         {/* SECTION I: Pipeline Status Timeline */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
@@ -258,33 +262,60 @@ export default function StudentRotationsPage() {
                                 timeZoneName: "short",
                               })}
                             </p>
+
+                            {/* Teams Pro Room Credentials */}
+                            {(meet.teams_meeting_id || meet.teams_passcode) && (
+                              <div className="flex flex-wrap items-center gap-3 mt-1.5 text-[11px] text-slate-600 font-mono bg-slate-100/80 px-2.5 py-1 rounded-md">
+                                <span><strong>Teams Room ID:</strong> {meet.teams_meeting_id || "Direct URL"}</span>
+                                {meet.teams_passcode && <span><strong>Passcode:</strong> {meet.teams_passcode}</span>}
+                                <span className="font-sans font-bold text-[10px] text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded">
+                                  Teams Pro
+                                </span>
+                              </div>
+                            )}
+
                             {meet.notes && (
-                              <p className="text-xs text-slate-500 mt-1 leading-relaxed bg-slate-50 p-2 rounded-lg border border-slate-100">
+                              <p className="text-xs text-slate-500 mt-1.5 leading-relaxed bg-slate-50 p-2 rounded-lg border border-slate-100">
                                 <strong>Topic &amp; Clinical Syllabus:</strong> {meet.notes}
                               </p>
+                            )}
+
+                            {/* Teams Pro AI Clinical Recap */}
+                            {meet.ai_summary && (
+                              <div className="mt-2 p-2.5 rounded-lg bg-indigo-50/70 border border-indigo-100 text-xs text-indigo-950 leading-relaxed">
+                                <span className="font-bold text-indigo-800 flex items-center gap-1 mb-0.5">
+                                  <span>🤖</span> Teams Pro AI Clinical Recap:
+                                </span>
+                                {meet.ai_summary}
+                              </div>
                             )}
                           </div>
                         </div>
 
                         {/* Action Buttons */}
                         <div className="flex flex-col sm:flex-row md:flex-col gap-2 shrink-0 items-end">
-                          {meet.teams_join_url && (
+                          {isCompleted && meet.recording_url ? (
+                            <a
+                              href={meet.recording_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition inline-flex items-center gap-1.5 justify-center w-full md:w-auto bg-indigo-700 text-white hover:bg-indigo-800"
+                            >
+                              <span>▶</span> Watch Cloud Recording (Teams Pro)
+                            </a>
+                          ) : meet.teams_join_url ? (
                             <a
                               href={meet.teams_join_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className={`px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition inline-flex items-center gap-1.5 justify-center w-full md:w-auto ${
-                                isCompleted
-                                  ? "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
-                                  : "bg-indigo-600 text-white hover:bg-indigo-700"
-                              }`}
+                              className="px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition inline-flex items-center gap-1.5 justify-center w-full md:w-auto bg-indigo-600 text-white hover:bg-indigo-700"
                             >
                               <svg width="15" height="15" style={{ width: 15, height: 15 }} viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M19.5 5h-15C3.12 5 2 6.12 2 7.5v9C2 17.88 3.12 19 4.5 19h15c1.38 0 2.5-1.12 2.5-2.5v-9C22 6.12 20.88 5 19.5 5zm-3.5 9h-8v-1.5h8V14zm0-3h-8V9.5h8V11z" />
                               </svg>
-                              {isCompleted ? "Teams Recording / Room" : "Join Teams Meeting"}
+                              Join Teams Meeting
                             </a>
-                          )}
+                          ) : null}
                           {meet.materials_url && (
                             <a
                               href={meet.materials_url}
