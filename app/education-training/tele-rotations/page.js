@@ -16,8 +16,9 @@ export default function TeleRotationsPage() {
             <h1>{C.heading}</h1>
             <p className="lede">{C.body}</p>
             <div className="hero-actions">
-              <Link href="/education-training/tele-rotations/apply" className="btn btn-primary">Apply for This Program</Link>
-              <Link href="/education-training/physical-rotations" className="btn btn-outline">See Physical Rotations</Link>
+              <Link href="/education-training/tele-rotations/apply" className="btn btn-primary">Apply for Learning Hub</Link>
+              <Link href="/student-dashboard" className="btn btn-gold">Student Portal &rarr;</Link>
+              <Link href="/education-training/physical-rotations" className="btn btn-outline">Physical Rotations</Link>
             </div>
           </div>
           <div className="hero-card">

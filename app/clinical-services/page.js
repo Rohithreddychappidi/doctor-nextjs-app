@@ -1,111 +1,193 @@
 "use client";
 
 import { useState } from "react";
+import MandatoryStar from "@/components/MandatoryStar";
 import { useSiteData } from "@/lib/DataContext";
 
 export default function ClinicalServicesPage() {
-  const { addRequest, content } = useSiteData();
-  const c = content.clinicalServices;
+  const { addRequest } = useSiteData();
   const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState({ name: "", contact: "", reason: "", preferredTime: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", concern: "", preferredTime: "" });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    addRequest({ ...form, reason: `Clinical Services — ${form.reason}` });
-    setSubmitted(true);
+    setError("");
+
+    if (!form.name || (!form.email && !form.phone) || !form.concern) {
+      setError("Full name, contact (email or phone), and clinical concern are mandatory fields (*)");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // Save to DataContext
+      addRequest({
+        name: form.name,
+        contact: form.email || form.phone,
+        reason: `Clinical Guidance — ${form.concern}`,
+        preferredTime: form.preferredTime,
+      });
+
+      // Save to database inquiries
+      await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email || "phone-consultation@jva-medical.com",
+          phone: form.phone,
+          category: "Newborn, pediatric, or special-needs guidance",
+          reason: form.concern,
+          preferred_time: form.preferredTime,
+        }),
+      });
+
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <>
       <section className="hero" style={{ paddingBottom: 30 }}>
         <div className="container">
-          <div className="eyebrow">{c.eyebrow}</div>
-          <h1 style={{ maxWidth: 720 }}>{c.heading}</h1>
-          <p className="lede" style={{ marginTop: 16 }}>{c.body}</p>
+          <div className="eyebrow">Family Education &amp; Navigation</div>
+          <h1 style={{ maxWidth: 760 }}>Clinical Guidance for Families &amp; Parents</h1>
+          <p className="lede" style={{ marginTop: 16 }}>
+            Educational guidance for newborn care, premature infant follow-up, general pediatrics, and navigating specialized care in the United States.
+          </p>
         </div>
       </section>
 
       <section className="section tight">
         <div className="container">
           <div className="grid grid-3" style={{ marginBottom: 40 }}>
-            {c.features.map((f, idx) => (
-              <div className={`card${idx === 2 ? " dark" : ""}`} key={f.heading}>
-                <div className="icon">{idx === 2 ? "!" : idx + 1}</div>
-                <h3>{f.heading}</h3>
-                <p>{f.body}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="card" style={{ marginBottom: 40 }}>
-            <h3 style={{ marginBottom: 10 }}>{c.privacyHeading}</h3>
-            <p>{c.privacyBody}</p>
+            <div className="card">
+              <div className="icon">1</div>
+              <h3>Neonatal &amp; NICU Guidance</h3>
+              <p>Understanding prematurity complications, respiratory milestones, oxygen weaning, and transition from NICU to home.</p>
+            </div>
+            <div className="card">
+              <div className="icon">2</div>
+              <h3>Pediatric Clinical Concerns</h3>
+              <p>Guidance on recurrent fevers, neonatal jaundice, feeding challenges, developmental milestones, and specialist referrals.</p>
+            </div>
+            <div className="card dark">
+              <div className="icon">!</div>
+              <h3>Clinical Safety Notice</h3>
+              <p>Consultations are purely educational. They do not replace emergency care, physical in-person examinations, or your primary pediatrician.</p>
+            </div>
           </div>
         </div>
       </section>
 
       <section className="section soft">
         <div className="container hero-grid" style={{ alignItems: "flex-start" }}>
-          <div className="form-card">
+          <div className="form-card" style={{ boxShadow: "0 8px 30px rgba(0,0,0,0.08)" }}>
             {!submitted ? (
               <form onSubmit={handleSubmit}>
-                <h3 style={{ marginBottom: 22 }}>Request a free consultation</h3>
+                <h3 style={{ marginBottom: 20 }}>Request Educational Guidance</h3>
+
+                {error && (
+                  <div className="form-note error" style={{ color: "#8A2A34", backgroundColor: "#FFEBEE", padding: 10, borderRadius: 6, marginBottom: 16 }}>
+                    {error}
+                  </div>
+                )}
+
                 <div className="form-row">
                   <div className="field">
-                    <label htmlFor="name">Full name</label>
+                    <label htmlFor="name">
+                      Full Name <MandatoryStar />
+                    </label>
                     <input id="name" name="name" type="text" required value={form.name} onChange={handleChange} placeholder="Jordan Alvarez" />
                   </div>
                   <div className="field">
-                    <label htmlFor="contact">Phone or WhatsApp number</label>
-                    <input id="contact" name="contact" type="tel" required value={form.contact} onChange={handleChange} placeholder="+1 555 000 0000" />
+                    <label htmlFor="email">
+                      Email Address <MandatoryStar />
+                    </label>
+                    <input id="email" name="email" type="email" required value={form.email} onChange={handleChange} placeholder="you@example.com" />
                   </div>
                 </div>
+
+                <div className="form-row">
+                  <div className="field">
+                    <label htmlFor="phone">Phone Number</label>
+                    <input id="phone" name="phone" type="tel" value={form.phone} onChange={handleChange} placeholder="+1 (312) 555-0199" />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="preferredTime">Preferred Contact Window</label>
+                    <input id="preferredTime" name="preferredTime" type="text" value={form.preferredTime} onChange={handleChange} placeholder="Weekday evenings (CST)" />
+                  </div>
+                </div>
+
                 <div className="form-row single">
                   <div className="field">
-                    <label htmlFor="reason">What would you like to discuss?</label>
-                    <textarea id="reason" name="reason" required value={form.reason} onChange={handleChange} placeholder="A few sentences on your background and what you're hoping to discuss." />
+                    <label htmlFor="concern">
+                      Child&apos;s Age &amp; Primary Question or Health Concern <MandatoryStar />
+                    </label>
+                    <textarea
+                      id="concern"
+                      name="concern"
+                      rows={5}
+                      required
+                      value={form.concern}
+                      onChange={handleChange}
+                      placeholder="Please describe the newborn or pediatric health question, previous diagnoses, or guidance needed..."
+                    />
                   </div>
                 </div>
-                <div className="form-row single">
-                  <div className="field">
-                    <label htmlFor="preferredTime">Best time to call you</label>
-                    <input id="preferredTime" name="preferredTime" type="text" value={form.preferredTime} onChange={handleChange} placeholder="e.g. Weekday evenings, IST" />
-                  </div>
-                </div>
-                <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: 20 }}>
-                  Request My Free Call
+
+                <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
+                  {submitting ? "Submitting..." : "Submit Guidance Request"}
                 </button>
-                <p style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 14, textAlign: "center" }}>
-                  This is not for urgent concerns. In an emergency, contact local emergency services directly.
-                </p>
+
+                <div className="form-note" style={{ marginTop: 16 }}>
+                  <span>&#9432;</span>
+                  <span>
+                    <strong>Clinical Safety Note:</strong> In the event of acute respiratory distress, cyanosis, lethargy, or other medical emergency, call 911 or visit the nearest emergency room immediately.
+                  </span>
+                </div>
               </form>
             ) : (
-              <div style={{ textAlign: "center", padding: "26px 10px" }}>
-                <div className="icon" style={{ margin: "0 auto 20px", background: "var(--accent-soft)", color: "var(--accent)" }}>&#10003;</div>
-                <h3 style={{ marginBottom: 12 }}>Request received — thank you</h3>
-                <p style={{ maxWidth: 380, margin: "0 auto" }}>
-                  Your request has been logged. We&apos;ll call you at the number you
-                  provided. There is no charge for this consultation.
+              <div style={{ textAlign: "center", padding: "40px 16px" }}>
+                <div className="icon" style={{ margin: "0 auto 20px", background: "#E8F5E9", color: "#2E7D3A", fontSize: 24 }}>&#10003;</div>
+                <h3 style={{ marginBottom: 12 }}>Guidance Request Logged</h3>
+                <p style={{ color: "var(--ink-soft)", lineHeight: 1.6 }}>
+                  Thank you, <strong>{form.name}</strong>. Dr. Janardhan Mydam or a clinical coordinator will follow up with you at <strong>{form.email || form.phone}</strong>.
                 </p>
+                <button
+                  onClick={() => {
+                    setSubmitted(false);
+                    setForm({ name: "", email: "", phone: "", concern: "", preferredTime: "" });
+                  }}
+                  className="btn btn-outline btn-sm"
+                  style={{ marginTop: 24 }}
+                >
+                  Submit Another Request
+                </button>
               </div>
             )}
           </div>
 
-          <div>
-            <div className="card" style={{ marginBottom: 20 }}>
-              <div className="icon">Rt</div>
-              <h3>Looking for a rotation instead?</h3>
-              <p style={{ marginBottom: 14 }}>Tele-Rotations and Physical Rotations are
-                under Education &amp; Training, with their own eligibility and application process.</p>
-              <a href="/education-training" className="btn btn-outline btn-sm">Go to Education &amp; Training</a>
-            </div>
-            <div className="card dark">
-              <div className="icon">Ad</div>
-              <h3>Representing a hospital or institution?</h3>
-              <p style={{ marginBottom: 14 }}>NICU development and curriculum consulting
-                are handled under Advisory Services, not this consultation form.</p>
-              <a href="/advisory-services" className="btn btn-ghost-light btn-sm">Go to Advisory Services</a>
+          <div style={{ paddingLeft: 20 }}>
+            <h3 style={{ marginBottom: 16 }}>Suggested Service Pathways</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, fontSize: 14 }}>
+              <div className="card" style={{ padding: "14px 18px" }}>
+                <strong>Neonatal &amp; NICU Guidance:</strong> Prematurity follow-up, bronchopulmonary dysplasia, incubator weaning.
+              </div>
+              <div className="card" style={{ padding: "14px 18px" }}>
+                <strong>Children with Special Healthcare Needs:</strong> Coordinating complex multi-specialty care and therapy services.
+              </div>
+              <div className="card" style={{ padding: "14px 18px" }}>
+                <strong>Second Opinions &amp; Visit Preparation:</strong> Organizing clinical questions and interpreting diagnostic reports.
+              </div>
             </div>
           </div>
         </div>

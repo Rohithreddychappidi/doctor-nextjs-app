@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="awardBg4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1C2E4A" />
+      <stop offset="100%" stop-color="#0E182A" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#awardBg4)" rx="12" />
+  <rect x="15" y="15" width="370" height="270" fill="none" stroke="#B4832A" stroke-width="1.5" stroke-dasharray="6,4" rx="8" />
+  <circle cx="200" cy="100" r="42" fill="#B4832A" opacity="0.15" />
+  <circle cx="200" cy="100" r="34" fill="none" stroke="#E9C989" stroke-width="2.5" />
+  <path d="M190,130 L180,175 L200,162 L220,175 L210,130" fill="#B4832A" opacity="0.8" />
+  <polygon points="200,85 204,97 217,97 206,105 210,117 200,109 190,117 194,105 183,97 196,97" fill="#E9C989" />
+  <text x="200" y="210" fill="#FFFFFF" font-family="'Fraunces', serif" font-size="15" font-weight="700" text-anchor="middle">In-Training Recognition</text>
+  <text x="200" y="232" fill="#E9C989" font-family="'Public Sans', sans-serif" font-size="11" font-weight="600" letter-spacing="1" text-anchor="middle">CHILDREN'S HOSPITAL OF MICHIGAN</text>
+  <text x="200" y="254" fill="rgba(255,255,255,0.7)" font-family="'Public Sans', sans-serif" font-size="10.5" text-anchor="middle">2nd in Class In-Training Exam</text>
+</svg>

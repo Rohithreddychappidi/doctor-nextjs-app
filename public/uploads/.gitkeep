@@ -1,0 +1,2 @@
+# Directory for user and admin uploaded files (notes, assignments, PDFs, photos)
+# This folder is served statically at /uploads/*

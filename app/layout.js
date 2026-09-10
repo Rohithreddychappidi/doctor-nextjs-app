@@ -2,11 +2,13 @@ import "./globals.css";
 import { DataProvider } from "@/lib/DataContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import EmergencyBanner from "@/components/EmergencyBanner";
+import PromoPopup from "@/components/PromoPopup";
 
 export const metadata = {
-  title: "Dr. Janardhan Mydam — Free Consultations · Neonatology & Pediatrics Mentorship",
+  title: "Dr. Janardhan Mydam, MD, FAAP — Neonatology · Pediatrics · Education · Research",
   description:
-    "Free phone consultations, student mentorship, research and rotations in neonatology and pediatrics — from India to the world.",
+    "Specialized medical education, clinical mentorship, free mock tests, biostatistics, tele-rotations, and clinical healthcare guidance for families and institutions.",
 };
 
 export default function RootLayout({ children }) {
@@ -21,15 +23,17 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <DataProvider>
+          <EmergencyBanner />
           <a href="#main" className="skip-link">Skip to content</a>
           <Navbar />
           <div className="promo-strip">
-            <div className="container">
-              <span className="pill">Free</span>
-              <span>Every consultation is free — this site exists to record and share the impact, not to charge for it.</span>
+            <div className="container" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <span className="pill accent">Free Practice</span>
+              <span>Free board-style clinical reasoning mock tests &amp; tele-rotations in neonatology and pediatrics.</span>
             </div>
           </div>
           <main id="main">{children}</main>
+          <PromoPopup />
           <Footer />
         </DataProvider>
       </body>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Website Cybersecurity & Emergency Shutdown Protocol - Dr. Janardhan Mydam / JVA Medical Services</title>
+  <style>
+    @page {
+      size: letter;
+      margin: 16mm 14mm;
+      @bottom-right {
+        content: "Page " counter(page) " of " counter(pages);
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #171A21;
+      line-height: 1.5;
+      font-size: 11pt;
+      margin: 0;
+      padding: 0;
+      background: #FFFFFF;
+    }
+    .header-band {
+      background-color: #12203B;
+      color: #FFFFFF;
+      padding: 24px 28px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      border-bottom: 4px solid #B4832A;
+    }
+    .header-band h1 {
+      margin: 0 0 6px;
+      font-size: 20pt;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #FFFFFF;
+    }
+    .header-band .subtitle {
+      color: #E9C989;
+      font-size: 11pt;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 16px;
+      font-size: 9.5pt;
+      color: rgba(255, 255, 255, 0.85);
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+    .meta-grid strong { color: #FFFFFF; }
+
+    h2 {
+      color: #12203B;
+      font-size: 13.5pt;
+      border-bottom: 2px solid #E6E2D8;
+      padding-bottom: 6px;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      page-break-after: avoid;
+    }
+    h3 {
+      color: #8A2A34;
+      font-size: 11.5pt;
+      margin-top: 16px;
+      margin-bottom: 6px;
+      page-break-after: avoid;
+    }
+    p { margin: 0 0 10px; }
+
+    .callout {
+      background-color: #F7F4EE;
+      border-left: 4px solid #B4832A;
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
+      margin: 14px 0;
+      font-size: 10pt;
+    }
+    .callout-alert {
+      background-color: #FFEBEE;
+      border-left: 4px solid #D32F2F;
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
+      margin: 14px 0;
+      font-size: 10pt;
+      color: #5C0000;
+    }
+    .callout-alert strong { color: #D32F2F; }
+
+    .protocol-step {
+      display: flex;
+      margin-bottom: 12px;
+      background: #FAFAFA;
+      border: 1px solid #E6E2D8;
+      border-radius: 6px;
+      padding: 10px 14px;
+      page-break-inside: avoid;
+    }
+    .step-number {
+      background: #12203B;
+      color: #E9C989;
+      font-weight: bold;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11pt;
+      flex-shrink: 0;
+      margin-right: 14px;
+      margin-top: 2px;
+    }
+    .step-content h4 {
+      margin: 0 0 4px;
+      color: #12203B;
+      font-size: 10.5pt;
+    }
+    .step-content p {
+      margin: 0;
+      font-size: 9.5pt;
+      color: #333333;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 20px;
+      font-size: 9.5pt;
+      page-break-inside: avoid;
+    }
+    th, td {
+      border: 1px solid #D8D4CA;
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background-color: #12203B;
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+    tr:nth-child(even) td { background-color: #F7F4EE; }
+
+    .checklist {
+      list-style: none;
+      padding-left: 0;
+      margin: 10px 0;
+    }
+    .checklist li {
+      padding: 6px 0 6px 26px;
+      position: relative;
+      font-size: 10pt;
+    }
+    .checklist li::before {
+      content: "✓";
+      position: absolute;
+      left: 6px;
+      color: #2E7D3A;
+      font-weight: bold;
+    }
+
+    .sign-block {
+      border: 2px solid #12203B;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-top: 30px;
+      background-color: #FAFAFA;
+      page-break-inside: avoid;
+    }
+    .sign-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-top: 20px;
+    }
+    .sign-line {
+      border-bottom: 1px solid #333;
+      height: 36px;
+      margin-bottom: 6px;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- COVER / HEADER -->
+  <div class="header-band">
+    <div class="subtitle">Official Practice Security Document</div>
+    <h1>WEBSITE CYBERSECURITY &amp; EMERGENCY SHUTDOWN PROTOCOL</h1>
+    <p style="margin: 0; color: rgba(255,255,255,0.85); font-size: 10.5pt;">
+      Architecture, Preventive Safeguards, Forensic Evidence Preservation, and Incident Response Playbook
+    </p>
+    <div class="meta-grid">
+      <div><strong>Website Owner:</strong> Dr. Janardhan Mydam / JVA Medical Services</div>
+      <div><strong>Target Audience:</strong> Practice Leadership &amp; Engineering</div>
+      <div><strong>Platform:</strong> Neonatology, Pediatrics &amp; Education Portal</div>
+      <div><strong>Protocol Status:</strong> Active &amp; Verified in Codebase</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Document Purpose:</strong> To provide Dr. Janardhan Mydam and administrative personnel with clear, definitive documentation explaining (1) the technical safeguards protecting the website from hacking, and (2) the exact operational protocol executed if an unauthorized breach, server attack, or account compromise is detected.
+  </div>
+
+  <!-- SECTION 1 -->
+  <h2>1. Proactive Security Safeguards (Preventing Attacks)</h2>
+  <p>The platform has been engineered with defense-in-depth principles across authentication, database queries, and file operations to prevent security vulnerabilities:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 28%;">Security Layer</th>
+        <th style="width: 36%;">Technical Safeguard Implemented</th>
+        <th style="width: 36%;">Threat Neutralized</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Cryptographic Passwords</strong></td>
+        <td>Passwords hashed using salted <code>bcrypt</code> with multiple rounds. Raw passwords are never written to disk or database.</td>
+        <td>Credential dumping and database dictionary attacks. Stored hashes cannot be reversed.</td>
+      </tr>
+      <tr>
+        <td><strong>Session Tokens</strong></td>
+        <td>Encrypted JWT tokens stored in <code>HttpOnly</code>, <code>SameSite=Lax</code> browser cookies.</td>
+        <td>Cross-Site Scripting (XSS) token theft. Malicious JavaScript cannot read session credentials.</td>
+      </tr>
+      <tr>
+        <td><strong>SQL Injection Defense</strong></td>
+        <td>All queries to Neon DB / VPS PostgreSQL use parameterized prepared statements (<code>$1, $2, ...</code>).</td>
+        <td>SQL Injection attacks. User inputs are strictly treated as data, never executable SQL commands.</td>
+      </tr>
+      <tr>
+        <td><strong>File Upload Isolation</strong></td>
+        <td>Uploads (lecture notes, assignments) are sanitized, timestamp-randomized, and restricted from executing code.</td>
+        <td>Remote Code Execution (RCE). Malicious script uploads (<code>.php</code>, <code>.sh</code>, <code>.exe</code>) cannot run.</td>
+      </tr>
+      <tr>
+        <td><strong>Transport Encryption</strong></td>
+        <td>Enforced HTTPS and database SSL transport encryption (<code>sslmode=require</code>).</td>
+        <td>Man-in-the-Middle (MitM) wire interception and data packet eavesdropping.</td>
+      </tr>
+      <tr>
+        <td><strong>Minimal Data Footprint</strong></td>
+        <td>Strictly educational records (name, email, mock exam scores). No credit cards or clinical health records stored.</td>
+        <td>High-liability data loss. Dramatically reduces exposure under privacy and medical regulations.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 2 -->
+  <h2>2. Emergency Shutdown: What Happens When Hackers Attack?</h2>
+  <p>If unauthorized access, defacement, false medical guidance, ransomware, or server manipulation is detected, the <strong>highest operational priority is taking the public website offline immediately</strong> without deleting evidence.</p>
+
+  <div class="callout-alert">
+    <strong>Target Response Time: Under 60 Seconds.</strong> Public shutdown can be executed independently by the website owner or technical personnel without reliance on the external developer.
+  </div>
+
+  <div class="protocol-step">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <h4>Immediate Emergency Killswitch Activation</h4>
+      <p>The owner navigates to <code>/admin/emergency</code> and clicks <strong>"ENGAGE EMERGENCY SHUTDOWN"</strong> (or issues an API command using the private <code>ADMIN_SECRET_KEY</code>). This immediately puts the platform into offline mode.</p>
+    </div>
+  </div>
+
+  <div class="protocol-step">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <h4>Public Redirection to Maintenance Mode</h4>
+      <p>Within seconds, all public pages, registration forms, student logins, and API routes are cut off from visitors. The public sees only the pre-approved professional notice:<br>
+      <em>&ldquo;This website is temporarily unavailable while maintenance is being performed.&rdquo;</em></p>
+    </div>
+  </div>
+
+  <div class="protocol-step">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <h4>Forensic Evidence Preservation (Do NOT Delete Systems)</h4>
+      <p>Attacked systems must not be deleted or reformatted immediately. The platform automatically preserves server access logs, administrator login history, modified timestamps, and IP addresses in the <code>audit_logs</code> table. One-click CSV export enables immediate backup for legal and technical review.</p>
+    </div>
+  </div>
+
+  <div class="protocol-step">
+    <div class="step-number">4</div>
+    <div class="step-content">
+      <h4>Comprehensive Account &amp; Credential Rotation</h4>
+      <p>All administrative credentials, domain/hosting access, database strings, and API secrets are rotated to lock out the adversary completely (see Step 3 below).</p>
+    </div>
+  </div>
+
+  <div class="protocol-step">
+    <div class="step-number">5</div>
+    <div class="step-content">
+      <h4>Vulnerability Investigation &amp; Safe Restoration</h4>
+      <p>Technical personnel investigate how unauthorized access occurred, patch the vulnerability, verify no backdoor remains, and restore clean public access with owner confirmation.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="page-break"></div>
+  <h2>3. Credential &amp; Server Compromise Action Plan</h2>
+  <p>If an administrative account or server key is suspected of being compromised, execute the following credential rotation order:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Asset</th>
+        <th>Immediate Action Required</th>
+        <th>Impact</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Domain &amp; DNS (Cloudflare/Registrar)</strong></td>
+        <td>Change registrar password and verify Multi-Factor Authentication (MFA/2FA). Inspect DNS records for unauthorized redirects.</td>
+        <td>Prevents attackers from redirecting visitors to malicious phishing servers.</td>
+      </tr>
+      <tr>
+        <td><strong>JWT Session Secret (<code>JWT_SECRET</code>)</strong></td>
+        <td>Change the secret key in <code>.env.local</code>.</td>
+        <td>Instantly invalidates all active sessions. Hackers holding stolen cookies are immediately logged out.</td>
+      </tr>
+      <tr>
+        <td><strong>Database Credentials (<code>DATABASE_URL</code>)</strong></td>
+        <td>Reset Neon DB / VPS PostgreSQL user password and update connection string.</td>
+        <td>Terminates any rogue direct connections to the database layer.</td>
+      </tr>
+      <tr>
+        <td><strong>Email Service (<code>RESEND_API_KEY</code>)</strong></td>
+        <td>Revoke current API key in Resend dashboard; generate a new key and update environment variables.</td>
+        <td>Prevents attackers from broadcasting spam or phishing emails from the practice domain.</td>
+      </tr>
+      <tr>
+        <td><strong>Admin Passwords</strong></td>
+        <td>Execute bcrypt password reset in database for all administrative emails.</td>
+        <td>Prevents attackers from re-logging in with compromised passwords.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 4 -->
+  <h2>4. Legal, Privacy &amp; Healthcare Compliance Escalation</h2>
+  <p>Because Dr. Janardhan Mydam serves patients and students in the United States, strict adherence to US medical and privacy standards is maintained:</p>
+
+  <ul class="checklist">
+    <li><strong>Educational Guidance Distinction:</strong> Website consultations are clearly disclaimed as educational navigation and clinical mentorship, not telemedicine emergency services. This eliminates medical-licensure jurisdictional ambiguity across state lines.</li>
+    <li><strong>Emergency Disclaimers:</strong> Clinical guidance forms enforce bold disclaimers instructing patients to dial 911 or visit an emergency room in acute medical situations.</li>
+    <li><strong>Breach Notification Assessment:</strong> If personal data exposure is confirmed, counsel and hosting personnel are notified immediately to determine state and federal breach notification obligations.</li>
+    <li><strong>Written Timeline Maintenance:</strong> The owner maintains an audit log: <em>Discovery Time &rarr; Website Disabled &rarr; Parties Notified &rarr; Evidence Preserved &rarr; Credentials Rotated &rarr; Investigation &rarr; Restoration</em>.</li>
+  </ul>
+
+  <!-- SECTION 5 -->
+  <h2>5. Pre-Launch Owner Verification &amp; Sign-Off</h2>
+  <p>Per the website cybersecurity mandate, before public launch, the technical team has demonstrated that if the developer is unreachable, the owner can independently take the public website offline within minutes without deleting the database or evidence.</p>
+
+  <div class="sign-block">
+    <div style="font-weight: bold; color: #12203B; margin-bottom: 12px; font-size: 11pt;">
+      CYBERSECURITY &amp; EMERGENCY SHUTDOWN PROTOCOL SIGN-OFF
+    </div>
+    <p style="font-size: 9.5pt; color: #4B505C; margin-bottom: 14px;">
+      By signing below, the developer confirms the emergency offline maintenance mode and forensic audit logging have been implemented and verified in the codebase. The website owner confirms receipt of access controls and operational training.
+    </p>
+
+    <div class="sign-grid">
+      <div>
+        <div style="font-size: 9pt; color: #767C87; text-transform: uppercase;">Technical Developer Confirmation:</div>
+        <div class="sign-line"></div>
+        <div style="font-size: 9.5pt; font-weight: 600;">Rohith Reddy / Engineering Team</div>
+        <div style="font-size: 8.5pt; color: #767C87;">Date: September 9, 2026</div>
+      </div>
+      <div>
+        <div style="font-size: 9pt; color: #767C87; text-transform: uppercase;">Website Owner &amp; Medical Director:</div>
+        <div class="sign-line"></div>
+        <div style="font-size: 9.5pt; font-weight: 600;">Dr. Janardhan Mydam, MD, FAAP</div>
+        <div style="font-size: 8.5pt; color: #767C87;">JVA Medical Services · Date: ______________</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

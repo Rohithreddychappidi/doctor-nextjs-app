@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import ImagePlaceholder from "@/components/ImagePlaceholder";
 import StatStrip from "@/components/StatStrip";
 import JourneyTimeline from "@/components/JourneyTimeline";
 import CitationChart from "@/components/CitationChart";
@@ -25,35 +24,46 @@ export default function AboutPage() {
   return (
     <>
       <section className="hero" style={{ paddingBottom: 40 }}>
-        <div className="container hero-grid" style={{ gridTemplateColumns: "0.85fr 1.15fr" }}>
-          <ImagePlaceholder label="Doctor photo — to be added" height={320} />
+        <div className="container hero-grid" style={{ gridTemplateColumns: "0.85fr 1.15fr", alignItems: "center" }}>
+          <div style={{ borderRadius: 12, overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,0.12)" }}>
+            <img
+              src={c.photoUrl || "/images/doctor-placeholder.svg"}
+              alt="Dr. Janardhan Mydam, MD, FAAP"
+              style={{ width: "100%", height: "auto", display: "block" }}
+            />
+          </div>
           <div>
-            <div className="eyebrow">{c.eyebrow}</div>
-            <h1 style={{ marginBottom: 14 }}>{c.heading}</h1>
-            <p className="lede" style={{ marginBottom: 10 }}>
-              <strong>{c.tagline}</strong> {c.intro}
+            <div className="eyebrow">{c.eyebrow || "About Dr. Mydam"}</div>
+            <h1 style={{ marginBottom: 14 }}>{c.heading || "Dr. Janardhan Mydam, MD, FAAP"}</h1>
+            <p className="lede" style={{ marginBottom: 12 }}>
+              <strong>Clinical Experience. Academic Leadership. Commitment to Teaching.</strong>
             </p>
-            <p style={{ fontSize: 14, marginBottom: 26 }}>{c.note}</p>
+            <p style={{ fontSize: 15, color: "var(--ink-soft)", lineHeight: 1.65, marginBottom: 16 }}>
+              Dr. Janardhan Mydam is a board-certified neonatologist and pediatrician with extensive experience in newborn medicine, pediatric care, medical education, clinical research, physician mentorship, and healthcare leadership. His work is centered on improving outcomes for newborns and children while developing the next generation of compassionate, knowledgeable, and research-oriented physicians.
+            </p>
+            <p style={{ fontSize: 13.5, color: "var(--muted)", marginBottom: 24 }}>{c.note}</p>
             <div className="hero-actions">
-              <Link href="/clinical-services" className="btn btn-primary">Request a Free Consultation</Link>
-              <Link href="/research" className="btn btn-outline">View Research</Link>
+              <Link href="/clinical-services" className="btn btn-primary">Request Clinical Guidance</Link>
+              <Link href="/research" className="btn btn-outline">View Research &amp; Publications</Link>
             </div>
           </div>
         </div>
       </section>
 
-      <StatStrip />
+      <div className="container" style={{ margin: "20px auto 40px" }}>
+        <StatStrip />
+      </div>
 
       <section className="section soft">
         <div className="container">
           <div className="section-head">
             <div>
               <div className="eyebrow">The journey</div>
-              <h2>From India, to the world — year by year</h2>
+              <h2>From Medical School in India to US Clinical Leadership</h2>
             </div>
-            <p className="lede">Scroll to follow the path from medical school in India
-              through specialist training in the UK to neonatology practice and research
-              leadership in Chicago.</p>
+            <p className="lede">
+              A chronological journey spanning MBBS and MD in India, specialist training in the United Kingdom, and neonatology fellowship and hospital leadership in Chicago, USA.
+            </p>
           </div>
           <JourneyTimeline items={c.journey} />
         </div>
@@ -64,7 +74,7 @@ export default function AboutPage() {
           <div className="eyebrow" style={{ justifyContent: "center" }}>Academic Record</div>
           <h2 style={{ marginBottom: 12 }}>Citations by year</h2>
           <p className="lede mx-auto" style={{ marginBottom: 40 }}>
-            Growth in research impact over time, as tracked on Google Scholar.
+            Growth in clinical research impact over time, tracked on Google Scholar.
           </p>
           <CitationChart data={c.citationsByYear} />
           <ScholarCard profile={c.scholarProfile} />
@@ -75,11 +85,12 @@ export default function AboutPage() {
         <div className="container">
           <div className="section-head">
             <div>
-              <div className="eyebrow">The full record</div>
-              <h2>Employment, education, research &amp; more</h2>
+              <div className="eyebrow">Comprehensive Academic CV</div>
+              <h2>Appointments, Education, Certifications &amp; Research</h2>
             </div>
-            <p className="lede">Click any section to expand it. Where a section links to a
-              full supporting document, a button appears at the bottom of that section.</p>
+            <p className="lede">
+              All 18 curriculum vitae sections are maintained in our CMS. Click any section to view detailed entries and supporting documents.
+            </p>
           </div>
 
           {c.sections.map((section, idx) => (
@@ -109,7 +120,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Awards & Honors — dedicated layout: image left, timeline right */}
+      {/* Awards & Honors */}
       <section className="section soft">
         <div className="container">
           <div className="section-head">
@@ -117,24 +128,45 @@ export default function AboutPage() {
               <div className="eyebrow">Recognition</div>
               <h2>Awards &amp; Honors</h2>
             </div>
+            <p className="lede">
+              Milestones in clinical research grants, conference gold medals, and nationwide fellowship recognition.
+            </p>
           </div>
-          <div className="awards-grid">
-            <div className="awards-gallery">
-              {c.awardsGallery.map((img, idx) => (
-                <ImagePlaceholder
-                  key={idx}
-                  label={img.caption || "Awards photo — to be added"}
-                  imageUrl={img.imageUrl}
-                  height="auto"
-                />
+
+          <div className="awards-parallel-grid">
+            {/* Left Column: Photo & Recognition Gallery */}
+            <div className="awards-photo-gallery">
+              {((c.awardsGallery && c.awardsGallery.some(g => g.imageUrl || g.url)) ? c.awardsGallery : [
+                { imageUrl: "/images/award-1.svg", caption: "NIH Site PI — PREMOD2 International Trial" },
+                { imageUrl: "/images/award-2.svg", caption: "Gold Medal — AP PEDICON XXIII Annual Conference" },
+                { imageUrl: "/images/award-3.svg", caption: "PAS Travel Grant — Pediatric Academic Societies" },
+                { imageUrl: "/images/award-4.svg", caption: "Fellowship & In-Training Top Honors" },
+              ]).map((img, idx) => (
+                <div className="award-photo-card" key={idx}>
+                  <img
+                    src={img.imageUrl || img.url || `/images/award-${(idx % 4) + 1}.svg`}
+                    alt={img.caption || `Award recognition photo ${idx + 1}`}
+                    loading="lazy"
+                  />
+                  {img.caption && (
+                    <div className="award-photo-caption">{img.caption}</div>
+                  )}
+                </div>
               ))}
             </div>
-            <div className="steps">
-              {c.awards.map((award) => (
-                <div className="step" key={award.title}>
-                  <span className="meta" style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--accent)", display: "block", marginBottom: 4 }}>{award.year}</span>
-                  <h4>{award.title}</h4>
-                  <p>{award.description}</p>
+
+            {/* Right Column: Animated Milestones Timeline */}
+            <div className="awards-timeline-animated">
+              {c.awards.map((a, idx) => (
+                <div className="award-timeline-item" key={idx}>
+                  <div className="award-timeline-node" />
+                  <span className="award-timeline-year">{a.year}</span>
+                  <h3 className="award-timeline-title">{a.title}</h3>
+                  {(a.org || a.body || a.description) && (
+                    <p className="award-timeline-desc">
+                      {a.description || a.body || a.org}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -142,31 +174,21 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* End-of-page counts */}
-      <section className="section">
+      {/* Counts Strip */}
+      <section className="section navy">
         <div className="container">
-          <div className="section-head">
-            <div>
-              <div className="eyebrow">By the numbers</div>
-              <h2>A career&apos;s worth of research, in one place</h2>
-            </div>
-          </div>
-          <div className="grid grid-3">
-            {COUNT_LABELS.map(([key, label]) => (
-              <div className="card center" key={key}>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: "2.2rem", color: "var(--accent)" }}>{c.counts[key]}+</div>
-                <div style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 6 }}>{label}</div>
+          <div className="grid grid-3" style={{ textAlign: "center", gap: 32 }}>
+            {COUNT_LABELS.map(([k, label]) => (
+              <div key={k}>
+                <div style={{ fontSize: "2.8rem", fontWeight: "bold", color: "#E9C989", fontFamily: "var(--font-mono)" }}>
+                  {c.counts[k] || 0}+
+                </div>
+                <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 14, textTransform: "uppercase", letterSpacing: 1 }}>
+                  {label}
+                </div>
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="section navy center">
-        <div className="container">
-          <div className="eyebrow on-dark" style={{ justifyContent: "center" }}>Talk to Dr. Mydam directly</div>
-          <h2 style={{ marginBottom: 24 }}>Every consultation is a free phone call — no cost, ever</h2>
-          <Link href="/clinical-services" className="btn btn-primary">Request a Free Consultation</Link>
         </div>
       </section>
     </>

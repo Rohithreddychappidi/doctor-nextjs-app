@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="awardBg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1B2E52" />
+      <stop offset="100%" stop-color="#12203B" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#awardBg3)" rx="12" />
+  <rect x="15" y="15" width="370" height="270" fill="none" stroke="#B4832A" stroke-width="1.5" stroke-dasharray="6,4" rx="8" />
+  <circle cx="200" cy="100" r="42" fill="#B4832A" opacity="0.15" />
+  <circle cx="200" cy="100" r="34" fill="none" stroke="#E9C989" stroke-width="2.5" />
+  <polygon points="200,80 207,95 222,95 210,104 214,118 200,109 186,118 190,104 178,95 193,95" fill="#E9C989" />
+  <text x="200" y="210" fill="#FFFFFF" font-family="'Fraunces', serif" font-size="15" font-weight="700" text-anchor="middle">PAS Travel Grant</text>
+  <text x="200" y="232" fill="#E9C989" font-family="'Public Sans', sans-serif" font-size="11" font-weight="600" letter-spacing="1" text-anchor="middle">PEDIATRIC ACADEMIC SOCIETIES</text>
+  <text x="200" y="254" fill="rgba(255,255,255,0.7)" font-family="'Public Sans', sans-serif" font-size="10.5" text-anchor="middle">COVID-19 Vertical Transmission</text>
+</svg>

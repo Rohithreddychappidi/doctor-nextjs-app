@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="100%" height="100%">
+  <defs>
+    <linearGradient id="heroBg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E182A" />
+      <stop offset="50%" stop-color="#12203B" />
+      <stop offset="100%" stop-color="#1B2E52" />
+    </linearGradient>
+    <linearGradient id="accentG1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E9C989" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#B4832A" stop-opacity="0.05" />
+    </linearGradient>
+    <radialGradient id="glow1" cx="80%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#2D4A7A" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#12203B" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="1200" height="600" fill="url(#heroBg1)" />
+  <rect width="1200" height="600" fill="url(#glow1)" />
+
+  <!-- Subtle Medical / Abstract Scientific Geometric Rings on Right Side -->
+  <g transform="translate(880, 280)" opacity="0.18">
+    <circle cx="0" cy="0" r="260" fill="none" stroke="#E9C989" stroke-width="1.5" stroke-dasharray="8 6" />
+    <circle cx="0" cy="0" r="190" fill="none" stroke="#FFFFFF" stroke-width="1" />
+    <circle cx="0" cy="0" r="120" fill="none" stroke="#E9C989" stroke-width="2" />
+    <circle cx="0" cy="0" r="40" fill="url(#accentG1)" />
+    
+    <!-- Medical Cross Motif -->
+    <rect x="-8" y="-45" width="16" height="90" rx="8" fill="#FFFFFF" opacity="0.3" />
+    <rect x="-45" y="-8" width="90" height="16" rx="8" fill="#FFFFFF" opacity="0.3" />
+  </g>
+
+  <!-- Floating Ambient Particles -->
+  <circle cx="980" cy="120" r="6" fill="#E9C989" opacity="0.35" />
+  <circle cx="780" cy="420" r="4" fill="#FFFFFF" opacity="0.25" />
+  <circle cx="1120" cy="380" r="8" fill="#E9C989" opacity="0.2" />
+  <circle cx="840" cy="180" r="3" fill="#FFFFFF" opacity="0.4" />
+  
+  <!-- Subtle Grid Lines on Far Right -->
+  <path d="M750 0 L750 600 M900 0 L900 600 M1050 0 L1050 600" stroke="#FFFFFF" stroke-width="0.5" opacity="0.04" />
+</svg>

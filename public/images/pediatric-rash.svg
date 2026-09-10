@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="rashBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F7F4EE" />
+      <stop offset="100%" stop-color="#EAE3D2" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#rashBg)" rx="12" stroke="#E6E2D8" stroke-width="2" />
+  <rect x="40" y="40" width="160" height="28" rx="14" fill="#8A2A34" />
+  <text x="120" y="59" fill="#FFFFFF" font-family="'Public Sans', sans-serif" font-size="11" font-weight="700" letter-spacing="1" text-anchor="middle">FEATURED CLINICAL CASE</text>
+  <text x="40" y="115" fill="#12203B" font-family="'Fraunces', serif" font-size="24" font-weight="600">Rashes in Newborns &amp; Children</text>
+  <text x="40" y="145" fill="#4B505C" font-family="'Public Sans', sans-serif" font-size="14">Windsor University Interactive Clinical Session</text>
+  <g transform="translate(40, 180)">
+    <rect width="520" height="170" rx="8" fill="#FFFFFF" stroke="#E6E2D8" />
+    <text x="24" y="36" fill="#171A21" font-family="'Public Sans', sans-serif" font-size="14" font-weight="600">Key Clinical Competencies Covered:</text>
+    <text x="24" y="70" fill="#4B505C" font-family="'Public Sans', sans-serif" font-size="13">• Erythema toxicum neonatorum vs. neonatal herpes vs. pustular melanosis</text>
+    <text x="24" y="100" fill="#4B505C" font-family="'Public Sans', sans-serif" font-size="13">• Kawasaki disease diagnostic criteria &amp; multisystem evaluation</text>
+    <text x="24" y="130" fill="#4B505C" font-family="'Public Sans', sans-serif" font-size="13">• Case-based vignette questions with differential diagnosis charts</text>
+  </g>
+</svg>
