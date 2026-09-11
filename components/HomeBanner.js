@@ -8,7 +8,7 @@ const DEFAULT_SLIDES = [
   {
     tag: "NEONATOLOGY • PEDIATRICS • EDUCATION • RESEARCH",
     heading: "Improving Newborn and Child Health Through Education, Clinical Guidance, and Research",
-    body: "Welcome to the professional and educational platform of Dr. Janardhan Mydam — neonatologist, pediatrician, physician educator, researcher, and academic leader.",
+    body: "Welcome to jvmmedicalservices — the premier clinical and educational platform led by Dr. Janardhan Mydam, MD, FAAP, dedicated to pediatric excellence, virtual tele-rotations, and board-level mastery.",
     ctaLabel: "Explore Education & Training",
     href: "/education-training",
     imageUrl: "/images/hero-banner-1.svg",

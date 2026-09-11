@@ -7,17 +7,15 @@ export default function Footer() {
         <div className="footer-grid">
           <div>
             <div className="brand" style={{ color: "#fff", marginBottom: 16 }}>
-              <span className="mark">DR</span>
+              <span className="mark">JVM</span>
               <span>
-                Dr. Janardhan Mydam
+                jvmmedicalservices
                 <br />
-                <small style={{ color: "rgba(255,255,255,.5)" }}>Neonatology &amp; Pediatrics</small>
+                <small style={{ color: "rgba(255,255,255,.6)" }}>JVM Medical Services · Neonatal &amp; Pediatric Care</small>
               </span>
             </div>
             <p style={{ maxWidth: 280, fontSize: 13.5, color: "rgba(255,255,255,.55)" }}>
-              A free consultation and mentorship practice — from India to students and
-              families around the world. This site exists to record and share how many
-              people we&apos;ve been able to help.
+              Dedicated to clinical excellence, evidence-based newborn care, US clinical education, and worldwide physician mentorship.
             </p>
           </div>
           <div>
@@ -36,15 +34,16 @@ export default function Footer() {
             <Link href="/student-login">Student Login</Link>
           </div>
           <div>
-            <h4>About &amp; Support</h4>
-            <Link href="/about">About</Link>
+            <h4>About &amp; Portfolio</h4>
+            <Link href="/about">About Practice</Link>
+            <Link href="/doctor-portfolio">Doctor Portfolio</Link>
             <Link href="/community-impact">Community Impact</Link>
             <Link href="/testimonials">Testimonials</Link>
             <Link href="/contact">Contact</Link>
           </div>
         </div>
         <div className="footer-bottom">
-          <span>&copy; 2026 Dr. Janardhan Mydam — Free Consultation &amp; Mentorship Practice. All rights reserved.</span>
+          <span>&copy; 2026 jvmmedicalservices (JVM Medical Services) · Chief Medical Director: Dr. Janardhan Mydam, MD, FAAP. All rights reserved.</span>
           <span>
             Privacy Policy &nbsp;·&nbsp; Terms of Use &nbsp;·&nbsp;{" "}
             <Link href="/admin" style={{ color: "rgba(255,255,255,.45)" }}>Admin Panel (preview)</Link>

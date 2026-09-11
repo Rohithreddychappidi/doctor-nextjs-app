@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import ImagePlaceholder from "./ImagePlaceholder";
 
 /**
@@ -9,6 +10,8 @@ import ImagePlaceholder from "./ImagePlaceholder";
  * Enforces the join-link-active-near-start-time rule.
  */
 export default function MeetingCard({ meeting = {} }) {
+  const [enrolling, setEnrolling] = useState(false);
+  const [enrolled, setEnrolled] = useState(false);
   const {
     title = "Session",
     description = "",
@@ -135,28 +138,118 @@ export default function MeetingCard({ meeting = {} }) {
   }
 
   // Fallback for public marketing cards
+  const handleEnroll = async (e) => {
+    e.preventDefault();
+    setEnrolling(true);
+    try {
+      const res = await fetch("/api/student/live-learning", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          meetingId: meeting.id,
+          title: meeting.title,
+          isFree: isFree,
+          price: price,
+        }),
+      });
+      if (res.ok) {
+        setEnrolled(true);
+        setTimeout(() => {
+          window.location.href = "/student/live-learning";
+        }, 500);
+      } else {
+        window.location.href = "/student/live-learning";
+      }
+    } catch (err) {
+      window.location.href = "/student/live-learning";
+    } finally {
+      setEnrolling(false);
+    }
+  };
+
   return (
-    <div className="meeting-card">
-      <div className="meeting-media" style={{ position: "relative" }}>
-        {imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={imageUrl} alt={title} />
-        ) : (
-          <span>Event Photo</span>
-        )}
-        <span className={`meeting-price-tag${isFree ? " free" : ""}`}>
-          {isFree ? "Free" : `$${price}`}
-        </span>
-      </div>
-      <div className="meeting-body">
-        <h3>{title}</h3>
-        <p>{description}</p>
-        <div className="meeting-meta">
-          <span>{date}</span>
+    <div className="meeting-card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      <div>
+        <div className="meeting-media" style={{ position: "relative" }}>
+          {imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={imageUrl} alt={title} />
+          ) : (
+            <span>Event Photo</span>
+          )}
+          <span
+            style={{
+              position: "absolute",
+              top: 12,
+              right: 12,
+              padding: "4px 10px",
+              borderRadius: "999px",
+              fontSize: "11px",
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+              backgroundColor: isFree ? "#ECFDF5" : "#EEF2FF",
+              color: isFree ? "#047857" : "#4338CA",
+              border: isFree ? "1.5px solid #A7F3D0" : "1.5px solid #C7D2FE",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+            }}
+          >
+            {isFree ? "✓ FREE" : `PAID · $${price || 25}`}
+          </span>
         </div>
-        <a href="/education-training/live-learning" className="btn btn-outline btn-sm" style={{ marginTop: 8, alignSelf: "flex-start" }}>
-          {isFree ? "Join this session" : "Reserve a spot"}
-        </a>
+        <div className="meeting-body" style={{ paddingBottom: 0 }}>
+          <div style={{ marginBottom: 6 }}>
+            <span
+              style={{
+                fontSize: "10.5px",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.6px",
+                color: isFree ? "#059669" : "#4F46E5",
+              }}
+            >
+              {isFree ? "Open Community Grand Rounds" : "Specialized Masterclass"}
+            </span>
+          </div>
+          <h3 style={{ fontSize: "16px", marginBottom: "8px" }}>{title}</h3>
+          <p style={{ fontSize: "13px", color: "#475569", lineHeight: 1.5 }}>{description}</p>
+        </div>
+      </div>
+
+      <div style={{ padding: "0 1.25rem 1.25rem 1.25rem", marginTop: "1rem" }}>
+        <div className="meeting-meta" style={{ marginBottom: 12, fontSize: "12px", color: "#64748B" }}>
+          <span>📅 {date}</span>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleEnroll}
+          disabled={enrolling}
+          className="btn btn-primary btn-sm"
+          style={{
+            width: "100%",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+            fontWeight: 700,
+            fontSize: "13px",
+            backgroundColor: enrolled ? "#059669" : undefined,
+            borderColor: enrolled ? "#059669" : undefined,
+            cursor: enrolling ? "wait" : "pointer",
+          }}
+        >
+          {enrolling ? (
+            "Enrolling..."
+          ) : enrolled ? (
+            "✓ Enrolled! Opening Dashboard..."
+          ) : (
+            <>
+              <span>Enroll to Attend</span>
+              <span aria-hidden="true">&rarr;</span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );

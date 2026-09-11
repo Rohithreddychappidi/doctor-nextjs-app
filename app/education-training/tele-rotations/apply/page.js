@@ -10,37 +10,70 @@ export default function TeleRotationApplyPage() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [documentName, setDocumentName] = useState("");
   const [form, setForm] = useState({
     name: "",
-    contact: "",
-    reason: "",
-    preferredTime: "",
+    email: "",
+    phone: "",
+    message: "",
+    preferredTime: "Next Available Cohort (Fall 2026)",
+    document_url: "",
   });
 
   const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setDocumentName(file.name);
+      // Simulate uploaded URL
+      setForm((f) => ({ ...f, document_url: `/uploads/${file.name}` }));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!form.name || !form.contact || !form.reason) {
-      setError("Full name, contact email/phone, and background are mandatory fields (*)");
+    if (!form.name || !form.email || !form.phone || !form.message) {
+      setError("Full name, email, phone number, and personal statement message are mandatory fields (*)");
       return;
     }
 
     setSubmitting(true);
     try {
-      addRequest({ ...form, reason: `Learning Hub / Tele-Rotation — ${form.reason}` });
+      addRequest({
+        name: form.name,
+        contact: form.email,
+        phone: form.phone,
+        reason: `Learning Hub / Tele-Rotation — ${form.message}`,
+      });
 
+      // Submit to rotations application pipeline
+      await fetch("/api/student/rotations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "apply",
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          document_url: form.document_url || (documentName ? `/uploads/${documentName}` : ""),
+          message: form.message,
+          preferred_time: form.preferredTime,
+        }),
+      });
+
+      // Also persist to inquiries log
       await fetch("/api/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name,
-          email: form.contact.includes("@") ? form.contact : "applicant@jva-medical.com",
-          phone: form.contact.includes("@") ? "" : form.contact,
+          email: form.email,
+          phone: form.phone,
           category: "Tele-rotation application",
-          reason: form.reason,
+          reason: form.message,
           preferred_time: form.preferredTime,
         }),
       });
@@ -58,9 +91,9 @@ export default function TeleRotationApplyPage() {
       <section className="hero" style={{ paddingBottom: 30 }}>
         <div className="container">
           <div className="eyebrow">Education &amp; Training · Learning Hub · Apply</div>
-          <h1 style={{ maxWidth: 700 }}>Apply for the Tele-Rotation Learning Hub</h1>
+          <h1 style={{ maxWidth: 700 }}>Apply for the Virtual Neonatal &amp; Pediatric Tele-Rotation</h1>
           <p className="lede" style={{ marginTop: 16 }}>
-            Cohorts run 6–12 learners at a time. Submit your details below — once accepted, you&apos;ll get Student Login credentials to access live weekly Microsoft Teams classes, clinical notes, and assignments.
+            Cohorts run 6–12 learners at a time under the direct preceptorship of Dr. Janardhan Mydam, MD, FAAP. Submit your details below &mdash; once reviewed and approved by faculty, you will be invited to complete tuition payment and activate your live Microsoft Teams cohort seat.
           </p>
         </div>
       </section>
@@ -70,7 +103,7 @@ export default function TeleRotationApplyPage() {
           <div className="form-card">
             {!submitted ? (
               <form onSubmit={handleSubmit}>
-                <h3 style={{ marginBottom: 22 }}>Enrollment Details</h3>
+                <h3 style={{ marginBottom: 22 }}>Candidate Enrollment Details</h3>
 
                 {error && (
                   <div className="form-note error" style={{ color: "#8A2A34", backgroundColor: "#FFEBEE", padding: 10, borderRadius: 6, marginBottom: 16 }}>
@@ -78,27 +111,65 @@ export default function TeleRotationApplyPage() {
                   </div>
                 )}
 
-                <div className="form-row">
+                <div className="form-row single">
                   <div className="field">
                     <label htmlFor="name">
-                      Full Name <MandatoryStar />
+                      Full Legal Name <MandatoryStar />
                     </label>
-                    <input id="name" name="name" type="text" required value={form.name} onChange={handleChange} placeholder="Jordan Alvarez" />
+                    <input id="name" name="name" type="text" required value={form.name} onChange={handleChange} placeholder="e.g. Jordan Alvarez" />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="field">
+                    <label htmlFor="email">
+                      Email Address <MandatoryStar />
+                    </label>
+                    <input id="email" name="email" type="email" required value={form.email} onChange={handleChange} placeholder="you@example.com" />
                   </div>
                   <div className="field">
-                    <label htmlFor="contact">
-                      Email or Phone <MandatoryStar />
+                    <label htmlFor="phone">
+                      Phone / WhatsApp Number <MandatoryStar />
                     </label>
-                    <input id="contact" name="contact" type="text" required value={form.contact} onChange={handleChange} placeholder="you@example.com" />
+                    <input id="phone" name="phone" type="tel" required value={form.phone} onChange={handleChange} placeholder="+1 (312) 555-0192" />
+                  </div>
+                </div>
+
+                {/* Document Upload */}
+                <div className="form-row single">
+                  <div className="field">
+                    <label htmlFor="docUpload">
+                      Supporting Document (CV, Transcript, or USMLE Score Report)
+                    </label>
+                    <input
+                      id="docUpload"
+                      type="file"
+                      accept=".pdf,.doc,.docx,.jpg,.png"
+                      onChange={handleFileChange}
+                      style={{ padding: "8px 12px", border: "1px dashed #94a3b8", borderRadius: 8, backgroundColor: "#f8fafc", width: "100%" }}
+                    />
+                    {documentName && (
+                      <p style={{ fontSize: 12, color: "#0f766e", fontWeight: 700, marginTop: 4 }}>
+                        ✓ File attached: {documentName}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div className="form-row single">
                   <div className="field">
-                    <label htmlFor="reason">
-                      Background &amp; What Stage of Training You&apos;re At <MandatoryStar />
+                    <label htmlFor="message">
+                      Personal Statement &amp; Clinical Background Message <MandatoryStar />
                     </label>
-                    <textarea id="reason" name="reason" rows={4} required value={form.reason} onChange={handleChange} placeholder="e.g. 3rd-year medical student at Windsor University, preparing for pediatric residency" />
+                    <textarea
+                      id="message"
+                      name="message"
+                      rows={4}
+                      required
+                      value={form.message}
+                      onChange={handleChange}
+                      placeholder="Share your medical school, current stage of training, US residency goals, and why you are interested in neonatal & pediatric USCE with Dr. Mydam..."
+                    />
                   </div>
                 </div>
 
@@ -110,18 +181,25 @@ export default function TeleRotationApplyPage() {
                 </div>
 
                 <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
-                  {submitting ? "Submitting Application..." : "Submit Application"}
+                  {submitting ? "Submitting Application..." : "Submit Candidate Application"}
                 </button>
               </form>
             ) : (
               <div style={{ textAlign: "center", padding: "30px 10px" }}>
-                <div className="icon" style={{ margin: "0 auto 20px", background: "var(--accent-soft)", color: "var(--accent)" }}>&#10003;</div>
-                <h3 style={{ marginBottom: 12 }}>Application Submitted</h3>
-                <p>
-                  Thanks for applying, {form.name}. We will review your background and send enrollment details and your Student Login credentials to {form.contact}.
+                <div className="icon" style={{ margin: "0 auto 20px", background: "#f0fdfa", color: "#0f766e", fontSize: 28, width: 64, height: 64, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  ✓
+                </div>
+                <h3 style={{ marginBottom: 12, fontSize: 20, color: "#0f172a" }}>Application Submitted Successfully!</h3>
+                <p style={{ fontSize: 14, color: "#475569", lineHeight: 1.6, maxWidth: 440, margin: "0 auto" }}>
+                  Thank you, <strong>{form.name}</strong>. Your clinical background and credentials have been submitted for faculty review by Dr. Janardhan Mydam. Once approved, you will be invited to complete tuition payment and unlock your live cohort schedule.
                 </p>
-                <div style={{ marginTop: 20 }}>
-                  <Link href="/student-login" className="btn btn-primary btn-sm">Go to Student Login</Link>
+                <div style={{ marginTop: 24, display: "flex", justifyContent: "center", gap: 12 }}>
+                  <Link href="/student/rotations" className="btn btn-primary btn-sm">
+                    View in Student Rotation Dashboard →
+                  </Link>
+                  <Link href="/student-login" className="btn btn-outline btn-sm">
+                    Student Login
+                  </Link>
                 </div>
               </div>
             )}
@@ -129,11 +207,24 @@ export default function TeleRotationApplyPage() {
 
           <div>
             <div className="card" style={{ marginBottom: 20 }}>
-              <span className="tag">What happens next</span>
-              <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 14 }}>
-                <div><strong>1. Application Review:</strong> Verified for cohort capacity and training stage alignment.</div>
-                <div><strong>2. Student Login Issued:</strong> Access your personal dashboard for Microsoft Teams links.</div>
-                <div><strong>3. Curriculum Schedule:</strong> Live weekly case discussions and assignments begin.</div>
+              <span className="tag">End-to-End Enrollment Process</span>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 16 }}>
+                <div>
+                  <strong style={{ color: "#0f172a", display: "block" }}>1. Submit Candidate Application</strong>
+                  <span style={{ fontSize: 12.5, color: "#64748b" }}>Provide medical school details, phone, CV/transcript document, and statement.</span>
+                </div>
+                <div>
+                  <strong style={{ color: "#0f172a", display: "block" }}>2. Faculty Review &amp; Approval</strong>
+                  <span style={{ fontSize: 12.5, color: "#64748b" }}>Admin reviews submission in the rotations queue and marks status as &ldquo;Approved &mdash; Payment Pending&rdquo;.</span>
+                </div>
+                <div>
+                  <strong style={{ color: "#0f172a", display: "block" }}>3. Tuition Payment Confirmation</strong>
+                  <span style={{ fontSize: 12.5, color: "#64748b" }}>Complete tuition checkout ($1,250) in your Student Portal to confirm your seat in the cohort.</span>
+                </div>
+                <div>
+                  <strong style={{ color: "#0f172a", display: "block" }}>4. Cohort Live Access &amp; Teams Pro</strong>
+                  <span style={{ fontSize: 12.5, color: "#64748b" }}>Access weekly live rounds on Microsoft Teams Pro, cloud recordings, oral examine calls, and attending LOR evaluations.</span>
+                </div>
               </div>
             </div>
           </div>

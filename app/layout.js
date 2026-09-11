@@ -6,9 +6,9 @@ import EmergencyBanner from "@/components/EmergencyBanner";
 import PromoPopup from "@/components/PromoPopup";
 
 export const metadata = {
-  title: "Dr. Janardhan Mydam, MD, FAAP — Neonatology · Pediatrics · Education · Research",
+  title: "jvmmedicalservices — JVM Medical Services · Neonatology, Pediatrics & USCE Training",
   description:
-    "Specialized medical education, clinical mentorship, free mock tests, biostatistics, tele-rotations, and clinical healthcare guidance for families and institutions.",
+    "JVM Medical Services provides board-certified neonatal and pediatric clinical education, tele-rotations, USMLE question banks, and research mentorship led by Dr. Janardhan Mydam, MD, FAAP.",
 };
 
 export default function RootLayout({ children }) {

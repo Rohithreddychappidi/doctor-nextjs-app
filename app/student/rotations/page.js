@@ -74,6 +74,36 @@ export default function StudentRotationsPage() {
   const isEnrolled = !!data?.is_enrolled;
   const rotation = data?.rotation;
   const programs = data?.programs || [];
+  const applications = data?.applications || [];
+  const latestApp = applications[0];
+
+  const [paying, setPaying] = useState(false);
+  const [payMsg, setPayMsg] = useState("");
+
+  const handlePayTuition = async () => {
+    setPaying(true);
+    setPayMsg("");
+    try {
+      const res = await fetch("/api/student/rotations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "pay_tuition" }),
+      });
+      const resJson = await res.json();
+      if (!res.ok) throw new Error(resJson.error || "Payment processing failed");
+      setPayMsg("Tuition payment confirmed! Your seat is active.");
+      // Refresh rotations state
+      const refreshRes = await fetch("/api/student/rotations");
+      if (refreshRes.ok) {
+        const refreshJson = await refreshRes.json();
+        setData(refreshJson);
+      }
+    } catch (e) {
+      alert("Payment error: " + e.message);
+    } finally {
+      setPaying(false);
+    }
+  };
 
   const rotationSteps = [
     "Submitted",
@@ -87,6 +117,85 @@ export default function StudentRotationsPage() {
     "Evaluation",
     "Certificate",
   ];
+
+  // If student has an application that is approved or pending review, show dedicated workflow
+  if (!isEnrolled && latestApp) {
+    const isApproved = latestApp.status === "Approved" || latestApp.status === "Approved - Payment Pending";
+    return (
+      <div className="max-w-4xl mx-auto my-12 p-8 bg-white border border-slate-200 rounded-3xl shadow-sm text-center">
+        <div className="w-14 h-14 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center text-2xl mx-auto mb-4 border border-teal-200">
+          {isApproved ? "🎉" : "📋"}
+        </div>
+
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-800 border border-teal-200 mb-3">
+          Status: {latestApp.status}
+        </div>
+
+        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
+          {isApproved
+            ? "Your Tele-Rotation Application is Approved!"
+            : "Application Under Faculty Review"}
+        </h2>
+
+        <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto mb-6 leading-relaxed">
+          {isApproved
+            ? "Dr. Janardhan Mydam has reviewed and approved your medical background and credentials. Complete tuition payment below to confirm your seat in the upcoming cohort and activate Microsoft Teams Pro rounds."
+            : `Your application submitted on ${new Date(latestApp.applied_at || Date.now()).toLocaleDateString()} is currently being evaluated by attending preceptor Dr. Janardhan Mydam.`}
+        </p>
+
+        {payMsg && (
+          <div className="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold mb-4">
+            ✓ {payMsg}
+          </div>
+        )}
+
+        {isApproved ? (
+          <div className="p-6 bg-slate-50 border border-slate-200 rounded-2xl max-w-lg mx-auto text-left mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h4 className="font-bold text-slate-900 text-base">Virtual Tele-Rotation Tuition</h4>
+                <p className="text-xs text-slate-500">6-Week USCE Immersion &amp; Attending LOR</p>
+              </div>
+              <span className="text-2xl font-black text-teal-700">$1,250</span>
+            </div>
+
+            <ul className="text-xs text-slate-600 space-y-2 mb-6 border-t border-slate-200/80 pt-4">
+              <li className="flex items-center gap-2">✓ Microsoft Teams Pro live bedside rounds (multi-session weekly)</li>
+              <li className="flex items-center gap-2">✓ 1-on-1 Graded Examine Calls with clinical rubric feedback</li>
+              <li className="flex items-center gap-2">✓ Cloud recording playback access &amp; AI clinical summaries</li>
+              <li className="flex items-center gap-2">✓ Merit-based Attending Physician Letter of Recommendation (LOR)</li>
+            </ul>
+
+            <button
+              onClick={handlePayTuition}
+              disabled={paying}
+              className="w-full py-3.5 px-6 rounded-xl bg-teal-700 text-white font-bold text-sm hover:bg-teal-800 shadow-md transition flex items-center justify-center gap-2"
+            >
+              {paying ? "Processing Payment & Unlocking Cohort..." : "💳 Pay Tuition & Join Cohort Now ($1,250)"}
+            </button>
+          </div>
+        ) : (
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl max-w-md mx-auto text-xs text-slate-600 mb-6">
+            <p className="m-0">
+              <strong>Applicant:</strong> {latestApp.applicant_name} ({latestApp.applicant_email})
+            </p>
+            <p className="mt-1 mb-0">
+              <strong>Target Timing:</strong> {latestApp.timing_preference || "Evenings CST"}
+            </p>
+          </div>
+        )}
+
+        <div className="flex justify-center gap-4 text-xs font-semibold">
+          <Link href="/education-training/tele-rotations" className="text-teal-700 hover:underline">
+            View Rotation Curriculum Syllabus →
+          </Link>
+          <Link href="/student/dashboard" className="text-slate-500 hover:underline">
+            Return to Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <EnrollmentGate

@@ -14,22 +14,38 @@ export async function POST(request) {
       return NextResponse.json({ error: "Active QBank enrollment required" }, { status: 403 });
     }
 
-    const { title, mode, questionCount, subject } = await request.json();
+    const {
+      title,
+      mode = "Timed",
+      questionCount = 5,
+      subject,
+      specialization_id,
+      module_ids = [],
+    } = await request.json();
 
-    let pool = memoryStore.questions;
-    if (subject && subject !== "All") {
-      pool = pool.filter((q) => q.subject.toLowerCase() === subject.toLowerCase());
-    }
+    // Look up specialization and module names for certificate
+    const spec = (memoryStore.qbank_specializations || []).find(s => s.id === specialization_id);
+    const selectedModules = (memoryStore.qbank_modules || []).filter(m => module_ids.includes(m.id));
+    const moduleNames = selectedModules.length > 0 ? selectedModules.map(m => m.name) : ["Core Clinical Vignettes"];
 
-    const count = Math.min(Number(questionCount) || 5, pool.length);
-    const shuffled = [...pool].sort(() => 0.5 - Math.random());
-    const selectedIds = shuffled.slice(0, count).map((q) => q.id);
+    const chosenQuestions = await db.getRandomPracticeQuestions({
+      specializationId: specialization_id,
+      moduleIds: module_ids,
+      count: Number(questionCount) || 5,
+    });
+
+    const selectedIds = chosenQuestions.map((q) => q.id);
 
     const attempt = await db.createTestAttempt(
       session.id,
-      title || "Custom QBank Practice Block",
+      title || `${spec ? spec.name : "Pediatric & Neonatal"} Practice Exam Block`,
       selectedIds,
-      mode || "Timed"
+      mode || "Timed",
+      {
+        specialization_id: specialization_id || null,
+        specialization_name: spec ? spec.name : "Neonatal & Pediatric Medicine",
+        module_names: moduleNames,
+      }
     );
 
     return NextResponse.json({

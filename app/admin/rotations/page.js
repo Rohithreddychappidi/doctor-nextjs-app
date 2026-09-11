@@ -387,12 +387,30 @@ export default function AdminRotationsPage() {
                           <td style={{ padding: "14px 18px" }}>
                             <div style={{ fontWeight: 700, color: "#0F172A" }}>{app.applicant_name}</div>
                             <div style={{ fontSize: "11.5px", color: "#64748B" }}>{app.applicant_email}</div>
-                            <div style={{ fontSize: "11.5px", color: "#475569", marginTop: "2px" }}>{app.medical_school} ({app.graduation_year || "2026"})</div>
+                            {app.applicant_phone && (
+                              <div style={{ fontSize: "11.5px", color: "#0F766E", marginTop: "2px" }}>📞 {app.applicant_phone}</div>
+                            )}
+                            <div style={{ fontSize: "11.5px", color: "#475569", marginTop: "2px" }}>{app.medical_school || "Medical Candidate"} ({app.graduation_year || "2026"})</div>
+                            {app.document_url && (
+                              <a
+                                href={app.document_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{ display: "inline-block", marginTop: "4px", fontSize: "11px", color: "#4F46E5", textDecoration: "underline", fontWeight: 600 }}
+                              >
+                                📄 View Uploaded Document / CV
+                              </a>
+                            )}
                           </td>
                           <td style={{ padding: "14px 18px" }}>
-                            <div style={{ fontWeight: 600, color: "#1E293B" }}>{app.usmle_stage}</div>
+                            <div style={{ fontWeight: 600, color: "#1E293B" }}>{app.usmle_stage || "Step 1 / 2 CK"}</div>
                             <div style={{ fontSize: "11.5px", color: "#64748B" }}>Pref: {app.timing_preference || "Flexible"}</div>
                             <div style={{ fontSize: "11.5px", color: "#94A3B8" }}>Start: {app.preferred_start || "Fall 2026"}</div>
+                            {app.notes && (
+                              <div style={{ fontSize: "11px", color: "#334155", backgroundColor: "#F8FAFC", padding: "4px 8px", borderRadius: "4px", marginTop: "4px", maxWidth: "240px", fontStyle: "italic", border: "1px solid #E2E8F0" }}>
+                                &ldquo;{app.notes}&rdquo;
+                              </div>
+                            )}
                           </td>
                           <td style={{ padding: "14px 18px" }}>
                             <span style={{ fontSize: "11px", fontWeight: 700, padding: "3px 8px", borderRadius: "999px", backgroundColor: badgeColor.bg, color: badgeColor.text, border: `1px solid ${badgeColor.border}` }}>

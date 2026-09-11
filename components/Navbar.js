@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { key: "clinical", label: "Clinical Guidance", href: "/clinical-services" },
   { key: "newborn-care", label: "Newborn Care Programs", href: "/advisory-services" },
   { key: "community", label: "Community Health", href: "/community-impact" },
+  { key: "portfolio", label: "Doctor Portfolio", href: "/doctor-portfolio" },
   { key: "contact", label: "Contact", href: "/contact" },
 ];
 
@@ -70,10 +71,10 @@ export default function Navbar() {
     <header className="site-header" ref={headerRef}>
       <div className="nav-wrap">
         <Link href="/" className="brand">
-          <span className="mark">JM</span>
+          <span className="mark">JVM</span>
           <span>
-            Dr. Janardhan Mydam, MD, FAAP
-            <small>Neonatology · Pediatrics · Education · Research</small>
+            jvmmedicalservices
+            <small>JVM Medical Services · Neonatology, Pediatrics &amp; USCE Training</small>
           </span>
         </Link>
 

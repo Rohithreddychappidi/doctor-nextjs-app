@@ -143,6 +143,75 @@ export default function StudentQBankPage() {
           </div>
         </div>
 
+        {/* SECTION: 3 Specializations Modules Selector */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-bold text-slate-900 text-base">Board Exam Specialization Pathways</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Choose your discipline to practice specific clinical modules and random 5–20 question batches.</p>
+            </div>
+            <Link
+              href="/student/qbank/create"
+              className="text-xs font-bold text-teal-700 hover:text-teal-800"
+            >
+              Configure Custom Block →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link
+              href="/student/qbank/create"
+              className="p-4 rounded-xl border border-slate-200 hover:border-teal-500 bg-slate-50/50 hover:bg-teal-50/30 transition group flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">👶</span>
+                  <h4 className="text-sm font-bold text-slate-900 group-hover:text-teal-700 transition">Neonatal-Perinatal Medicine</h4>
+                </div>
+                <p className="text-xs text-slate-600 line-clamp-2">Golden Hour resuscitation, RDS surfactant kinetics, PPHN, and extreme prematurity.</p>
+              </div>
+              <div className="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs font-semibold text-teal-700">
+                <span>10 Modules Available</span>
+                <span>Practice →</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/student/qbank/create"
+              className="p-4 rounded-xl border border-slate-200 hover:border-teal-500 bg-slate-50/50 hover:bg-teal-50/30 transition group flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">🩺</span>
+                  <h4 className="text-sm font-bold text-slate-900 group-hover:text-teal-700 transition">General Pediatrics</h4>
+                </div>
+                <p className="text-xs text-slate-600 line-clamp-2">Developmental milestones, immunization schedules, pediatric exanthems, and gastroenterology.</p>
+              </div>
+              <div className="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs font-semibold text-teal-700">
+                <span>10 Modules Available</span>
+                <span>Practice →</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/student/qbank/create"
+              className="p-4 rounded-xl border border-slate-200 hover:border-teal-500 bg-slate-50/50 hover:bg-teal-50/30 transition group flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">⚡</span>
+                  <h4 className="text-sm font-bold text-slate-900 group-hover:text-teal-700 transition">Critical Care &amp; Emergency</h4>
+                </div>
+                <p className="text-xs text-slate-600 line-clamp-2">PALS algorithms, pediatric septic shock, status epilepticus, and USMLE biostatistics.</p>
+              </div>
+              <div className="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs font-semibold text-teal-700">
+                <span>8 Modules Available</span>
+                <span>Practice →</span>
+              </div>
+            </Link>
+          </div>
+        </div>
+
         {/* SECTION I: Recent Tests List & Detailed Rationales */}
         {recent_attempts.length > 0 && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
