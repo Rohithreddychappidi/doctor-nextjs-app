@@ -91,6 +91,27 @@ export async function GET(request) {
         l.details,
       ]);
       csvContent = arrayToCSV(headers, rows);
+    } else if (type === "full_backup") {
+      const backupData = {
+        exported_at: new Date().toISOString(),
+        system: "jvmmedicalservices",
+        emergency_snapshot: true,
+        users: await db.getUsers(),
+        student_profiles: (await db.getStudents?.()) || [],
+        test_attempts: await db.getTestAttempts(),
+        qbank_modules: await db.getQBankModules(),
+        classes: await db.getClasses(),
+        inquiries: await db.getInquiries(),
+        audit_logs: await db.getAuditLogs(),
+        system_settings: await db.getSystemSettings(),
+      };
+      return new Response(JSON.stringify(backupData, null, 2), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          "Content-Disposition": `attachment; filename="jvm_emergency_db_backup_${Date.now()}.json"`,
+        },
+      });
     } else {
       return NextResponse.json({ error: "Invalid export type requested" }, { status: 400 });
     }

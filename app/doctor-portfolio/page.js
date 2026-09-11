@@ -202,9 +202,9 @@ export default function DoctorPortfolioPage() {
               <div style={{ width: "100%", maxWidth: 350, backgroundColor: "#FFFFFF", borderRadius: "20px", border: "1px solid #E2E8F0", padding: "14px", boxShadow: "0 12px 30px rgba(0,0,0,0.06)", position: "relative" }}>
                 <div style={{ width: "100%", height: 380, borderRadius: "14px", overflow: "hidden", position: "relative", backgroundColor: "#F8FAFC" }}>
                   <img
-                    src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=600&auto=format&fit=crop"
+                    src="/images/dr-janardhan-mydam.jpg"
                     alt="Dr. Janardhan Mydam, MD, FAAP"
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block" }}
                   />
                   <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "16px 14px", background: "linear-gradient(to top, rgba(15,23,42,0.92) 0%, rgba(15,23,42,0.5) 70%, transparent 100%)", color: "#FFFFFF" }}>
                     <div style={{ fontSize: "14.5px", fontWeight: 800 }}>Dr. Janardhan Mydam, MD, FAAP</div>

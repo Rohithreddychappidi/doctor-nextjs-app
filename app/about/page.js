@@ -25,11 +25,11 @@ export default function AboutPage() {
     <>
       <section className="hero" style={{ paddingBottom: 40 }}>
         <div className="container hero-grid" style={{ gridTemplateColumns: "0.85fr 1.15fr", alignItems: "center" }}>
-          <div style={{ borderRadius: 12, overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,0.12)" }}>
+          <div style={{ borderRadius: 16, overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,0.12)", maxWidth: 360, margin: "0 auto", border: "1px solid #E2E8F0" }}>
             <img
-              src={c.photoUrl || "/images/doctor-placeholder.svg"}
+              src={c.photoUrl || "/images/dr-janardhan-mydam.jpg"}
               alt="Dr. Janardhan Mydam, MD, FAAP"
-              style={{ width: "100%", height: "auto", display: "block" }}
+              style={{ width: "100%", height: 420, objectFit: "cover", objectPosition: "top center", display: "block" }}
             />
           </div>
           <div>
