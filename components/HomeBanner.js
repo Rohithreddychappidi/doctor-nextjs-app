@@ -1,180 +1,200 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSiteData } from "@/lib/DataContext";
 
-const DEFAULT_SLIDES = [
-  {
-    tag: "NEONATOLOGY • PEDIATRICS • EDUCATION • RESEARCH",
-    heading: "Improving Newborn and Child Health Through Education, Clinical Guidance, and Research",
-    body: "Welcome to jvmmedicalservices — the premier clinical and educational platform led by Dr. Janardhan Mydam, MD, FAAP, dedicated to pediatric excellence, virtual tele-rotations, and board-level mastery.",
-    ctaLabel: "Explore Education & Training",
-    href: "/education-training",
-    imageUrl: "/images/hero-banner-1.svg",
-  },
-  {
-    tag: "ONLINE MOCK TESTS • FREE INITIAL PERIOD",
-    heading: "Master Clinical Reasoning with Board-Style Mock Examinations",
-    body: "Comprehensive question banks in Neonatology, Pediatrics, and Biostatistics with in-depth rationales explaining why the correct choice is right and why distractors are wrong.",
-    ctaLabel: "Take Free Mock Test",
-    href: "/question-banks",
-    imageUrl: "/images/hero-banner-2.svg",
-  },
-  {
-    tag: "LEARNING HUB • TELE-ROTATION",
-    heading: "Structured Virtual Tele-Rotations & Live Microsoft Teams Classes",
-    body: "Weekly interactive sessions, clinical case writeups, EMR orientation (Epic, Cerner, Meditech), and biostatistical mentorship.",
-    ctaLabel: "View Learning Hub",
-    href: "/education-training/tele-rotations",
-    imageUrl: "/images/hero-banner-3.svg",
-  },
-];
-
 export default function HomeBanner() {
   const { content } = useSiteData();
-  const rawSlides = content?.home?.bannerSlides || [];
-  const slides = rawSlides.length > 0 ? rawSlides.map((s, idx) => ({
-    ...s,
-    imageUrl: s.imageUrl || DEFAULT_SLIDES[idx % DEFAULT_SLIDES.length].imageUrl,
-    href: s.href || DEFAULT_SLIDES[idx % DEFAULT_SLIDES.length].href,
-  })) : DEFAULT_SLIDES;
-
-  const [i, setI] = useState(0);
-  const timer = useRef(null);
-
-  useEffect(() => {
-    if (slides.length < 2) return;
-    timer.current = setInterval(() => setI((v) => (v + 1) % slides.length), 7000);
-    return () => clearInterval(timer.current);
-  }, [slides.length]);
-
-  const go = (idx) => {
-    setI((idx + slides.length) % slides.length);
-    clearInterval(timer.current);
-    timer.current = setInterval(() => setI((v) => (v + 1) % slides.length), 7000);
+  const hero = content?.home?.heroBanner || {
+    tag: "NEONATOLOGY · PEDIATRICS · USCE TRAINING · CLINICAL RESEARCH",
+    heading: "Elevating Newborn & Pediatric Healthcare Through Clinical Mentorship",
+    subtitle: "Join premier clinical tele-rotations, high-yield board question banks, and weekly grand rounds mentored by Dr. Janardhan Mydam, MD, FAAP — Chair of Pediatrics at Humboldt Park Health.",
+    pcImageUrl: "https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=1600&auto=format&fit=crop",
+    mobileImageUrl: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=800&auto=format&fit=crop",
+    primaryBtnText: "Explore Education & Training",
+    primaryBtnLink: "/education-training",
+    secondaryBtnText: "Doctor Portfolio & Bio",
+    secondaryBtnLink: "/doctor-portfolio",
   };
 
-  if (slides.length === 0) return null;
-
-  const currentSlide = slides[i];
+  const pcImage = hero.pcImageUrl || "https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=1600&auto=format&fit=crop";
+  const mobileImage = hero.mobileImageUrl || pcImage;
 
   return (
     <div
-      className="banner"
+      className="home-hero-banner"
       style={{
         position: "relative",
-        borderRadius: 14,
+        borderRadius: "18px",
         overflow: "hidden",
-        backgroundColor: "#12203B",
-        minHeight: 460,
-        boxShadow: "0 12px 36px rgba(18, 32, 59, 0.2)",
+        backgroundColor: "#0E182A",
+        minHeight: "520px",
+        display: "flex",
+        alignItems: "center",
+        boxShadow: "0 20px 45px -10px rgba(14, 24, 42, 0.35)",
       }}
     >
-      {/* Background Banner Image with Gradient Mask */}
+      {/* PC Background Image (Displayed on screens >= 768px) */}
       <div
+        className="banner-bg banner-bg-pc"
         style={{
           position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundImage: `linear-gradient(90deg, rgba(14,24,42,0.92) 0%, rgba(18,32,59,0.78) 55%, rgba(18,32,59,0.3) 100%), url(${currentSlide.imageUrl})`,
+          inset: 0,
+          backgroundImage: `linear-gradient(90deg, rgba(14,24,42,0.94) 0%, rgba(14,24,42,0.85) 45%, rgba(14,24,42,0.45) 80%, rgba(14,24,42,0.2) 100%), url(${pcImage})`,
           backgroundSize: "cover",
-          backgroundPosition: "center",
-          transition: "background-image 0.5s ease-in-out",
+          backgroundPosition: "center right",
+          zIndex: 1,
         }}
       />
 
-      {/* Slide Content Overlay */}
+      {/* Mobile Background Image (Displayed on screens < 768px) */}
       <div
+        className="banner-bg banner-bg-mobile"
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: `linear-gradient(180deg, rgba(14,24,42,0.88) 0%, rgba(14,24,42,0.96) 80%), url(${mobileImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          zIndex: 1,
+        }}
+      />
+
+      {/* Content Container */}
+      <div
+        className="banner-content-box"
         style={{
           position: "relative",
           zIndex: 2,
-          padding: "54px 48px",
-          maxWidth: 740,
+          maxWidth: "800px",
           color: "#FFFFFF",
         }}
       >
-        <span
-          className="tag"
-          style={{
-            backgroundColor: "rgba(180, 131, 42, 0.25)",
-            color: "#E9C989",
-            border: "1px solid #B4832A",
-            padding: "4px 12px",
-            borderRadius: 16,
-            fontSize: 11.5,
-            fontWeight: 700,
-            letterSpacing: 1,
-            textTransform: "uppercase",
-            display: "inline-block",
-            marginBottom: 16,
-          }}
-        >
-          {currentSlide.tag}
-        </span>
-        <h2
+        {/* Eyebrow Badge */}
+        <div style={{ marginBottom: "14px" }}>
+          <span
+            style={{
+              backgroundColor: "rgba(180, 131, 42, 0.28)",
+              color: "#E9C989",
+              border: "1px solid rgba(233, 201, 137, 0.5)",
+              padding: "5px 12px",
+              borderRadius: "20px",
+              fontSize: "11px",
+              fontWeight: 800,
+              letterSpacing: "1px",
+              textTransform: "uppercase",
+              display: "inline-block",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+            }}
+          >
+            {hero.tag || "NEONATOLOGY · PEDIATRICS · USCE TRAINING"}
+          </span>
+        </div>
+
+        {/* Headline */}
+        <h1
           style={{
             color: "#FFFFFF",
-            fontFamily: "'Fraunces', serif",
-            fontSize: "clamp(1.9rem, 3.2vw, 2.7rem)",
-            lineHeight: 1.2,
-            marginBottom: 16,
+            fontFamily: "var(--font-display, 'Fraunces', serif)",
+            fontSize: "clamp(1.6rem, 3.8vw, 3.1rem)",
+            lineHeight: 1.18,
+            letterSpacing: "-0.02em",
+            fontWeight: 800,
+            marginBottom: "14px",
+            textShadow: "0 2px 8px rgba(0,0,0,0.3)",
           }}
         >
-          {currentSlide.heading}
-        </h2>
+          {hero.heading || "Elevating Newborn & Pediatric Healthcare Through Clinical Mentorship"}
+        </h1>
+
+        {/* Subtitle */}
         <p
           style={{
-            color: "rgba(255, 255, 255, 0.85)",
-            fontSize: "1.05rem",
+            color: "rgba(255, 255, 255, 0.88)",
+            fontSize: "clamp(13.5px, 1.3vw, 16px)",
             lineHeight: 1.6,
-            marginBottom: 28,
+            marginBottom: "24px",
+            maxWidth: "680px",
+            textShadow: "0 1px 4px rgba(0,0,0,0.25)",
           }}
         >
-          {currentSlide.body}
+          {hero.subtitle || "Join premier clinical tele-rotations, high-yield board question banks, and weekly grand rounds mentored by Dr. Janardhan Mydam, MD, FAAP — Chair of Pediatrics at Humboldt Park Health."}
         </p>
-        <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-          <Link href={currentSlide.href || "/education-training"} className="btn btn-primary" style={{ fontWeight: 600 }}>
-            {currentSlide.ctaLabel || "Explore"}
+
+        {/* Dual Action Buttons */}
+        <div className="banner-btn-group" style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+          <Link
+            href={hero.primaryBtnLink || "/education-training"}
+            className="btn btn-primary banner-btn"
+            style={{
+              padding: "11px 22px",
+              fontSize: "13.5px",
+              fontWeight: 700,
+              boxShadow: "0 4px 14px rgba(13, 148, 136, 0.4)",
+            }}
+          >
+            {hero.primaryBtnText || "Explore Education & Training"} &rarr;
           </Link>
-          <Link href="/clinical-services" className="btn btn-ghost-light">
-            Clinical Guidance
+          <Link
+            href={hero.secondaryBtnLink || "/doctor-portfolio"}
+            className="btn btn-gold banner-btn"
+            style={{
+              padding: "11px 20px",
+              fontSize: "13.5px",
+              fontWeight: 700,
+              boxShadow: "0 4px 14px rgba(180, 131, 42, 0.35)",
+            }}
+          >
+            {hero.secondaryBtnText || "Doctor Portfolio & Bio"}
+          </Link>
+          <Link
+            href="/question-banks"
+            className="btn btn-ghost-light banner-btn"
+            style={{
+              padding: "11px 18px",
+              fontSize: "13px",
+              fontWeight: 600,
+            }}
+          >
+            Free Mock Tests
           </Link>
         </div>
       </div>
 
-      {/* Pagination Dots */}
-      <div
-        className="banner-dots"
-        style={{
-          position: "absolute",
-          bottom: 20,
-          left: 48,
-          zIndex: 3,
-          display: "flex",
-          gap: 8,
-        }}
-      >
-        {slides.map((s, idx) => (
-          <button
-            key={idx}
-            className={idx === i ? "active" : ""}
-            aria-label={`Show slide ${idx + 1}`}
-            onClick={() => go(idx)}
-            style={{
-              width: idx === i ? 28 : 10,
-              height: 10,
-              borderRadius: 5,
-              backgroundColor: idx === i ? "#E9C989" : "rgba(255,255,255,0.4)",
-              border: "none",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-            }}
-          />
-        ))}
-      </div>
+      <style jsx>{`
+        .banner-content-box {
+          padding: 54px 44px;
+        }
+        @media (min-width: 768px) {
+          .banner-bg-mobile {
+            display: none !important;
+          }
+          .banner-bg-pc {
+            display: block !important;
+          }
+        }
+        @media (max-width: 767px) {
+          .banner-bg-pc {
+            display: none !important;
+          }
+          .banner-bg-mobile {
+            display: block !important;
+          }
+          .home-hero-banner {
+            min-height: 380px !important;
+            padding: 0 !important;
+            border-radius: 12px !important;
+          }
+          .banner-content-box {
+            padding: 24px 16px !important;
+          }
+          .banner-btn {
+            padding: 9px 16px !important;
+            font-size: 12.5px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
+

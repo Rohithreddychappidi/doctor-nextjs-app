@@ -114,6 +114,141 @@ export default function AdminOverviewPage() {
         </div>
       )}
 
+      {/* 4 CORE HERO PILLARS (Primary Operational Focus) */}
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <div>
+            <div className="eyebrow" style={{ color: "var(--accent)", margin: 0 }}>Executive Command</div>
+            <h2 style={{ fontSize: "20px", margin: "2px 0 0" }}>⭐ The 4 Core Operations Heroes</h2>
+          </div>
+          <span style={{ fontSize: "12px", color: "#64748B" }}>
+            Primary clinical, didactic &amp; scientific workflows
+          </span>
+        </div>
+
+        <div className="grid grid-4" style={{ gap: 16 }}>
+          {/* HERO 1: RESEARCH */}
+          <Link
+            href="/admin/research"
+            style={{
+              textDecoration: "none",
+              backgroundColor: "#FFFFFF",
+              borderRadius: "12px",
+              padding: "20px",
+              border: "2px solid #B4832A",
+              boxShadow: "0 4px 14px rgba(180, 131, 42, 0.12)",
+              display: "flex",
+              flexDirection: "column",
+              transition: "transform 0.15s ease",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <span style={{ fontSize: "26px" }}>🔬</span>
+              <span style={{ fontSize: "10.5px", fontWeight: 700, padding: "2px 8px", borderRadius: 10, backgroundColor: "#FEF3C7", color: "#92400E" }}>
+                HERO 1 · FREE
+              </span>
+            </div>
+            <h3 style={{ margin: "0 0 6px", fontSize: "16px", color: "#0E182A" }}>Research Hub &amp; Mentorship</h3>
+            <p style={{ margin: 0, fontSize: "12.5px", color: "#64748B", lineHeight: "1.4", flex: 1 }}>
+              Trainee admissions queue, group chat with MS Teams link, file/image sharing, and dynamic tuition controls.
+            </p>
+            <div style={{ marginTop: 12, fontSize: "12px", fontWeight: 700, color: "#B4832A" }}>
+              Open Research Command &rarr;
+            </div>
+          </Link>
+
+          {/* HERO 2: TELE-ROTATIONS */}
+          <Link
+            href="/admin/rotations"
+            style={{
+              textDecoration: "none",
+              backgroundColor: "#FFFFFF",
+              borderRadius: "12px",
+              padding: "20px",
+              border: "1.5px solid #0D9488",
+              boxShadow: "0 4px 14px rgba(13, 148, 136, 0.08)",
+              display: "flex",
+              flexDirection: "column",
+              transition: "transform 0.15s ease",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <span style={{ fontSize: "26px" }}>🩺</span>
+              <span style={{ fontSize: "10.5px", fontWeight: 700, padding: "2px 8px", borderRadius: 10, backgroundColor: "#CCFBF1", color: "#0F766E" }}>
+                HERO 2 · TEAMS
+              </span>
+            </div>
+            <h3 style={{ margin: "0 0 6px", fontSize: "16px", color: "#0E182A" }}>Tele-Rotation Pipeline</h3>
+            <p style={{ margin: 0, fontSize: "12.5px", color: "#64748B", lineHeight: "1.4", flex: 1 }}>
+              Student rotation cohorts, weekly Microsoft Teams bedside rounds, clinical evaluations, and certificate issuance.
+            </p>
+            <div style={{ marginTop: 12, fontSize: "12px", fontWeight: 700, color: "#0D9488" }}>
+              Open Rotation Pipeline &rarr;
+            </div>
+          </Link>
+
+          {/* HERO 3: LIVE CLASSES */}
+          <Link
+            href="/admin/classes"
+            style={{
+              textDecoration: "none",
+              backgroundColor: "#FFFFFF",
+              borderRadius: "12px",
+              padding: "20px",
+              border: "1.5px solid #6366F1",
+              boxShadow: "0 4px 14px rgba(99, 102, 241, 0.08)",
+              display: "flex",
+              flexDirection: "column",
+              transition: "transform 0.15s ease",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <span style={{ fontSize: "26px" }}>🎥</span>
+              <span style={{ fontSize: "10.5px", fontWeight: 700, padding: "2px 8px", borderRadius: 10, backgroundColor: "#EDE9FE", color: "#5B21B6" }}>
+                HERO 3 · TEAMS PRO
+              </span>
+            </div>
+            <h3 style={{ margin: "0 0 6px", fontSize: "16px", color: "#0E182A" }}>Live Classes &amp; Seminars</h3>
+            <p style={{ margin: 0, fontSize: "12.5px", color: "#64748B", lineHeight: "1.4", flex: 1 }}>
+              Schedule weekly interactive clinical lectures, generate MS Teams links, upload lecture handouts, and review homework.
+            </p>
+            <div style={{ marginTop: 12, fontSize: "12px", fontWeight: 700, color: "#6366F1" }}>
+              Manage Live Seminars &rarr;
+            </div>
+          </Link>
+
+          {/* HERO 4: TESTS */}
+          <Link
+            href="/admin/tests"
+            style={{
+              textDecoration: "none",
+              backgroundColor: "#FFFFFF",
+              borderRadius: "12px",
+              padding: "20px",
+              border: "1.5px solid #2563EB",
+              boxShadow: "0 4px 14px rgba(37, 99, 235, 0.08)",
+              display: "flex",
+              flexDirection: "column",
+              transition: "transform 0.15s ease",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <span style={{ fontSize: "26px" }}>📝</span>
+              <span style={{ fontSize: "10.5px", fontWeight: 700, padding: "2px 8px", borderRadius: 10, backgroundColor: "#DBEAFE", color: "#1D4ED8" }}>
+                HERO 4 · 28 MODS
+              </span>
+            </div>
+            <h3 style={{ margin: "0 0 6px", fontSize: "16px", color: "#0E182A" }}>Question Bank CMS</h3>
+            <p style={{ margin: 0, fontSize: "12.5px", color: "#64748B", lineHeight: "1.4", flex: 1 }}>
+              Author board-style clinical vignettes with detailed distractors, question explanations, and timed simulation mocks.
+            </p>
+            <div style={{ marginTop: 12, fontSize: "12px", fontWeight: 700, color: "#2563EB" }}>
+              Open Question Bank &rarr;
+            </div>
+          </Link>
+        </div>
+      </div>
+
       {/* Personalized Student Portal KPIs */}
       <div className="kpi-row" style={{ marginBottom: 28 }}>
         <div className="kpi">

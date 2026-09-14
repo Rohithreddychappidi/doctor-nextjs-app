@@ -6,13 +6,15 @@ export async function POST(request) {
   try {
     const { persona } = await request.json();
 
-    let email = "student.a@example.com";
-    if (persona === "student_a" || persona === "A") email = "student.a@example.com";
+    let email = "student@jvmmedicalservices.com";
+    if (persona === "student" || persona === "student_jvm") email = "student@jvmmedicalservices.com";
+    else if (persona === "physician" || persona === "dr_mydam" || persona === "mydam") email = "dr.mydam@jvmmedicalservices.com";
+    else if (persona === "admin" || persona === "admin_jvm") email = "admin@jvmmedicalservices.com";
+    else if (persona === "student_a" || persona === "A") email = "student.a@example.com";
     else if (persona === "student_b" || persona === "B") email = "student.b@example.com";
     else if (persona === "student_c" || persona === "C") email = "student.c@example.com";
     else if (persona === "student_d" || persona === "D") email = "student.d@example.com";
     else if (persona === "student_f" || persona === "F") email = "student.f@example.com";
-    else if (persona === "admin") email = "admin@jva-medical.com";
 
     const user = await db.findUserByEmail(email);
     if (!user) {

@@ -24,6 +24,8 @@ export async function POST(request) {
     // Verify admin access via session or secret key
     const isAuthorized =
       user?.role === "admin" ||
+      user?.role === "super_admin" ||
+      (Array.isArray(user?.roles) && (user.roles.includes("admin") || user.roles.includes("super_admin"))) ||
       admin_key === (process.env.ADMIN_SECRET_KEY || "admin-super-key-mydam-2026");
 
     if (!isAuthorized) {

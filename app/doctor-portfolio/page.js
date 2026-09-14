@@ -60,11 +60,18 @@ export default function DoctorPortfolioPage() {
 
   const appointments = [
     {
-      role: "Chair of Neonatology & Pediatrics",
+      role: "Chair of Pediatrics",
       hospital: "Humboldt Park Health, Chicago, IL",
       years: "2023 – Present",
       description:
-        "Provides departmental clinical leadership, departmental staffing oversight, NICU clinical pathway formulation, quality-improvement governance, and maternal-infant safety initiatives.",
+        "Provides departmental clinical leadership, departmental staffing oversight, NICU clinical pathway formulation, quality-improvement governance, and maternal-infant safety initiatives as Chair of Pediatrics & Neonatology.",
+    },
+    {
+      role: "Chair of Pediatrics Academics (Volunteer)",
+      hospital: "Windsor University School of Medicine, St. Kitts",
+      years: "Ongoing Academic Appointment",
+      description:
+        "Directs clinical curriculum development, lectures in pediatric pathophysiology, coordinates OSCE examinations, and provides residency application mentorship for graduating classes.",
     },
     {
       role: "Attending Physician, Neonatal-Perinatal Medicine",
@@ -79,13 +86,6 @@ export default function DoctorPortfolioPage() {
       years: "2021 – Present",
       description:
         "Provides subspecialty neonatal consultation, acute tele-rounding, emergency newborn transfers, and protocol support across regional Midwestern hospital systems through Onsite Neonatal PC and Midwest Neoped Associates.",
-    },
-    {
-      role: "Volunteer Chair of Pediatrics",
-      hospital: "Windsor University School of Medicine, St. Kitts",
-      years: "Ongoing Academic Appointment",
-      description:
-        "Directs clinical curriculum development, lectures in pediatric pathophysiology, coordinates OSCE examinations, and provides residency application mentorship for graduating classes.",
     },
   ];
 
@@ -156,7 +156,7 @@ export default function DoctorPortfolioPage() {
               </div>
 
               <p style={{ fontSize: "15.5px", color: "#475569", lineHeight: 1.7, marginBottom: "18px" }}>
-                Dr. Janardhan Mydam is an internationally trained neonatologist and pediatrician with over 25 years of bedside clinical experience, NIH-funded clinical research leadership, and academic medical faculty teaching. He serves as an Attending Neonatologist at <strong>John H. Stroger, Jr. Hospital of Cook County</strong> and <strong>Chair of Neonatology and Pediatrics at Humboldt Park Health</strong> in Chicago, Illinois.
+                Dr. Janardhan Mydam is an internationally trained neonatologist and pediatrician with over 25 years of bedside clinical experience, NIH-funded clinical research leadership, and academic medical faculty teaching. He serves as <strong>Chair of Pediatrics, Humboldt Park Health</strong>, <strong>Chair of Pediatrics Academics (Volunteer), Windsor University School of Medicine</strong>, and Attending Neonatologist at <strong>John H. Stroger, Jr. Hospital of Cook County</strong> in Chicago, Illinois.
               </p>
 
               <p style={{ fontSize: "14.5px", color: "#64748B", lineHeight: 1.65, marginBottom: "26px" }}>
@@ -165,17 +165,17 @@ export default function DoctorPortfolioPage() {
 
               {/* Quick credential chips */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "28px" }}>
+                <span style={{ padding: "5px 12px", borderRadius: "6px", backgroundColor: "#F0FDFA", border: "1px solid #99F6E4", fontSize: "12px", fontWeight: 700, color: "#0F766E" }}>
+                  🏥 Chair of Pediatrics, Humboldt Park Health
+                </span>
+                <span style={{ padding: "5px 12px", borderRadius: "6px", backgroundColor: "#EEF2FF", border: "1px solid #C7D2FE", fontSize: "12px", fontWeight: 700, color: "#4338CA" }}>
+                  🎓 Chair of Pediatrics Academics (Volunteer), Windsor University
+                </span>
                 <span style={{ padding: "5px 12px", borderRadius: "6px", backgroundColor: "#F1F5F9", border: "1px solid #E2E8F0", fontSize: "12px", fontWeight: 600, color: "#334155" }}>
                   🏥 Chicago Level III NICU Attending
                 </span>
                 <span style={{ padding: "5px 12px", borderRadius: "6px", backgroundColor: "#F1F5F9", border: "1px solid #E2E8F0", fontSize: "12px", fontWeight: 600, color: "#334155" }}>
-                  🎓 Double Board Certified (ABP)
-                </span>
-                <span style={{ padding: "5px 12px", borderRadius: "6px", backgroundColor: "#F1F5F9", border: "1px solid #E2E8F0", fontSize: "12px", fontWeight: 600, color: "#334155" }}>
                   🔬 NIH Multicenter Site PI (PREMOD2)
-                </span>
-                <span style={{ padding: "5px 12px", borderRadius: "6px", backgroundColor: "#F1F5F9", border: "1px solid #E2E8F0", fontSize: "12px", fontWeight: 600, color: "#334155" }}>
-                  🇬🇧 UK Specialist Pediatric Registrar (NHS)
                 </span>
               </div>
 

@@ -45,8 +45,7 @@ export default function Footer() {
         <div className="footer-bottom">
           <span>&copy; 2026 jvmmedicalservices (JVM Medical Services) · Chief Medical Director: Dr. Janardhan Mydam, MD, FAAP. All rights reserved.</span>
           <span>
-            Privacy Policy &nbsp;·&nbsp; Terms of Use &nbsp;·&nbsp;{" "}
-            <Link href="/admin" style={{ color: "rgba(255,255,255,.45)" }}>Admin Panel (preview)</Link>
+            Privacy Policy &nbsp;·&nbsp; Terms of Use
           </span>
         </div>
       </div>

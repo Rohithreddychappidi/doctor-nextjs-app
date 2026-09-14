@@ -5,7 +5,18 @@ import { sendWelcomeEmail } from "@/lib/email";
 
 export async function POST(request) {
   try {
-    const { email, password, full_name, specialty } = await request.json();
+    const {
+      email,
+      password,
+      full_name,
+      role = "student",
+      phone = "",
+      country_code = "+1",
+      resume_url = "",
+      description = "",
+      specialty = "",
+      medical_school = ""
+    } = await request.json();
 
     if (!email || !password || !full_name) {
       return NextResponse.json(
@@ -25,14 +36,19 @@ export async function POST(request) {
 
     const passwordHash = await hashPassword(password);
     const userId = `usr_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    const assignedRole = role === "guest" ? "guest" : "student";
+    const fullPhone = phone ? `${country_code} ${phone}`.trim() : "";
 
     const newUser = await db.createUser({
       id: userId,
       email: cleanEmail,
       password_hash: passwordHash,
       full_name: full_name.trim(),
-      role: "student",
-      specialty: specialty?.trim() || "Medical Student / Trainee",
+      role: assignedRole,
+      phone: fullPhone,
+      resume_url: resume_url?.trim() || "",
+      description: description?.trim() || "",
+      specialty: specialty?.trim() || (assignedRole === "guest" ? "Community Visitor" : (medical_school?.trim() || "Medical Student")),
       created_at: new Date().toISOString(),
     });
 
@@ -43,11 +59,11 @@ export async function POST(request) {
 
     // Audit log
     await db.logAudit(
-      "STUDENT_REGISTERED",
+      assignedRole === "guest" ? "GUEST_REGISTERED" : "STUDENT_REGISTERED",
       userId,
       cleanEmail,
       request.headers.get("x-forwarded-for") || "127.0.0.1",
-      { name: full_name }
+      { name: full_name, role: assignedRole, phone: fullPhone }
     );
 
     const token = await createToken({

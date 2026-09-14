@@ -38,13 +38,28 @@ export default function AboutPage() {
             <p className="lede" style={{ marginBottom: 12 }}>
               <strong>Clinical Experience. Academic Leadership. Commitment to Teaching.</strong>
             </p>
+
+            {/* Prominent Leadership Titles */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", margin: "14px 0 16px" }}>
+              <span style={{ padding: "4px 10px", borderRadius: "6px", backgroundColor: "#F0FDFA", border: "1px solid #99F6E4", fontSize: "12px", fontWeight: 700, color: "#0F766E" }}>
+                🏥 Chair of Pediatrics, Humboldt Park Health
+              </span>
+              <span style={{ padding: "4px 10px", borderRadius: "6px", backgroundColor: "#EEF2FF", border: "1px solid #C7D2FE", fontSize: "12px", fontWeight: 700, color: "#4338CA" }}>
+                🎓 Chair of Pediatrics Academics (Volunteer), Windsor University
+              </span>
+              <span style={{ padding: "4px 10px", borderRadius: "6px", backgroundColor: "#F1F5F9", border: "1px solid #CBD5E1", fontSize: "12px", fontWeight: 600, color: "#334155" }}>
+                👶 Attending Neonatologist, Cook County Health
+              </span>
+            </div>
+
             <p style={{ fontSize: 15, color: "var(--ink-soft)", lineHeight: 1.65, marginBottom: 16 }}>
-              Dr. Janardhan Mydam is a board-certified neonatologist and pediatrician with extensive experience in newborn medicine, pediatric care, medical education, clinical research, physician mentorship, and healthcare leadership. His work is centered on improving outcomes for newborns and children while developing the next generation of compassionate, knowledgeable, and research-oriented physicians.
+              Dr. Janardhan Mydam is a board-certified neonatologist and pediatrician serving as <strong>Chair of Pediatrics at Humboldt Park Health</strong>, <strong>Chair of Pediatrics Academics (Volunteer) at Windsor University School of Medicine</strong>, and Attending Neonatologist at <strong>John H. Stroger, Jr. Hospital of Cook County</strong>. With over 25 years in newborn medicine, medical education, clinical research, and US residency mentorship, his mission centers on elevating neonatal outcomes and training future medical leaders.
             </p>
             <p style={{ fontSize: 13.5, color: "var(--muted)", marginBottom: 24 }}>{c.note}</p>
             <div className="hero-actions">
-              <Link href="/clinical-services" className="btn btn-primary">Request Clinical Guidance</Link>
-              <Link href="/research" className="btn btn-outline">View Research &amp; Publications</Link>
+              <Link href="/about/doctor" className="btn btn-primary">Complete Info About Doctor &rarr;</Link>
+              <Link href="/about/company" className="btn btn-gold">About JVM Medical Services</Link>
+              <Link href="/doctor-portfolio" className="btn btn-outline">Doctor Portfolio</Link>
             </div>
           </div>
         </div>

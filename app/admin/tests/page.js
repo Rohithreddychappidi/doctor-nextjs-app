@@ -821,6 +821,13 @@ export default function AdminTestsPage() {
             </div>
 
             <div className="space-y-4">
+              {questions.length === 0 && (
+                <div style={{ padding: "32px", textAlign: "center", color: "#64748B", backgroundColor: "#F8FAFC", borderRadius: "10px", border: "1px dashed #CBD5E1" }}>
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>📝</div>
+                  <div style={{ fontWeight: 700, color: "#1E293B", marginBottom: "4px" }}>Question Bank Library is Empty</div>
+                  <p style={{ fontSize: "13px", margin: 0 }}>No test questions in the library. Add clinical questions using the form on the left or the Bulk CSV Importer tab.</p>
+                </div>
+              )}
               {questions
                 .filter(q => !qSearch || q.stem.toLowerCase().includes(qSearch.toLowerCase()))
                 .map((q, idx) => (
@@ -904,7 +911,14 @@ export default function AdminTestsPage() {
             <span className="pill accent">{tests.length} Active Exams</span>
           </div>
 
-          <div className="grid grid-2" style={{ gap: 16 }}>
+          {tests.length === 0 ? (
+            <div style={{ padding: "32px", textAlign: "center", color: "#64748B", backgroundColor: "#F8FAFC", borderRadius: "10px", border: "1px dashed #CBD5E1" }}>
+              <div style={{ fontSize: "28px", marginBottom: "8px" }}>📋</div>
+              <div style={{ fontWeight: 700, color: "#1E293B", marginBottom: "4px" }}>No Mock Exams Created Yet</div>
+              <p style={{ fontSize: "13px", margin: 0 }}>Create a new timed mock exam simulation block using the form below or import questions to package tests.</p>
+            </div>
+          ) : (
+            <div className="grid grid-2" style={{ gap: 16 }}>
             {tests.map(t => (
               <div key={t.id} style={{ padding: 16, borderRadius: 10, border: "1px solid #e2e8f0", backgroundColor: "#fff" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
@@ -922,6 +936,7 @@ export default function AdminTestsPage() {
               </div>
             ))}
           </div>
+        )}
         </div>
       )}
     </AdminShell>

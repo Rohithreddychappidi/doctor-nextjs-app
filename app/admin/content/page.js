@@ -137,10 +137,149 @@ function FlatFieldsPanel({ pageKey, fields }) {
   );
 }
 
+function HomeHeroBannerEditor() {
+  const { content, updateContent } = useSiteData();
+  const currentHero = content?.home?.heroBanner || {
+    tag: "NEONATOLOGY · PEDIATRICS · USCE TRAINING · CLINICAL RESEARCH",
+    heading: "Elevating Newborn & Pediatric Healthcare Through Clinical Mentorship",
+    subtitle: "Join premier clinical tele-rotations, high-yield board question banks, and weekly grand rounds mentored by Dr. Janardhan Mydam, MD, FAAP — Chair of Pediatrics at Humboldt Park Health.",
+    pcImageUrl: "https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=1600&auto=format&fit=crop",
+    mobileImageUrl: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=800&auto=format&fit=crop",
+    primaryBtnText: "Explore Education & Training",
+    primaryBtnLink: "/education-training",
+    secondaryBtnText: "Doctor Portfolio & Bio",
+    secondaryBtnLink: "/doctor-portfolio",
+  };
+
+  const [form, setForm] = useState(currentHero);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (content?.home?.heroBanner) {
+      setForm(content.home.heroBanner);
+    }
+  }, [content]);
+
+  const handleChange = (field) => (e) => {
+    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+    setSaved(false);
+  };
+
+  const handleSave = () => {
+    const updatedHome = {
+      ...(content?.home || {}),
+      heroBanner: form,
+    };
+    updateContent("home", updatedHome);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  return (
+    <div className="panel" style={{ border: "2px solid #E9C989", backgroundColor: "#FCFBF8" }}>
+      <div className="panel-head" style={{ borderBottom: "1px solid #E2E8F0", paddingBottom: "14px", marginBottom: "16px" }}>
+        <div>
+          <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#0E182A" }}>
+            🖥️ Home Page Hero Banner CMS (PC &amp; Mobile Views)
+          </h3>
+          <p style={{ fontSize: "12px", color: "#64748B", margin: 0 }}>
+            Configure the full-bleed hero banner image, headline typography, and action buttons for desktop and mobile visitors.
+          </p>
+        </div>
+        <button type="button" className="btn btn-primary btn-sm" onClick={handleSave}>
+          {saved ? "Saved to Live Site ✓" : "Save Banner Changes"}
+        </button>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
+        <div className="field">
+          <label style={{ fontWeight: 600, fontSize: "12px" }}>💻 PC / Desktop Banner Image URL</label>
+          <input
+            type="text"
+            value={form.pcImageUrl || ""}
+            onChange={handleChange("pcImageUrl")}
+            placeholder="https://..."
+            style={{ fontSize: "12px" }}
+          />
+          <span style={{ fontSize: "11px", color: "#64748B" }}>Recommended aspect ratio 16:9 or 21:9 (1600x900px)</span>
+        </div>
+
+        <div className="field">
+          <label style={{ fontWeight: 600, fontSize: "12px" }}>📱 Mobile View Banner Image URL</label>
+          <input
+            type="text"
+            value={form.mobileImageUrl || ""}
+            onChange={handleChange("mobileImageUrl")}
+            placeholder="https://..."
+            style={{ fontSize: "12px" }}
+          />
+          <span style={{ fontSize: "11px", color: "#64748B" }}>Optimized for vertical/square mobile screens (800x800px)</span>
+        </div>
+      </div>
+
+      <div className="field" style={{ marginBottom: "14px" }}>
+        <label style={{ fontWeight: 600, fontSize: "12px" }}>Eyebrow Tag (Gold Badge)</label>
+        <input
+          type="text"
+          value={form.tag || ""}
+          onChange={handleChange("tag")}
+          placeholder="NEONATOLOGY · PEDIATRICS..."
+        />
+      </div>
+
+      <div className="field" style={{ marginBottom: "14px" }}>
+        <label style={{ fontWeight: 600, fontSize: "12px" }}>Hero Main Heading</label>
+        <input
+          type="text"
+          value={form.heading || ""}
+          onChange={handleChange("heading")}
+          placeholder="Headline text..."
+        />
+      </div>
+
+      <div className="field" style={{ marginBottom: "14px" }}>
+        <label style={{ fontWeight: 600, fontSize: "12px" }}>Hero Subtitle / Description</label>
+        <textarea
+          rows={3}
+          value={form.subtitle || ""}
+          onChange={handleChange("subtitle")}
+          placeholder="Describe the clinical programs and mentorship..."
+        />
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
+        <div style={{ backgroundColor: "#FFFFFF", padding: "12px", borderRadius: "8px", border: "1px solid #CBD5E1" }}>
+          <div style={{ fontSize: "11.5px", fontWeight: 700, color: "#0D9488", marginBottom: "8px" }}>Primary Button</div>
+          <div className="field" style={{ marginBottom: "8px" }}>
+            <label style={{ fontSize: "11px" }}>Button Text</label>
+            <input type="text" value={form.primaryBtnText || ""} onChange={handleChange("primaryBtnText")} />
+          </div>
+          <div className="field">
+            <label style={{ fontSize: "11px" }}>Destination URL</label>
+            <input type="text" value={form.primaryBtnLink || ""} onChange={handleChange("primaryBtnLink")} />
+          </div>
+        </div>
+
+        <div style={{ backgroundColor: "#FFFFFF", padding: "12px", borderRadius: "8px", border: "1px solid #CBD5E1" }}>
+          <div style={{ fontSize: "11.5px", fontWeight: 700, color: "#B4832A", marginBottom: "8px" }}>Secondary Button</div>
+          <div className="field" style={{ marginBottom: "8px" }}>
+            <label style={{ fontSize: "11px" }}>Button Text</label>
+            <input type="text" value={form.secondaryBtnText || ""} onChange={handleChange("secondaryBtnText")} />
+          </div>
+          <div className="field">
+            <label style={{ fontSize: "11px" }}>Destination URL</label>
+            <input type="text" value={form.secondaryBtnLink || ""} onChange={handleChange("secondaryBtnLink")} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Each entry: { key, label, extra: [React nodes rendered after the flat-field panel] }
 function usePageGroups() {
   return [
-    { key: "home", label: "Home", extra: ["home-banner", "home-cards"] },
+    { key: "home", label: "Home", extra: ["hero-banner-editor", "home-banner", "home-cards"] },
     { key: "educationTraining", label: "Education & Training (hub)", extra: ["education-subpages"] },
     { key: "liveLearning", label: "Live Learning" },
     { key: "questionBanks", label: "Question Banks", extra: ["question-topics"] },
@@ -159,6 +298,8 @@ function usePageGroups() {
 
 function renderExtra(key) {
   switch (key) {
+    case "hero-banner-editor":
+      return <HomeHeroBannerEditor key={key} />;
     case "home-banner":
       return <ObjectArrayEditor key={key} pageKey="home" arrayKey="bannerSlides" label="Home Banner Slides" columns={3}
         fields={[{ key: "tag", label: "Tag" }, { key: "heading", label: "Heading" }, { key: "body", label: "Body", type: "textarea" }, { key: "ctaLabel", label: "Button label" }]} />;

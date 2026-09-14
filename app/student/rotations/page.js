@@ -12,6 +12,8 @@ export default function StudentRotationsPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showUploader, setShowUploader] = useState(false);
+  const [paying, setPaying] = useState(false);
+  const [payMsg, setPayMsg] = useState("");
   const [documents, setDocuments] = useState([
     {
       id: "doc_rot_1",
@@ -76,9 +78,6 @@ export default function StudentRotationsPage() {
   const programs = data?.programs || [];
   const applications = data?.applications || [];
   const latestApp = applications[0];
-
-  const [paying, setPaying] = useState(false);
-  const [payMsg, setPayMsg] = useState("");
 
   const handlePayTuition = async () => {
     setPaying(true);

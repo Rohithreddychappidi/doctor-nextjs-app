@@ -136,8 +136,8 @@ export default function StudentQBankPage() {
 
             <div className="pt-4 border-t border-slate-100">
               <span className="text-[11px] font-semibold text-slate-500 uppercase block mb-1">Identified Weak Areas:</span>
-              <span className="inline-block text-xs font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
-                Neonatal Sepsis Screening (55% Accuracy)
+              <span className="inline-block text-xs font-medium text-slate-600 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                {recent_attempts.length > 0 ? "Analyzing recent attempts..." : "No weak areas identified • Launch practice blocks to analyze"}
               </span>
             </div>
           </div>

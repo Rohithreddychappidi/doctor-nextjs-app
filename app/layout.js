@@ -11,6 +11,12 @@ export const metadata = {
     "JVM Medical Services provides board-certified neonatal and pediatric clinical education, tele-rotations, USMLE question banks, and research mentorship led by Dr. Janardhan Mydam, MD, FAAP.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">

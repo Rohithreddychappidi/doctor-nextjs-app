@@ -54,7 +54,7 @@ export default function EnrollmentGate({
       <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl mb-6 text-left text-sm text-slate-700">
         <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
           <svg width="16" height="16" style={{ width: 16, height: 16 }} className="w-4 h-4 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 backward 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
           </svg>
           What you get upon enrollment:
         </h4>

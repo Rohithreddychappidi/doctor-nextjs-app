@@ -15,12 +15,15 @@ export default function StudentLayout({ children }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationsList, setNotificationsList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentPersona, setCurrentPersona] = useState("student_a");
-  const [switching, setSwitching] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     loadStudentData();
   }, []);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   async function loadStudentData() {
     try {
@@ -32,15 +35,6 @@ export default function StudentLayout({ children }) {
         setActiveKeys(data.dashboard.active_keys || []);
         setUnreadNotifications(data.dashboard.unread_notifications_count || 0);
         setNotificationsList(data.dashboard.notifications || []);
-
-        // Detect persona by email
-        const email = data.dashboard.profile.email;
-        if (email.includes("student.a")) setCurrentPersona("student_a");
-        else if (email.includes("student.b")) setCurrentPersona("student_b");
-        else if (email.includes("student.c")) setCurrentPersona("student_c");
-        else if (email.includes("student.d")) setCurrentPersona("student_d");
-        else if (email.includes("student.f")) setCurrentPersona("student_f");
-        else if (email.includes("admin")) setCurrentPersona("admin");
       } else {
         // Not logged in or error
         router.push("/student-login");
@@ -49,26 +43,6 @@ export default function StudentLayout({ children }) {
       console.error("Layout data error:", e);
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function handleSwitchPersona(personaKey) {
-    setSwitching(true);
-    try {
-      const res = await fetch("/api/auth/demo-switch", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ persona: personaKey }),
-      });
-      if (res.ok) {
-        setCurrentPersona(personaKey);
-        // Refresh page data
-        window.location.reload();
-      }
-    } catch (e) {
-      console.error("Persona switch error:", e);
-    } finally {
-      setSwitching(false);
     }
   }
 
@@ -95,75 +69,109 @@ export default function StudentLayout({ children }) {
     { label: "Explore More Programs", href: "/student/explore", icon: "🧭" },
   ];
 
-  const personas = [
-    { key: "student_a", label: "Student A", desc: "Rotation Only (Alex Rivera)" },
-    { key: "student_b", label: "Student B", desc: "QBank Only (Bethany Chen)" },
-    { key: "student_c", label: "Student C", desc: "QBank + Live + Mentor (Carlos Mendez)" },
-    { key: "student_d", label: "Student D", desc: "Research + Rotation (Divya Patel)" },
-    { key: "student_f", label: "Student F", desc: "All Programs (Fatima Al-Mansoor)" },
-  ];
-
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: "#F9F8F5", color: "#171A21", fontFamily: "var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif)" }}>
-      {/* Top Demo Persona Switcher Bar */}
-      <div style={{ backgroundColor: "#0B1E36", color: "#FFFFFF", padding: "8px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "13px", borderBottom: "1px solid rgba(255,255,255,0.1)", flexWrap: "wrap", gap: "8px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ backgroundColor: "#B4832A", color: "#FFFFFF", padding: "2px 8px", borderRadius: "4px", fontWeight: 700, fontSize: "11px", letterSpacing: "0.5px" }}>
-            DEMO TESTER
-          </span>
-          <span style={{ opacity: 0.85 }}>Switch Persona to Test Section E Personalization:</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-          {personas.map((p) => {
-            const isSelected = currentPersona === p.key;
-            return (
-              <button
-                key={p.key}
-                onClick={() => handleSwitchPersona(p.key)}
-                disabled={switching}
-                title={p.desc}
-                style={{
-                  backgroundColor: isSelected ? "#8A2A34" : "rgba(255,255,255,0.12)",
-                  color: "#FFFFFF",
-                  border: isSelected ? "1px solid #E9C989" : "1px solid rgba(255,255,255,0.15)",
-                  padding: "4px 10px",
-                  borderRadius: "4px",
-                  fontSize: "12px",
-                  fontWeight: isSelected ? 700 : 500,
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                {isSelected ? `✓ ${p.label}` : p.label}
-              </button>
-            );
-          })}
-          <Link
-            href="/admin"
+
+      {/* Mobile Top Header (Visible on screens <= 768px) */}
+      <header
+        className="student-mobile-topbar"
+        style={{
+          display: "none",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "10px 14px",
+          backgroundColor: "#12203B",
+          color: "#FFFFFF",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          position: "sticky",
+          top: 0,
+          zIndex: 998,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <button
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open student navigation menu"
             style={{
-              backgroundColor: "rgba(255,255,255,0.15)",
-              color: "#E9C989",
-              border: "1px solid rgba(233,201,137,0.4)",
-              padding: "4px 10px",
-              borderRadius: "4px",
-              fontSize: "12px",
-              fontWeight: 600,
-              textDecoration: "none",
-              marginLeft: "6px"
+              backgroundColor: "rgba(255,255,255,0.1)",
+              border: "1px solid rgba(255,255,255,0.15)",
+              color: "#FFFFFF",
+              borderRadius: "6px",
+              padding: "6px 10px",
+              fontSize: "16px",
+              cursor: "pointer",
+              lineHeight: 1,
             }}
           >
-            Admin Portal ⚙️
-          </Link>
+            ☰
+          </button>
+          <div>
+            <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", color: "#E9C989", fontWeight: 700 }}>
+              Dr. Janardhan Mydam
+            </div>
+            <div style={{ fontSize: "13px", fontWeight: 700, color: "#FFFFFF" }}>
+              Student Hub
+            </div>
+          </div>
         </div>
-      </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <button
+            onClick={() => setShowNotifications(!showNotifications)}
+            style={{
+              background: "rgba(255,255,255,0.1)",
+              border: "1px solid rgba(255,255,255,0.15)",
+              borderRadius: "6px",
+              padding: "5px 8px",
+              cursor: "pointer",
+              color: "#FFFFFF",
+              fontSize: "13px",
+            }}
+          >
+            🔔 {unreadNotifications > 0 ? unreadNotifications : ""}
+          </button>
+          {profile && (
+            <div style={{ width: "28px", height: "28px", borderRadius: "50%", backgroundColor: "#B4832A", color: "#FFFFFF", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "11px" }}>
+              {profile.first_name[0]}
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Mobile Backdrop Overlay */}
+      {mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(18, 32, 59, 0.65)",
+            backdropFilter: "blur(3px)",
+            zIndex: 99998,
+          }}
+          aria-hidden="true"
+        />
+      )}
 
       {/* Main App Container */}
       <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
         {/* Dynamic Sidebar */}
-        <aside style={{ width: "270px", backgroundColor: "#12203B", color: "#FFFFFF", display: "flex", flexDirection: "column", borderRight: "1px solid #1E2D4A", flexShrink: 0 }}>
+        <aside
+          className={`student-sidebar ${mobileOpen ? "open" : ""}`}
+          style={{
+            width: "270px",
+            backgroundColor: "#12203B",
+            color: "#FFFFFF",
+            display: "flex",
+            flexDirection: "column",
+            borderRight: "1px solid #1E2D4A",
+            flexShrink: 0,
+          }}
+        >
           {/* Brand Header */}
-          <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-            <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
+          <div style={{ padding: "18px 18px 14px", borderBottom: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+            <Link href="/" onClick={() => setMobileOpen(false)} style={{ textDecoration: "none", color: "inherit" }}>
               <div style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "1.2px", color: "#E9C989", fontWeight: 700 }}>
                 Dr. Janardhan Mydam
               </div>
@@ -171,25 +179,47 @@ export default function StudentLayout({ children }) {
                 Student Learning Hub
               </div>
             </Link>
-            {profile && (
-              <div style={{ marginTop: "14px", padding: "10px 12px", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.08)" }}>
-                <div style={{ fontSize: "13px", fontWeight: 700, color: "#FFFFFF" }}>
-                  {profile.first_name} {profile.last_name}
-                </div>
-                <div style={{ fontSize: "11px", color: "#A5ADC0", marginTop: "2px" }}>
-                  {profile.medical_school}
-                </div>
-                <div style={{ marginTop: "6px", display: "flex", gap: "4px", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: "10px", backgroundColor: "rgba(180,131,42,0.25)", color: "#E9C989", padding: "1px 6px", borderRadius: "3px", fontWeight: 600 }}>
-                    {profile.usmle_stage}
-                  </span>
-                  <span style={{ fontSize: "10px", backgroundColor: "rgba(74,222,128,0.15)", color: "#4ADE80", padding: "1px 6px", borderRadius: "3px", fontWeight: 600 }}>
-                    {activeKeys.length} Active Module{activeKeys.length !== 1 ? "s" : ""}
-                  </span>
-                </div>
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={() => setMobileOpen(false)}
+              className="student-drawer-close"
+              aria-label="Close navigation menu"
+              style={{
+                background: "rgba(255,255,255,0.08)",
+                border: "none",
+                color: "#CBD2E1",
+                borderRadius: "6px",
+                width: "28px",
+                height: "28px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                fontSize: "14px",
+              }}
+            >
+              ✕
+            </button>
           </div>
+
+          {profile && (
+            <div style={{ margin: "14px 14px 0", padding: "10px 12px", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div style={{ fontSize: "13px", fontWeight: 700, color: "#FFFFFF" }}>
+                {profile.first_name} {profile.last_name}
+              </div>
+              <div style={{ fontSize: "11px", color: "#A5ADC0", marginTop: "2px" }}>
+                {profile.medical_school}
+              </div>
+              <div style={{ marginTop: "6px", display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "10px", backgroundColor: "rgba(180,131,42,0.25)", color: "#E9C989", padding: "1px 6px", borderRadius: "3px", fontWeight: 600 }}>
+                  {profile.usmle_stage}
+                </span>
+                <span style={{ fontSize: "10px", backgroundColor: "rgba(74,222,128,0.15)", color: "#4ADE80", padding: "1px 6px", borderRadius: "3px", fontWeight: 600 }}>
+                  {activeKeys.length} Active Module{activeKeys.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Nav List */}
           <div style={{ flex: 1, overflowY: "auto", padding: "16px 12px" }}>
@@ -208,6 +238,7 @@ export default function StudentLayout({ children }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={() => setMobileOpen(false)}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -241,6 +272,7 @@ export default function StudentLayout({ children }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={() => setMobileOpen(false)}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -264,7 +296,7 @@ export default function StudentLayout({ children }) {
 
           {/* Footer User & Logout */}
           <div style={{ padding: "14px 16px", borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Link href="/" style={{ color: "#A5ADC0", fontSize: "12px", textDecoration: "none", display: "flex", alignItems: "center", gap: "6px" }}>
+            <Link href="/" onClick={() => setMobileOpen(false)} style={{ color: "#A5ADC0", fontSize: "12px", textDecoration: "none", display: "flex", alignItems: "center", gap: "6px" }}>
               ← Return to Site
             </Link>
             <button
@@ -287,7 +319,7 @@ export default function StudentLayout({ children }) {
         {/* Main Content Area */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflowY: "auto" }}>
           {/* Top Bar with Notifications */}
-          <header style={{ height: "60px", backgroundColor: "#FFFFFF", borderBottom: "1px solid #E6E2D8", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px", flexShrink: 0 }}>
+          <header className="student-header" style={{ height: "60px", backgroundColor: "#FFFFFF", borderBottom: "1px solid #E6E2D8", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px", flexShrink: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <h1 style={{ fontSize: "17px", fontWeight: 700, margin: 0, color: "#12203B" }}>
                 {pathname === "/student/dashboard" && "Personalized Dashboard"}
@@ -382,7 +414,7 @@ export default function StudentLayout({ children }) {
           </header>
 
           {/* Page Body */}
-          <main style={{ flex: 1, padding: "28px", backgroundColor: "#F9F8F5" }}>
+          <main className="student-main-content" style={{ flex: 1, padding: "28px", backgroundColor: "#F9F8F5" }}>
             {children}
           </main>
         </div>
