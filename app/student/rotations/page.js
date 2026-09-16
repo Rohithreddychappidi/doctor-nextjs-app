@@ -2,86 +2,108 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import EnrollmentGate from "@/components/EnrollmentGate";
-import StatusTimeline from "@/components/StatusTimeline";
-import DocumentList from "@/components/DocumentList";
-import DocumentUploader from "@/components/DocumentUploader";
-import SectionDisclaimer from "@/components/SectionDisclaimer";
+import MandatoryStar from "@/components/MandatoryStar";
+import CountryCodeSelect from "@/components/CountryCodeSelect";
 
 export default function StudentRotationsPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showUploader, setShowUploader] = useState(false);
+  const [activeTab, setActiveTab] = useState("orientation"); // orientation | meetings | notes | examination | recorded
   const [paying, setPaying] = useState(false);
-  const [payMsg, setPayMsg] = useState("");
-  const [documents, setDocuments] = useState([
-    {
-      id: "doc_rot_1",
-      title: "HIPAA & Patient Privacy Compliance Certificate",
-      category: "HIPAA Compliance Certificate",
-      file_name: "hipaa_training_cert.pdf",
-      file_size_kb: 420,
-      uploaded_at: "2026-08-12T10:00:00Z",
-      status: "Approved",
-      file_url: "/uploads/sample_hipaa.pdf",
-    },
-    {
-      id: "doc_rot_2",
-      title: "Immunization Record & Titer Verification",
-      category: "Immunization Record",
-      file_name: "immunization_titer_lab.pdf",
-      file_size_kb: 1180,
-      uploaded_at: "2026-08-14T15:30:00Z",
-      status: "Approved",
-      file_url: "/uploads/sample_immunization.pdf",
-    },
-    {
-      id: "doc_rot_3",
-      title: "Dean's Letter of Good Standing (MSPE)",
-      category: "Dean's Letter (MSPE)",
-      file_name: "deans_recommendation.pdf",
-      file_size_kb: 890,
-      uploaded_at: "2026-08-16T12:00:00Z",
-      status: "Approved",
-      file_url: "/uploads/sample_deans_letter.pdf",
-    },
-  ]);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+  const [showEditForm, setShowEditForm] = useState(false);
+
+  const [countryCode, setCountryCode] = useState("+1");
+  const [intakeForm, setIntakeForm] = useState({
+    full_name: "",
+    email: "",
+    phone: "",
+    medical_school: "",
+    graduation_year: "2026",
+    usmle_status: "Step 1 Pass (Pre-Step 2 CK)",
+    specialty_interest: "Pediatrics & Neonatal-Perinatal Medicine",
+    timing_preference: "Evenings CST (Flexible)",
+    cv_url: "",
+    deans_letter_url: "",
+    immunization_note: "Standard medical student immunizations & TB testing current",
+    personal_statement: "",
+  });
+
+  const loadData = async () => {
+    try {
+      const res = await fetch("/api/student/rotations");
+      if (res.ok) {
+        const json = await res.json();
+        setData(json);
+        if (json.application) {
+          setIntakeForm({
+            full_name: json.application.applicant_name || "",
+            email: json.application.applicant_email || "",
+            phone: json.application.applicant_phone || "",
+            medical_school: json.application.medical_school || "",
+            graduation_year: json.application.graduation_year || "2026",
+            usmle_status: json.application.usmle_status || "Step 1 Pass (Pre-Step 2 CK)",
+            specialty_interest: json.application.specialty_interest || "Pediatrics & Neonatal-Perinatal Medicine",
+            timing_preference: json.application.timing_preference || "Evenings CST (Flexible)",
+            cv_url: json.application.cv_url || "",
+            deans_letter_url: json.application.deans_letter_url || "",
+            immunization_note: json.application.immunization_note || "Standard medical student immunizations & TB testing current",
+            personal_statement: json.application.personal_statement || "",
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Rotations error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const res = await fetch("/api/student/rotations");
-        if (res.ok) {
-          const json = await res.json();
-          setData(json);
-        }
-      } catch (err) {
-        console.error("Rotations error:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
     loadData();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[350px] text-slate-500">
-        <div className="w-8 h-8 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mb-3" />
-        <p className="text-xs font-semibold">Loading rotation curriculum...</p>
-      </div>
-    );
-  }
+  const handleIntakeSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg("");
+    setSuccessMsg("");
 
-  const isEnrolled = !!data?.is_enrolled;
-  const rotation = data?.rotation;
-  const programs = data?.programs || [];
-  const applications = data?.applications || [];
-  const latestApp = applications[0];
+    if (!intakeForm.full_name || !intakeForm.email || !intakeForm.medical_school || !intakeForm.personal_statement) {
+      setErrorMsg("Full name, email, medical school, and personal statement are mandatory (*).");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/student/rotations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "apply_intake",
+          ...intakeForm,
+          phone: `${countryCode} ${intakeForm.phone}`.trim(),
+        }),
+      });
+
+      const resJson = await res.json();
+      if (!res.ok) throw new Error(resJson.error || "Submission failed");
+
+      setSuccessMsg("Application & credentials submitted successfully to Dr. Janardhan Mydam for review!");
+      setShowEditForm(false);
+      await loadData();
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handlePayTuition = async () => {
     setPaying(true);
-    setPayMsg("");
+    setErrorMsg("");
+    setSuccessMsg("");
     try {
       const res = await fetch("/api/student/rotations", {
         method: "POST",
@@ -90,468 +112,721 @@ export default function StudentRotationsPage() {
       });
       const resJson = await res.json();
       if (!res.ok) throw new Error(resJson.error || "Payment processing failed");
-      setPayMsg("Tuition payment confirmed! Your seat is active.");
-      // Refresh rotations state
-      const refreshRes = await fetch("/api/student/rotations");
-      if (refreshRes.ok) {
-        const refreshJson = await refreshRes.json();
-        setData(refreshJson);
-      }
-    } catch (e) {
-      alert("Payment error: " + e.message);
+
+      setSuccessMsg("Tuition payment confirmed! Your clinical rotation seat is active.");
+      await loadData();
+    } catch (err) {
+      setErrorMsg(err.message);
     } finally {
       setPaying(false);
     }
   };
 
-  const rotationSteps = [
-    "Submitted",
-    "Under Review",
-    "Documents Required",
-    "Approved",
-    "Payment Confirmed",
-    "Scheduled",
-    "Active",
-    "Completed",
-    "Evaluation",
-    "Certificate",
-  ];
-
-  // If student has an application that is approved or pending review, show dedicated workflow
-  if (!isEnrolled && latestApp) {
-    const isApproved = latestApp.status === "Approved" || latestApp.status === "Approved - Payment Pending";
+  if (loading) {
     return (
-      <div className="max-w-4xl mx-auto my-12 p-8 bg-white border border-slate-200 rounded-3xl shadow-sm text-center">
-        <div className="w-14 h-14 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center text-2xl mx-auto mb-4 border border-teal-200">
-          {isApproved ? "🎉" : "📋"}
+      <div style={{ padding: "60px 20px", textAlign: "center", color: "#64748B" }}>
+        <div style={{ width: 36, height: 36, border: "4px solid #0B1E36", borderTopColor: "transparent", borderRadius: "50%", margin: "0 auto 16px", animation: "spin 0.8s linear infinite" }} />
+        <p style={{ fontSize: "14px", fontWeight: 600 }}>Loading Clinical Rotation verification status...</p>
+        <style jsx>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
+  const app = data?.application;
+  const isEnrolled = !!data?.is_enrolled;
+  const isUnderReview = app && app.status === "Under Review";
+  const isApprovedPendingPay = app && (app.status === "Approved" || app.status === "Approved - Payment Pending") && app.tier_type === "paid" && app.payment_status !== "Paid";
+  const isApprovedFree = app && app.status === "Approved" && app.tier_type === "free";
+
+  // =========================================================================
+  // STATE 1 & 2: NO APPLICATION OR EDITING INTAKE FORM
+  // =========================================================================
+  if (!app || showEditForm) {
+    return (
+      <div style={{ maxWidth: 840, margin: "0 auto", padding: "30px 16px 60px" }}>
+        {/* Header */}
+        <div style={{ marginBottom: 28, textAlign: "center" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 14px", borderRadius: 20, backgroundColor: "#EEF2F6", color: "#0B1E36", fontSize: "12px", fontWeight: 700, letterSpacing: "0.5px", textTransform: "uppercase", marginBottom: 10 }}>
+            🩺 US Clinical Experience · Pre-Rotation Verification
+          </div>
+          <h1 style={{ fontSize: "28px", fontWeight: 800, color: "#0B1E36", margin: "0 0 8px" }}>
+            Clinical Rotation Verification &amp; Intake
+          </h1>
+          <p style={{ color: "#64748B", fontSize: "14.5px", maxWidth: 640, margin: "0 auto", lineHeight: 1.5 }}>
+            To ensure patient safety, HIPAA compliance, and institutional credentialing, all prospective trainees must submit their academic credentials for direct review and approval by <strong>Dr. Janardhan Mydam, MD, FAAP</strong>.
+          </p>
         </div>
 
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-800 border border-teal-200 mb-3">
-          Status: {latestApp.status}
-        </div>
-
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-          {isApproved
-            ? "Your Tele-Rotation Application is Approved!"
-            : "Application Under Faculty Review"}
-        </h2>
-
-        <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto mb-6 leading-relaxed">
-          {isApproved
-            ? "Dr. Janardhan Mydam has reviewed and approved your medical background and credentials. Complete tuition payment below to confirm your seat in the upcoming cohort and activate Microsoft Teams Pro rounds."
-            : `Your application submitted on ${new Date(latestApp.applied_at || Date.now()).toLocaleDateString()} is currently being evaluated by attending preceptor Dr. Janardhan Mydam.`}
-        </p>
-
-        {payMsg && (
-          <div className="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold mb-4">
-            ✓ {payMsg}
+        {errorMsg && (
+          <div style={{ padding: "12px 16px", backgroundColor: "#FEF2F2", border: "1px solid #FECACA", color: "#991B1B", borderRadius: 8, fontSize: "14px", marginBottom: 20 }}>
+            ⚠️ {errorMsg}
           </div>
         )}
 
-        {isApproved ? (
-          <div className="p-6 bg-slate-50 border border-slate-200 rounded-2xl max-w-lg mx-auto text-left mb-6">
-            <div className="flex justify-between items-center mb-4">
+        {successMsg && (
+          <div style={{ padding: "12px 16px", backgroundColor: "#F0FDF4", border: "1px solid #BBF7D0", color: "#166534", borderRadius: 8, fontSize: "14px", marginBottom: 20 }}>
+            ✓ {successMsg}
+          </div>
+        )}
+
+        {/* Medical Intake Form */}
+        <div style={{ backgroundColor: "#FFFFFF", borderRadius: 14, border: "1px solid #E2E8F0", padding: "28px 24px", boxShadow: "0 8px 30px rgba(11, 30, 54, 0.05)" }}>
+          <form onSubmit={handleIntakeSubmit}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16, marginBottom: 16 }}>
               <div>
-                <h4 className="font-bold text-slate-900 text-base">Virtual Tele-Rotation Tuition</h4>
-                <p className="text-xs text-slate-500">6-Week USCE Immersion &amp; Attending LOR</p>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                  Full Candidate Name <MandatoryStar />
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Alex Rivera, MD Candidate"
+                  value={intakeForm.full_name}
+                  onChange={(e) => setIntakeForm({ ...intakeForm, full_name: e.target.value })}
+                  style={{ width: "100%", height: 42, padding: "0 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: "14px", outline: "none", boxSizing: "border-box" }}
+                  required
+                />
               </div>
-              <span className="text-2xl font-black text-teal-700">$1,250</span>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                  Email Address <MandatoryStar />
+                </label>
+                <input
+                  type="email"
+                  placeholder="candidate@university.edu"
+                  value={intakeForm.email}
+                  onChange={(e) => setIntakeForm({ ...intakeForm, email: e.target.value })}
+                  style={{ width: "100%", height: 42, padding: "0 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: "14px", outline: "none", boxSizing: "border-box" }}
+                  required
+                />
+              </div>
             </div>
 
-            <ul className="text-xs text-slate-600 space-y-2 mb-6 border-t border-slate-200/80 pt-4">
-              <li className="flex items-center gap-2">✓ Microsoft Teams Pro live bedside rounds (multi-session weekly)</li>
-              <li className="flex items-center gap-2">✓ 1-on-1 Graded Examine Calls with clinical rubric feedback</li>
-              <li className="flex items-center gap-2">✓ Cloud recording playback access &amp; AI clinical summaries</li>
-              <li className="flex items-center gap-2">✓ Merit-based Attending Physician Letter of Recommendation (LOR)</li>
-            </ul>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16, marginBottom: 16 }}>
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                  Contact Mobile Number <MandatoryStar />
+                </label>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <CountryCodeSelect value={countryCode} onChange={setCountryCode} />
+                  <input
+                    type="tel"
+                    placeholder="555-0192"
+                    value={intakeForm.phone}
+                    onChange={(e) => setIntakeForm({ ...intakeForm, phone: e.target.value })}
+                    style={{ flex: 1, height: 42, padding: "0 12px", border: "1px solid #CBD5E1", borderRadius: "0 6px 6px 0", fontSize: "14px", outline: "none", boxSizing: "border-box" }}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                  Medical School / Institution <MandatoryStar />
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Windsor University School of Medicine"
+                  value={intakeForm.medical_school}
+                  onChange={(e) => setIntakeForm({ ...intakeForm, medical_school: e.target.value })}
+                  style={{ width: "100%", height: 42, padding: "0 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: "14px", outline: "none", boxSizing: "border-box" }}
+                  required
+                />
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, marginBottom: 16 }}>
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                  Graduation Year
+                </label>
+                <input
+                  type="text"
+                  placeholder="2026"
+                  value={intakeForm.graduation_year}
+                  onChange={(e) => setIntakeForm({ ...intakeForm, graduation_year: e.target.value })}
+                  style={{ width: "100%", height: 42, padding: "0 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: "14px", outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                  USMLE Status
+                </label>
+                <select
+                  value={intakeForm.usmle_status}
+                  onChange={(e) => setIntakeForm({ ...intakeForm, usmle_status: e.target.value })}
+                  style={{ width: "100%", height: 42, padding: "0 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: "14px", outline: "none", backgroundColor: "#FFF", boxSizing: "border-box" }}
+                >
+                  <option value="Step 1 Pass (Pre-Step 2 CK)">Step 1 Pass (Pre-Step 2 CK)</option>
+                  <option value="Step 1 & Step 2 CK Completed">Step 1 &amp; Step 2 CK Completed</option>
+                  <option value="Pre-Clinical / Clinical Clerkships">Pre-Clinical / Clerkships</option>
+                  <option value="International Medical Graduate (IMG)">International Medical Graduate (IMG)</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                  Target Specialty Track
+                </label>
+                <select
+                  value={intakeForm.specialty_interest}
+                  onChange={(e) => setIntakeForm({ ...intakeForm, specialty_interest: e.target.value })}
+                  style={{ width: "100%", height: 42, padding: "0 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: "14px", outline: "none", backgroundColor: "#FFF", boxSizing: "border-box" }}
+                >
+                  <option value="Pediatrics & Neonatal-Perinatal Medicine">Pediatrics &amp; Neonatology</option>
+                  <option value="Pediatric Critical Care (PICU)">Pediatric Critical Care (PICU)</option>
+                  <option value="General Outpatient Pediatrics">General Outpatient Pediatrics</option>
+                  <option value="Pediatric Cardiology">Pediatric Cardiology</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16, marginBottom: 16 }}>
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                  CV / Resume Link (Google Drive / Dropbox or URL) <MandatoryStar />
+                </label>
+                <input
+                  type="text"
+                  placeholder="https://drive.google.com/your-cv.pdf"
+                  value={intakeForm.cv_url}
+                  onChange={(e) => setIntakeForm({ ...intakeForm, cv_url: e.target.value })}
+                  style={{ width: "100%", height: 42, padding: "0 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: "14px", outline: "none", boxSizing: "border-box" }}
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                  Dean&apos;s Letter / Student ID / MSPE Link
+                </label>
+                <input
+                  type="text"
+                  placeholder="https://drive.google.com/deans-letter.pdf"
+                  value={intakeForm.deans_letter_url}
+                  onChange={(e) => setIntakeForm({ ...intakeForm, deans_letter_url: e.target.value })}
+                  style={{ width: "100%", height: 42, padding: "0 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: "14px", outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                Immunization &amp; Health Clearance Status
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. MMR, Hepatitis B, Tdap, and current TB Quantiferon on file"
+                value={intakeForm.immunization_note}
+                onChange={(e) => setIntakeForm({ ...intakeForm, immunization_note: e.target.value })}
+                style={{ width: "100%", height: 42, padding: "0 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: "14px", outline: "none", boxSizing: "border-box" }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                Personal Statement &amp; Clinical Rotation Goals <MandatoryStar />
+              </label>
+              <textarea
+                rows={4}
+                placeholder="Describe your current clinical clerkships, your goals during neonatal tele-rounds with Dr. Mydam, and what residency match specialty you are pursuing..."
+                value={intakeForm.personal_statement}
+                onChange={(e) => setIntakeForm({ ...intakeForm, personal_statement: e.target.value })}
+                style={{ width: "100%", padding: "12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: "14px", outline: "none", fontFamily: "inherit", boxSizing: "border-box" }}
+                required
+              />
+            </div>
 
             <button
-              onClick={handlePayTuition}
-              disabled={paying}
-              className="w-full py-3.5 px-6 rounded-xl bg-teal-700 text-white font-bold text-sm hover:bg-teal-800 shadow-md transition flex items-center justify-center gap-2"
+              type="submit"
+              disabled={submitting}
+              style={{
+                width: "100%",
+                padding: "14px 20px",
+                backgroundColor: "#0B1E36",
+                color: "#FFFFFF",
+                fontWeight: 700,
+                fontSize: "15px",
+                borderRadius: 8,
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 4px 14px rgba(11, 30, 54, 0.15)",
+                transition: "background-color 0.2s ease",
+              }}
             >
-              {paying ? "Processing Payment & Unlocking Cohort..." : "💳 Pay Tuition & Join Cohort Now ($1,250)"}
+              {submitting ? "Submitting to Dr. Janardhan Mydam..." : "Submit for Clinical Faculty Review & Verification →"}
             </button>
-          </div>
-        ) : (
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl max-w-md mx-auto text-xs text-slate-600 mb-6">
-            <p className="m-0">
-              <strong>Applicant:</strong> {latestApp.applicant_name} ({latestApp.applicant_email})
-            </p>
-            <p className="mt-1 mb-0">
-              <strong>Target Timing:</strong> {latestApp.timing_preference || "Evenings CST"}
-            </p>
-          </div>
-        )}
 
-        <div className="flex justify-center gap-4 text-xs font-semibold">
-          <Link href="/education-training/tele-rotations" className="text-teal-700 hover:underline">
-            View Rotation Curriculum Syllabus →
-          </Link>
-          <Link href="/student/dashboard" className="text-slate-500 hover:underline">
-            Return to Dashboard
-          </Link>
+            {showEditForm && (
+              <button
+                type="button"
+                onClick={() => setShowEditForm(false)}
+                style={{ width: "100%", marginTop: 10, padding: "10px", backgroundColor: "transparent", border: "1px solid #CBD5E1", borderRadius: 8, color: "#64748B", fontWeight: 600, cursor: "pointer", fontSize: "13px" }}
+              >
+                Cancel &amp; Return to Status View
+              </button>
+            )}
+          </form>
         </div>
       </div>
     );
   }
 
-  return (
-    <EnrollmentGate
-      isEnrolled={isEnrolled}
-      programKey="tele_rotation"
-      programTitle="Virtual Neonatal &amp; Pediatric Tele-Rotation"
-      programDescription="Complete 6 weeks of live clinical rounds, case discussions, and neonatal pathophysiology directly mentored by Dr. Janardhan Mydam."
-      icon="stethoscope"
-    >
-      <div className="max-w-6xl mx-auto space-y-8 pb-12">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
-          <div>
-            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-200 mb-1.5">
-              <span>🩺</span> US Clinical Experience
-            </div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-              Clinical Rotation &amp; Tele-Rounds Portal
-            </h1>
-            <p className="text-slate-600 text-xs sm:text-sm mt-0.5">
-              Supervising Attending: <strong>{rotation?.physician || "Dr. Janardhan Mydam, MD, FAAP"}</strong>
-            </p>
+  // =========================================================================
+  // STATE 2: APPLICATION UNDER DOCTOR REVIEW
+  // =========================================================================
+  if (isUnderReview) {
+    return (
+      <div style={{ maxWidth: 740, margin: "0 auto", padding: "40px 16px 60px" }}>
+        <div style={{ backgroundColor: "#FFFFFF", borderRadius: 16, border: "1px solid #E2E8F0", padding: "36px 28px", textAlign: "center", boxShadow: "0 8px 30px rgba(11, 30, 54, 0.05)" }}>
+          <div style={{ width: 64, height: 64, borderRadius: "50%", backgroundColor: "#FFFBEB", border: "2px solid #FDE68A", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px", margin: "0 auto 16px" }}>
+            ⏳
           </div>
 
-          <div className="flex items-center gap-2">
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 14px", borderRadius: 20, backgroundColor: "#FEF3C7", color: "#92400E", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", marginBottom: 12 }}>
+            ● Under Faculty Verification
+          </div>
+
+          <h2 style={{ fontSize: "24px", fontWeight: 800, color: "#0B1E36", margin: "0 0 10px" }}>
+            Clinical Rotation Intake Under Review
+          </h2>
+
+          <p style={{ color: "#64748B", fontSize: "15px", lineHeight: 1.6, maxWidth: 580, margin: "0 auto 24px" }}>
+            Your clinical background, verification documents, and medical school status submitted on <strong>{new Date(app.applied_at || Date.now()).toLocaleDateString()}</strong> are currently being personally evaluated by <strong>Dr. Janardhan Mydam, MD, FAAP</strong>.
+          </p>
+
+          {/* Details Summary Card */}
+          <div style={{ backgroundColor: "#F8FAFC", borderRadius: 10, border: "1px solid #E2E8F0", padding: "18px", textAlign: "left", maxWidth: 560, margin: "0 auto 24px", fontSize: "13.5px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "130px 1fr", rowGap: 8, color: "#475569" }}>
+              <div style={{ fontWeight: 600, color: "#0B1E36" }}>Applicant:</div>
+              <div>{app.applicant_name} ({app.applicant_email})</div>
+              <div style={{ fontWeight: 600, color: "#0B1E36" }}>Medical School:</div>
+              <div>{app.medical_school} ({app.graduation_year || "2026"})</div>
+              <div style={{ fontWeight: 600, color: "#0B1E36" }}>Specialty Track:</div>
+              <div>{app.specialty_interest}</div>
+              <div style={{ fontWeight: 600, color: "#0B1E36" }}>USMLE Status:</div>
+              <div>{app.usmle_status}</div>
+              <div style={{ fontWeight: 600, color: "#0B1E36" }}>CV Document:</div>
+              <div>
+                <a href={app.cv_url} target="_blank" rel="noopener noreferrer" style={{ color: "#0284C7", textDecoration: "underline" }}>
+                  View Submitted Resume / CV ↗
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
+            <button
+              onClick={() => setShowEditForm(true)}
+              style={{ padding: "10px 18px", borderRadius: 8, border: "1px solid #CBD5E1", backgroundColor: "#FFF", color: "#334155", fontWeight: 600, fontSize: "13.5px", cursor: "pointer" }}
+            >
+              ✏️ Update Submitted Details
+            </button>
             <Link
               href="/education-training/tele-rotations"
-              className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs hover:bg-slate-200 transition"
+              style={{ padding: "10px 18px", borderRadius: 8, border: "none", backgroundColor: "#EEF2F6", color: "#0B1E36", fontWeight: 600, fontSize: "13.5px", textDecoration: "none" }}
             >
-              Curriculum Syllabus
+              Explore Curriculum Syllabus →
             </Link>
-            <a
-              href="https://teams.microsoft.com/l/meetup-join/jva-medical-neonatology-week1"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold text-xs hover:bg-indigo-700 shadow-sm transition inline-flex items-center gap-1.5"
-            >
-              <svg width="16" height="16" style={{ width: 16, height: 16 }} className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19.5 5h-15C3.12 5 2 6.12 2 7.5v9C2 17.88 3.12 19 4.5 19h15c1.38 0 2.5-1.12 2.5-2.5v-9C22 6.12 20.88 5 19.5 5zm-3.5 9h-8v-1.5h8V14zm0-3h-8V9.5h8V11z"/>
-              </svg>
-              Join Live Rounds (Teams)
-            </a>
-          </div>
-        </div>
-
-        {/* Section Compliance Disclaimer (Admin Controlled) */}
-        <SectionDisclaimer sectionKey="tele_rotations" />
-
-        {/* SECTION I: Pipeline Status Timeline */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-bold text-slate-900 text-sm sm:text-base">Clinical Placement Pipeline</h3>
-              <p className="text-xs text-slate-500">Track your progress from application review to credential issuance.</p>
-            </div>
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              Current Stage: Active Rounds
-            </span>
-          </div>
-          <StatusTimeline steps={rotationSteps} currentStep="Active" />
-        </div>
-
-        {/* Placement Details Card */}
-        {rotation && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 block">
-                  Active Clinical Cohort
-                </span>
-                <h2 className="text-xl font-bold text-slate-900 mt-0.5">{rotation.hospital_site}</h2>
-                <p className="text-xs text-slate-600 mt-0.5">
-                  Supervising Attending: <strong>{rotation.physician}</strong>
-                </p>
-              </div>
-              <div className="text-left sm:text-right">
-                <div className="text-2xl font-black text-emerald-600">
-                  Week {rotation.current_week} <span className="text-sm font-semibold text-slate-400">of {rotation.total_weeks}</span>
-                </div>
-                <div className="text-xs text-slate-500 mt-0.5">
-                  {rotation.start_date} through {rotation.end_date}
-                </div>
-              </div>
-            </div>
-
-            {/* SECTION: Flexible Multi-Meeting Clinical Schedule */}
-            <div className="space-y-4 pt-2">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse"></span>
-                    Live Clinical Sessions &amp; Examine Calls
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Multiple scheduled rounds, graded oral examine calls, and faculty check-ins per week.
-                  </p>
-                </div>
-                <div className="inline-flex rounded-lg border border-slate-200 p-1 bg-slate-50 text-xs">
-                  <span className="px-2.5 py-1 rounded-md font-semibold text-slate-700 bg-white shadow-xs">
-                    {data?.meetings?.length || 0} Scheduled Sessions
-                  </span>
-                </div>
-              </div>
-
-              {/* Meetings List */}
-              <div className="grid grid-cols-1 gap-3.5">
-                {(data?.meetings || []).map((meet) => {
-                  const isExamine = meet.meeting_type === "Examine Call";
-                  const isCompleted = meet.status === "Completed";
-                  const typeColors = {
-                    "Live Teaching Session": "bg-blue-50 text-blue-700 border-blue-200",
-                    "Examine Call": "bg-amber-50 text-amber-800 border-amber-200 font-bold",
-                    "Mentor Check-in": "bg-teal-50 text-teal-700 border-teal-200",
-                    "Make-up Session": "bg-indigo-50 text-indigo-700 border-indigo-200",
-                    "Orientation Call": "bg-emerald-50 text-emerald-700 border-emerald-200",
-                  };
-                  const badgeColor = typeColors[meet.meeting_type] || "bg-slate-100 text-slate-700 border-slate-200";
-
-                  return (
-                    <div
-                      key={meet.id}
-                      className={`p-4 sm:p-5 rounded-xl border transition-all ${
-                        isExamine
-                          ? "bg-amber-50/40 border-amber-200 shadow-xs"
-                          : "bg-white border-slate-200 hover:border-slate-300"
-                      }`}
-                    >
-                      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                        <div className="flex items-start gap-3.5 flex-1 min-w-0">
-                          <div
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                              isExamine ? "bg-amber-600 text-white" : "bg-indigo-600 text-white"
-                            }`}
-                          >
-                            {isExamine ? (
-                              <span style={{ fontSize: 18 }}>⚖️</span>
-                            ) : (
-                              <svg width="18" height="18" style={{ width: 18, height: 18 }} viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M19.5 5h-15C3.12 5 2 6.12 2 7.5v9C2 17.88 3.12 19 4.5 19h15c1.38 0 2.5-1.12 2.5-2.5v-9C22 6.12 20.88 5 19.5 5zm-3.5 9h-8v-1.5h8V14zm0-3h-8V9.5h8V11z" />
-                              </svg>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-2 mb-1">
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-bold border ${badgeColor}`}>
-                                {meet.meeting_type}
-                              </span>
-                              <span className="text-[11px] text-slate-500 font-medium">
-                                ⏱️ {meet.duration_minutes} mins
-                              </span>
-                              <span
-                                className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                                  isCompleted
-                                    ? "bg-slate-100 text-slate-600"
-                                    : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                }`}
-                              >
-                                {meet.status}
-                              </span>
-                            </div>
-
-                            <h4 className="font-bold text-slate-900 text-sm sm:text-base leading-snug">
-                              {meet.title}
-                            </h4>
-                            <p className="text-xs text-slate-600 mt-1">
-                              <strong>Date &amp; Time:</strong>{" "}
-                              {new Date(meet.scheduled_at).toLocaleString("en-US", {
-                                weekday: "short",
-                                month: "short",
-                                day: "numeric",
-                                hour: "numeric",
-                                minute: "2-digit",
-                                timeZoneName: "short",
-                              })}
-                            </p>
-
-                            {/* Teams Pro Room Credentials */}
-                            {(meet.teams_meeting_id || meet.teams_passcode) && (
-                              <div className="flex flex-wrap items-center gap-3 mt-1.5 text-[11px] text-slate-600 font-mono bg-slate-100/80 px-2.5 py-1 rounded-md">
-                                <span><strong>Teams Room ID:</strong> {meet.teams_meeting_id || "Direct URL"}</span>
-                                {meet.teams_passcode && <span><strong>Passcode:</strong> {meet.teams_passcode}</span>}
-                                <span className="font-sans font-bold text-[10px] text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded">
-                                  Teams Pro
-                                </span>
-                              </div>
-                            )}
-
-                            {meet.notes && (
-                              <p className="text-xs text-slate-500 mt-1.5 leading-relaxed bg-slate-50 p-2 rounded-lg border border-slate-100">
-                                <strong>Topic &amp; Clinical Syllabus:</strong> {meet.notes}
-                              </p>
-                            )}
-
-                            {/* Teams Pro AI Clinical Recap */}
-                            {meet.ai_summary && (
-                              <div className="mt-2 p-2.5 rounded-lg bg-indigo-50/70 border border-indigo-100 text-xs text-indigo-950 leading-relaxed">
-                                <span className="font-bold text-indigo-800 flex items-center gap-1 mb-0.5">
-                                  <span>🤖</span> Teams Pro AI Clinical Recap:
-                                </span>
-                                {meet.ai_summary}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex flex-col sm:flex-row md:flex-col gap-2 shrink-0 items-end">
-                          {isCompleted && meet.recording_url ? (
-                            <a
-                              href={meet.recording_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition inline-flex items-center gap-1.5 justify-center w-full md:w-auto bg-indigo-700 text-white hover:bg-indigo-800"
-                            >
-                              <span>▶</span> Watch Cloud Recording (Teams Pro)
-                            </a>
-                          ) : meet.teams_join_url ? (
-                            <a
-                              href={meet.teams_join_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition inline-flex items-center gap-1.5 justify-center w-full md:w-auto bg-indigo-600 text-white hover:bg-indigo-700"
-                            >
-                              <svg width="15" height="15" style={{ width: 15, height: 15 }} viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M19.5 5h-15C3.12 5 2 6.12 2 7.5v9C2 17.88 3.12 19 4.5 19h15c1.38 0 2.5-1.12 2.5-2.5v-9C22 6.12 20.88 5 19.5 5zm-3.5 9h-8v-1.5h8V14zm0-3h-8V9.5h8V11z" />
-                              </svg>
-                              Join Teams Meeting
-                            </a>
-                          ) : null}
-                          {meet.materials_url && (
-                            <a
-                              href={meet.materials_url}
-                              download
-                              className="px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition inline-flex items-center gap-1"
-                            >
-                              📄 Session Materials
-                            </a>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* If Graded Examine Call: Detailed Assessment Breakdown */}
-                      {isExamine && meet.score !== null && (
-                        <div className="mt-4 pt-3.5 border-t border-amber-200/70 bg-white p-3.5 rounded-xl border">
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
-                                Oral Examine Evaluation Result:
-                              </span>
-                              <span className="px-2 py-0.5 rounded text-xs font-extrabold bg-emerald-100 text-emerald-800">
-                                Score: {meet.score}/100 ({meet.pass_fail || "Pass"})
-                              </span>
-                            </div>
-                            <span className="text-[11px] text-slate-500">
-                              Evaluator: {meet.physician}
-                            </span>
-                          </div>
-                          {meet.grader_notes && (
-                            <p className="text-xs text-slate-700 mt-2 italic bg-amber-50/50 p-2.5 rounded-lg border border-amber-100">
-                              &ldquo;{meet.grader_notes}&rdquo;
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Evaluation & Faculty Notes */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50">
-                <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  Clinical Evaluation Status
-                </h4>
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm font-bold text-emerald-700">{rotation.evaluation_status}</p>
-                  <span className="text-xs font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                    Grade: Honors (92%)
-                  </span>
-                </div>
-                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                  Attending feedback: Outstanding presentation on exchange transfusion indications. Active participant in differential diagnoses during morning rounds. Surfactant administration presentation received top marks.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50">
-                <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-teal-500"></span>
-                  Certificate &amp; US LOR Issuance
-                </h4>
-                <p className="text-sm font-semibold text-slate-700">
-                  {rotation.certificate_issued ? "Issued" : "Pending Week 6 Clinical Exit Exam"}
-                </p>
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                  Upon completion of Week 6 and evaluation sign-off by Dr. Janardhan Mydam, your verifiable digital credential and clinical Letter of Recommendation (LOR) will be generated in Certificates.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* SECTION I: Required vs. Uploaded Documents */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-slate-900 text-base">Rotation Compliance Documents</h3>
-              <p className="text-xs text-slate-500">All 3 required credentials verified by Dr. Janardhan Mydam.</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowUploader(true)}
-              className="px-3.5 py-2 rounded-xl bg-teal-600 text-white font-semibold text-xs hover:bg-teal-700 transition"
-            >
-              + Upload File
-            </button>
-          </div>
-
-          <DocumentList
-            documents={documents}
-            onUploadClick={() => setShowUploader(true)}
-            emptyMessage="No rotation documents uploaded yet."
-          />
-        </div>
-
-        {/* Rotation Catalog Outline */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
-          <h3 className="font-bold text-slate-900 text-base">Rotation Programs Catalog</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {programs.map((prog) => (
-              <div key={prog.id} className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <h4 className="font-bold text-slate-900 text-sm">{prog.title}</h4>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-200 text-slate-700">
-                      {prog.type}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 leading-relaxed mb-3">{prog.curriculum}</p>
-                </div>
-                <div className="text-[11px] font-medium text-slate-400">
-                  Duration: {prog.duration_weeks} Weeks • Accreditation Available
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>
+    );
+  }
 
-      <DocumentUploader
-        isOpen={showUploader}
-        onClose={() => setShowUploader(false)}
-        onSuccess={(newDoc) => setDocuments((prev) => [newDoc, ...prev])}
-        defaultCategory="Immunization Record"
-      />
-    </EnrollmentGate>
+  // =========================================================================
+  // STATE 3: APPROVED BUT PAYMENT PENDING (IF PAID TIER)
+  // =========================================================================
+  if (isApprovedPendingPay) {
+    return (
+      <div style={{ maxWidth: 740, margin: "0 auto", padding: "40px 16px 60px" }}>
+        <div style={{ backgroundColor: "#FFFFFF", borderRadius: 16, border: "1px solid #BBF7D0", padding: "36px 28px", textAlign: "center", boxShadow: "0 8px 30px rgba(11, 30, 54, 0.06)" }}>
+          <div style={{ width: 64, height: 64, borderRadius: "50%", backgroundColor: "#F0FDF4", border: "2px solid #86EFAC", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px", margin: "0 auto 16px" }}>
+            🎉
+          </div>
+
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 14px", borderRadius: 20, backgroundColor: "#DCFCE7", color: "#166534", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", marginBottom: 12 }}>
+            ✓ Verified &amp; Approved by Dr. Janardhan Mydam
+          </div>
+
+          <h2 style={{ fontSize: "26px", fontWeight: 800, color: "#0B1E36", margin: "0 0 10px" }}>
+            Congratulations! You are Approved for Clinical Tele-Rotation
+          </h2>
+
+          <p style={{ color: "#64748B", fontSize: "15px", lineHeight: 1.6, maxWidth: 580, margin: "0 auto 24px" }}>
+            Dr. Mydam has reviewed and verified your credentials. To confirm your clinical seat in the upcoming cohort and activate Microsoft Teams Pro rounds, please complete the tuition confirmation below.
+          </p>
+
+          {errorMsg && (
+            <div style={{ padding: "10px 14px", backgroundColor: "#FEF2F2", border: "1px solid #FECACA", color: "#991B1B", borderRadius: 8, fontSize: "13.5px", marginBottom: 16 }}>
+              ⚠️ {errorMsg}
+            </div>
+          )}
+
+          {/* Tuition Breakdown Card */}
+          <div style={{ backgroundColor: "#F8FAFC", borderRadius: 12, border: "1px solid #E2E8F0", padding: "22px", textAlign: "left", maxWidth: 520, margin: "0 auto 24px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #E2E8F0", paddingBottom: 14, marginBottom: 14 }}>
+              <div>
+                <div style={{ fontWeight: 800, color: "#0B1E36", fontSize: "16px" }}>6-Week Clinical Tele-Rotation Tuition</div>
+                <div style={{ fontSize: "12.5px", color: "#64748B" }}>Attending Preceptorship &amp; LOR Eligibility</div>
+              </div>
+              <div style={{ fontSize: "26px", fontWeight: 900, color: "#0B1E36" }}>${app.tuition_fee || 1250}</div>
+            </div>
+
+            <ul style={{ fontSize: "13px", color: "#475569", margin: 0, paddingLeft: 18, lineHeight: 1.8 }}>
+              <li>Direct live bedside rounds on Microsoft Teams with Dr. Janardhan Mydam</li>
+              <li>1-on-1 Graded Examine Calls with clinical rubric evaluation</li>
+              <li>Complete access to Orientation, Weekly Case Notes &amp; Examination</li>
+              <li>Full access to Recorded Clinical Lecture Archives</li>
+              <li>Merit-based Attending Physician Letter of Recommendation (LOR)</li>
+            </ul>
+          </div>
+
+          <button
+            onClick={handlePayTuition}
+            disabled={paying}
+            style={{
+              padding: "15px 36px",
+              backgroundColor: "#166534",
+              color: "#FFFFFF",
+              fontWeight: 700,
+              fontSize: "15px",
+              borderRadius: 8,
+              border: "none",
+              cursor: "pointer",
+              boxShadow: "0 4px 14px rgba(22, 101, 52, 0.25)",
+              transition: "all 0.2s ease",
+            }}
+          >
+            {paying ? "Confirming Seat & Activating Cohort..." : `💳 Confirm Seat & Pay Tuition ($${app.tuition_fee || 1250}) →`}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // STATE 4: APPROVED & ACTIVE (OR FREE) — FULL PHASED ROTATION HUB
+  // =========================================================================
+  const orientation = data?.orientation;
+  const weeklyMeetings = data?.weekly_meetings || [];
+  const clinicalNotes = data?.clinical_notes || [];
+  const examination = data?.examination;
+  const recordedSessions = data?.recorded_sessions || [];
+
+  return (
+    <div style={{ maxWidth: 1040, margin: "0 auto", padding: "24px 16px 60px" }}>
+      {/* Header Banner */}
+      <div style={{ backgroundColor: "#0B1E36", borderRadius: 14, padding: "26px 28px", color: "#FFFFFF", marginBottom: 24, display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
+        <div>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "3px 10px", borderRadius: 12, backgroundColor: "rgba(255,255,255,0.12)", color: "#93C5FD", fontSize: "11.5px", fontWeight: 700, textTransform: "uppercase", marginBottom: 8 }}>
+            ● Active Clinical Experience Cohort
+          </div>
+          <h1 style={{ fontSize: "24px", fontWeight: 800, margin: "0 0 4px" }}>
+            Clinical Rotation &amp; Tele-Rounds Hub
+          </h1>
+          <p style={{ color: "#94A3B8", fontSize: "13.5px", margin: 0 }}>
+            Supervising Attending: <strong>Dr. Janardhan Mydam, MD, FAAP</strong> · Preceptor in Neonatal-Perinatal Medicine
+          </p>
+        </div>
+
+        <div style={{ display: "flex", gap: 10 }}>
+          <a
+            href={weeklyMeetings[0]?.teams_url || "https://teams.microsoft.com"}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "10px 18px",
+              backgroundColor: "#2563EB",
+              color: "#FFFFFF",
+              borderRadius: 8,
+              fontSize: "13px",
+              fontWeight: 700,
+              textDecoration: "none",
+              boxShadow: "0 2px 8px rgba(37,99,235,0.3)",
+            }}
+          >
+            <span>📹</span> Join Live Rounds (Teams)
+          </a>
+        </div>
+      </div>
+
+      {/* Navigation Sub-sections (Tabs) */}
+      <div style={{ display: "flex", gap: 6, borderBottom: "2px solid #E2E8F0", paddingBottom: 0, marginBottom: 24, overflowX: "auto" }}>
+        {[
+          { key: "orientation", label: "1. Orientation Phase", icon: "📋" },
+          { key: "meetings", label: "2. Weekly Learnings", icon: "🗓️" },
+          { key: "notes", label: "3. Clinical Notes", icon: "📝" },
+          { key: "examination", label: "4. Examination & OSCE", icon: "🩺" },
+          { key: "recorded", label: "5. Recorded Sessions", icon: "🎥" },
+        ].map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "12px 18px",
+              border: "none",
+              borderBottom: activeTab === tab.key ? "3px solid #0B1E36" : "3px solid transparent",
+              backgroundColor: "transparent",
+              color: activeTab === tab.key ? "#0B1E36" : "#64748B",
+              fontWeight: activeTab === tab.key ? 700 : 500,
+              fontSize: "14px",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              transition: "all 0.15s ease",
+            }}
+          >
+            <span>{tab.icon}</span>
+            <span>{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* TAB 1: ORIENTATION PHASE */}
+      {activeTab === "orientation" && (
+        <div style={{ backgroundColor: "#FFFFFF", borderRadius: 12, border: "1px solid #E2E8F0", padding: "26px", boxShadow: "0 4px 16px rgba(0,0,0,0.03)" }}>
+          <h2 style={{ fontSize: "18px", fontWeight: 800, color: "#0B1E36", marginTop: 0, marginBottom: 12 }}>
+            Phase 1: Pre-Rotation Clinical Orientation &amp; Code of Conduct
+          </h2>
+          <p style={{ color: "#64748B", fontSize: "14px", lineHeight: 1.6, marginBottom: 20 }}>
+            Welcome to the virtual neonatal intensive care unit (NICU) and pediatric clinical training program. Complete the items below before your first live bedside round with Dr. Mydam.
+          </p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, marginBottom: 24 }}>
+            <div style={{ padding: 18, backgroundColor: "#F8FAFC", borderRadius: 10, border: "1px solid #E2E8F0" }}>
+              <div style={{ fontWeight: 700, color: "#0B1E36", fontSize: "14px", marginBottom: 10 }}>
+                🎯 Core Learning Objectives
+              </div>
+              <ul style={{ fontSize: "13px", color: "#475569", paddingLeft: 16, margin: 0, lineHeight: 1.7 }}>
+                {orientation?.objectives?.map((obj, i) => (
+                  <li key={i}>{obj}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div style={{ padding: 18, backgroundColor: "#FEF2F2", borderRadius: 10, border: "1px solid #FECACA" }}>
+              <div style={{ fontWeight: 700, color: "#991B1B", fontSize: "14px", marginBottom: 10 }}>
+                ⚖️ HIPAA &amp; Clinical Professionalism Rules
+              </div>
+              <ul style={{ fontSize: "13px", color: "#7F1D1D", paddingLeft: 16, margin: 0, lineHeight: 1.7 }}>
+                {orientation?.rules?.map((rule, i) => (
+                  <li key={i}>{rule}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <a
+              href="/education-training/tele-rotations"
+              target="_blank"
+              style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "10px 16px", borderRadius: 8, backgroundColor: "#EEF2F6", color: "#0B1E36", fontSize: "13px", fontWeight: 700, textDecoration: "none" }}
+            >
+              📄 View Full Curriculum Syllabus ↗
+            </a>
+            <button
+              onClick={() => setActiveTab("meetings")}
+              style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "10px 18px", borderRadius: 8, backgroundColor: "#0B1E36", color: "#FFF", fontSize: "13px", fontWeight: 700, border: "none", cursor: "pointer" }}
+            >
+              Proceed to Weekly Learnings →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: WEEKLY MEETINGS & LIVE LEARNINGS */}
+      {activeTab === "meetings" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {weeklyMeetings.map((m) => (
+            <div key={m.week} style={{ backgroundColor: "#FFFFFF", borderRadius: 12, border: "1px solid #E2E8F0", padding: "22px 24px", boxShadow: "0 2px 10px rgba(0,0,0,0.03)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 12 }}>
+                <div>
+                  <div style={{ display: "inline-block", padding: "2px 8px", backgroundColor: "#EEF2F6", color: "#0B1E36", fontSize: "11px", fontWeight: 700, borderRadius: 4, marginBottom: 6 }}>
+                    WEEK {m.week}
+                  </div>
+                  <h3 style={{ fontSize: "17px", fontWeight: 800, color: "#0B1E36", margin: "0 0 4px" }}>
+                    {m.title}
+                  </h3>
+                  <div style={{ fontSize: "13px", color: "#64748B" }}>
+                    🗓️ Schedule: <strong>{m.schedule}</strong>
+                  </div>
+                </div>
+
+                <a
+                  href={m.teams_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "9px 16px", backgroundColor: "#2563EB", color: "#FFF", fontSize: "13px", fontWeight: 700, borderRadius: 6, textDecoration: "none" }}
+                >
+                  Join Teams Session
+                </a>
+              </div>
+
+              <div style={{ backgroundColor: "#F8FAFC", borderRadius: 8, padding: "12px 16px", fontSize: "13px", color: "#334155" }}>
+                <div style={{ fontWeight: 700, color: "#0B1E36", marginBottom: 6 }}>Key Clinical Discussion Milestones:</div>
+                <ul style={{ margin: 0, paddingLeft: 16, lineHeight: 1.6 }}>
+                  {m.learning_points?.map((pt, i) => (
+                    <li key={i}>{pt}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* TAB 3: CLINICAL NOTES VAULT */}
+      {activeTab === "notes" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ padding: "12px 18px", backgroundColor: "#F0F9FF", border: "1px solid #BAE6FD", borderRadius: 8, color: "#0369A1", fontSize: "13.5px" }}>
+            💡 <strong>Attending Clinical Notes Vault:</strong> High-yield pearls, guideline summaries, and bedside teaching points entered directly by Dr. Janardhan Mydam.
+          </div>
+
+          {clinicalNotes.map((note) => (
+            <div key={note.id} style={{ backgroundColor: "#FFFFFF", borderRadius: 12, border: "1px solid #E2E8F0", padding: "20px 24px", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", backgroundColor: "#EEF2F6", color: "#0B1E36", borderRadius: 4 }}>
+                  {note.category}
+                </span>
+                <span style={{ fontSize: "12px", color: "#94A3B8" }}>{note.date}</span>
+              </div>
+              <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#0B1E36", margin: "0 0 8px" }}>
+                {note.title}
+              </h3>
+              <p style={{ fontSize: "14px", color: "#475569", lineHeight: 1.6, margin: "0 0 12px" }}>
+                {note.content}
+              </p>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {note.tags?.map((t) => (
+                  <span key={t} style={{ fontSize: "11px", color: "#64748B", backgroundColor: "#F1F5F9", padding: "2px 8px", borderRadius: 4 }}>
+                    #{t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* TAB 4: EXAMINATION & OSCE */}
+      {activeTab === "examination" && (
+        <div style={{ backgroundColor: "#FFFFFF", borderRadius: 12, border: "1px solid #E2E8F0", padding: "26px", boxShadow: "0 4px 16px rgba(0,0,0,0.03)" }}>
+          <h2 style={{ fontSize: "18px", fontWeight: 800, color: "#0B1E36", marginTop: 0, marginBottom: 12 }}>
+            Phase 4: Examination, OSCE Simulation &amp; Evaluation Rubric
+          </h2>
+          <p style={{ color: "#64748B", fontSize: "14px", lineHeight: 1.6, marginBottom: 20 }}>
+            Trainee evaluation is merit-based and follows the ACGME core competencies framework.
+          </p>
+
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontWeight: 700, color: "#0B1E36", fontSize: "14px", marginBottom: 10 }}>
+              📊 Clinical Grading Rubric
+            </div>
+            <div style={{ border: "1px solid #E2E8F0", borderRadius: 8, overflow: "hidden" }}>
+              {examination?.grading_rubric?.map((g, i) => (
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderBottom: i < examination.grading_rubric.length - 1 ? "1px solid #E2E8F0" : "none", backgroundColor: i % 2 === 0 ? "#FFF" : "#F8FAFC", fontSize: "13.5px" }}>
+                  <div style={{ color: "#334155", fontWeight: 500 }}>{g.component}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <span style={{ fontWeight: 700, color: "#0B1E36" }}>{g.weight}</span>
+                    <span style={{ fontSize: "12px", padding: "2px 8px", borderRadius: 10, backgroundColor: "#FEF3C7", color: "#92400E", fontWeight: 600 }}>{g.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", backgroundColor: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10 }}>
+            <div>
+              <div style={{ fontWeight: 800, color: "#166534", fontSize: "14.5px" }}>Attending Letter of Recommendation (LOR) Status</div>
+              <div style={{ fontSize: "13px", color: "#15803D" }}>{examination?.lor_eligibility}</div>
+            </div>
+            <Link
+              href="/student/qbank"
+              style={{ padding: "8px 16px", backgroundColor: "#166534", color: "#FFF", fontWeight: 700, fontSize: "13px", borderRadius: 6, textDecoration: "none" }}
+            >
+              Practice Question Bank →
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 5: RECORDED SESSIONS ARCHIVE */}
+      {activeTab === "recorded" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ padding: "12px 18px", backgroundColor: "#FAF5FF", border: "1px solid #E9D5FF", borderRadius: 8, color: "#6B21A8", fontSize: "13.5px" }}>
+            🎥 <strong>Curated Recorded Sessions Archive:</strong> Review clinical conference and morning bedside rounds recordings manually curated by the faculty.
+          </div>
+
+          {recordedSessions.length === 0 ? (
+            <div style={{ padding: "40px 20px", textAlign: "center", backgroundColor: "#FFF", borderRadius: 12, border: "1px solid #E2E8F0", color: "#64748B" }}>
+              <div style={{ fontSize: "32px", marginBottom: 8 }}>📹</div>
+              <div style={{ fontWeight: 700, color: "#0B1E36", fontSize: "15px" }}>No recordings uploaded yet</div>
+              <p style={{ fontSize: "13px", margin: "4px 0 0" }}>New clinical lecture recordings will appear here as sessions conclude.</p>
+            </div>
+          ) : (
+            recordedSessions.map((rec) => (
+              <div key={rec.id} style={{ backgroundColor: "#FFFFFF", borderRadius: 12, border: "1px solid #E2E8F0", padding: "20px 24px", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 8 }}>
+                  <div>
+                    <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", backgroundColor: "#EEF2F6", color: "#0B1E36", borderRadius: 4, marginRight: 8 }}>
+                      SESSION RECORDING
+                    </span>
+                    <span style={{ fontSize: "12px", color: "#64748B" }}>🗓️ {rec.date} · ⏱️ {rec.duration}</span>
+                    <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#0B1E36", margin: "8px 0 4px" }}>
+                      {rec.title}
+                    </h3>
+                    <div style={{ fontSize: "13px", color: "#475569" }}>
+                      Preceptor: <strong>{rec.preceptor}</strong>
+                    </div>
+                  </div>
+
+                  <a
+                    href={rec.video_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "9px 16px",
+                      backgroundColor: "#7C3AED",
+                      color: "#FFFFFF",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      borderRadius: 6,
+                      textDecoration: "none",
+                      boxShadow: "0 2px 8px rgba(124,58,237,0.25)",
+                    }}
+                  >
+                    ▶ Watch Recording
+                  </a>
+                </div>
+
+                {rec.notes && (
+                  <p style={{ fontSize: "13px", color: "#64748B", margin: "8px 0", lineHeight: 1.5 }}>
+                    {rec.notes}
+                  </p>
+                )}
+
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
+                  {rec.tags?.map((t) => (
+                    <span key={t} style={{ fontSize: "11px", color: "#6B21A8", backgroundColor: "#F3E8FF", padding: "2px 8px", borderRadius: 4 }}>
+                      #{t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
   );
 }

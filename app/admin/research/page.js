@@ -13,6 +13,8 @@ export default function AdminResearchPage() {
   const [selectedApp, setSelectedApp] = useState(null);
   const [approvalGroupId, setApprovalGroupId] = useState("");
   const [approvalNotes, setApprovalNotes] = useState("");
+  const [approvalTierType, setApprovalTierType] = useState("free"); // "free" | "paid"
+  const [approvalFee, setApprovalFee] = useState(350);
   const [actionLoading, setActionLoading] = useState(false);
   const [resendNotificationAlert, setResendNotificationAlert] = useState(null);
 
@@ -121,6 +123,8 @@ export default function AdminResearchPage() {
           status,
           assigned_group_id: status === "Approved" ? approvalGroupId || groups[0]?.id : null,
           notes: approvalNotes || (status === "Approved" ? "Approved for collaborative study" : "Declined"),
+          tier_type: approvalTierType,
+          fee: approvalTierType === "free" ? 0 : approvalFee,
         }),
       });
       const data = await res.json();
@@ -547,6 +551,47 @@ export default function AdminResearchPage() {
                 <p style={{ fontSize: "13px", color: "#64748B", marginBottom: 16 }}>
                   Approving this trainee will activate their research portal access and send an automated official acceptance letter via <strong>Resend</strong>.
                 </p>
+
+                <div style={{ marginBottom: 14, backgroundColor: "#F8FAFC", padding: "12px", borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: 6 }}>
+                    Research Admission Tier
+                  </label>
+                  <div style={{ display: "flex", gap: 16, marginBottom: 8 }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "13px", cursor: "pointer", fontWeight: 600, color: "#166534" }}>
+                      <input
+                        type="radio"
+                        name="res_tier"
+                        checked={approvalTierType === "free"}
+                        onChange={() => setApprovalTierType("free")}
+                      />
+                      Free Research Scholarship ($0)
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "13px", cursor: "pointer", fontWeight: 600, color: "#B45309" }}>
+                      <input
+                        type="radio"
+                        name="res_tier"
+                        checked={approvalTierType === "paid"}
+                        onChange={() => setApprovalTierType("paid")}
+                      />
+                      Paid Mentorship Program
+                    </label>
+                  </div>
+
+                  {approvalTierType === "paid" && (
+                    <div>
+                      <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#64748B", marginBottom: 4 }}>
+                        Tuition Fee ($ USD)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={approvalFee}
+                        onChange={(e) => setApprovalFee(e.target.value)}
+                        style={{ width: "120px", padding: "6px 10px", borderRadius: 6, border: "1px solid #CBD5E1", fontSize: "13px" }}
+                      />
+                    </div>
+                  )}
+                </div>
 
                 <div style={{ marginBottom: 14 }}>
                   <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#334155", marginBottom: 4 }}>

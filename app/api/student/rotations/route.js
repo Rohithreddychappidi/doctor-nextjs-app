@@ -9,30 +9,125 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const hasTele = await db.isEnrolledIn(session.id, "tele_rotation");
-    const hasPhysical = await db.isEnrolledIn(session.id, "physical_rotation");
-    const isEnrolled = hasTele || hasPhysical;
+    const application = await db.getStudentRotationApplication(session.id, session.email);
+    const recordedSessions = await db.getRecordedSessions();
 
-    if (isEnrolled) {
-      await db.recordActivity(session.id, hasTele ? "tele_rotation" : "physical_rotation");
-    }
+    // Student is only active if application exists, is approved, and (free OR paid)
+    const isApproved = application?.status === "Approved" || application?.status === "Approved - Paid";
+    const isPaidOrFree = application?.tier_type === "free" || application?.payment_status === "Paid";
+    const isEnrolled = !!(isApproved && isPaidOrFree);
 
-    const rotation = memoryStore.rotation_enrollments.find((r) => r.student_id === session.id);
-    const applications = memoryStore.rotation_applications.filter((a) => a.student_id === session.id);
-    const programs = memoryStore.rotation_programs;
-    const meetings = rotation
-      ? (memoryStore.rotation_meetings || []).filter(
-          (m) => m.rotation_enrollment_id === rotation.id || (m.attendee_scope === "cohort" && m.cohort_id === "cohort_fall_2026")
-        )
-      : [];
+    // Orientation materials
+    const orientation = {
+      title: "Pediatric & Neonatal Clinical Tele-Rotation Orientation",
+      preceptor: "Dr. Janardhan Mydam, MD, FAAP",
+      handbook_url: "/docs/tele_rotation_orientation_guide.pdf",
+      syllabus_url: "/education-training/tele-rotations",
+      objectives: [
+        "Master systematic Neonatal Resuscitation Program (NRP) 8th Edition clinical algorithms.",
+        "Synthesize clinical decision-making across premature infant hemodynamics, respiratory failure, and surfactant replacement.",
+        "Perform structured virtual morning bedside rounds and present clinical vignettes using SBAR format.",
+        "Apply 2022 AAP Hyperbilirubinemia guidelines to acute clinical scenarios."
+      ],
+      rules: [
+        "Camera ON and professional clinical attire required for all Microsoft Teams bedside encounters.",
+        "Strict adherence to HIPAA de-identification standards (zero protected health information transmission).",
+        "Preparation of assigned clinical journal papers before Thursday roundtable discussion."
+      ]
+    };
+
+    // Weekly meetings & live learnings
+    const weeklyMeetings = [
+      {
+        week: 1,
+        title: "Neonatal Resuscitation & Golden Hour Delivery Protocol",
+        schedule: "Tuesday & Thursday 18:00–19:30 CST",
+        teams_url: application?.teams_meeting_url || "https://teams.microsoft.com/l/meetup-join/jva-tele-neonatology-fall2026",
+        passcode: "NICU2026",
+        meeting_id: "904 812 7730",
+        learning_points: [
+          "T-piece resuscitator vs self-inflating bag titration",
+          "Delayed cord clamping vs umbilical cord milking (PREMOD2 trial context)",
+          "Target pre-ductal SpO2 milestones from 1 to 10 minutes of life"
+        ]
+      },
+      {
+        week: 2,
+        title: "Respiratory Distress Syndrome (RDS) & Surfactant Replacement (LISA vs INSURE)",
+        schedule: "Tuesday & Thursday 18:00–19:30 CST",
+        teams_url: application?.teams_meeting_url || "https://teams.microsoft.com/l/meetup-join/jva-tele-neonatology-fall2026",
+        passcode: "NICU2026",
+        meeting_id: "904 812 7730",
+        learning_points: [
+          "Non-invasive surfactant administration (LISA) mechanics",
+          "Early bubble CPAP titration to avoid ventilator-induced lung injury",
+          "Blood gas interpretation in extreme prematurity"
+        ]
+      },
+      {
+        week: 3,
+        title: "Neonatal Sepsis, Meningitis & Lumbar Puncture Decision Trees",
+        schedule: "Tuesday & Thursday 18:00–19:30 CST",
+        teams_url: application?.teams_meeting_url || "https://teams.microsoft.com/l/meetup-join/jva-tele-neonatology-fall2026",
+        passcode: "NICU2026",
+        meeting_id: "904 812 7730",
+        learning_points: [
+          "Early-onset vs late-onset GBS risk stratification",
+          "Kaiser Permanente Sepsis Calculator clinical application",
+          "Empiric ampicillin + gentamicin dosing adjustments in renal immaturity"
+        ]
+      }
+    ];
+
+    // Clinical Notes Vault
+    const clinicalNotes = [
+      {
+        id: "note_1",
+        title: "Dr. Mydam's High-Yield NICU Morning Rounds Pearls",
+        author: "Dr. Janardhan Mydam, MD, FAAP",
+        category: "Clinical Pearl Summary",
+        date: "2026-09-10",
+        content: "Rule of thumb for extreme preterms: Always preserve the capillary bed. Avoid rapid sodium bicarb boluses which elevate intraventricular hemorrhage (IVH) risk. Target PaCO2 45-55 mmHg (permissive hypercapnia) to minimize barotrauma.",
+        tags: ["NICU", "Ventilation", "Pearl"]
+      },
+      {
+        id: "note_2",
+        title: "AAP 2022 Phototherapy & Exchange Transfusion Cheat Sheet",
+        author: "Dr. Janardhan Mydam, MD, FAAP",
+        category: "Practice Guideline",
+        date: "2026-09-14",
+        content: "Remember that the 2022 revised AAP clinical practice guideline has slightly elevated phototherapy thresholds for infants without neurotoxicity risk factors, but requires aggressive monitoring if hemolytic disease is suspected.",
+        tags: ["Hyperbilirubinemia", "AAP 2022"]
+      }
+    ];
+
+    // Examination & OSCE Evaluation
+    const examination = {
+      osce_status: isEnrolled ? "Scheduled (Week 6)" : "Locked",
+      lor_eligibility: application?.lor_status || "Eligible upon completion of active rounds & final evaluation",
+      grading_rubric: [
+        { component: "Clinical Rounds Attendance & Punctuality", weight: "25%", status: "In Progress" },
+        { component: "Vignette Case Presentation & SBAR Communication", weight: "25%", status: "In Progress" },
+        { component: "Mid-Rotation Evaluation Call with Dr. Mydam", weight: "20%", status: "Pending" },
+        { component: "Final OSCE Tele-Simulation Clinical Exam", weight: "30%", status: "Pending" }
+      ],
+      exam_quiz: {
+        title: "Weekly Knowledge Milestone Quiz #1: Neonatal Resuscitation",
+        questions_count: 10,
+        passing_score: "80%",
+        link: "/student/qbank"
+      }
+    };
 
     return NextResponse.json({
       success: true,
       is_enrolled: isEnrolled,
-      rotation: rotation || null,
-      applications,
-      programs,
-      meetings,
+      application: application || null,
+      orientation,
+      weekly_meetings: weeklyMeetings,
+      clinical_notes: clinicalNotes,
+      examination,
+      recorded_sessions: recordedSessions
     });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
@@ -49,42 +144,89 @@ export async function POST(request) {
     const body = await request.json();
     const { action } = body;
 
-    // 1. Process Tuition Payment & Activate Cohort
+    // 1. Submit Intake Verification Form
+    if (action === "apply_intake") {
+      const {
+        full_name,
+        email,
+        phone,
+        medical_school,
+        graduation_year,
+        usmle_status,
+        specialty_interest,
+        timing_preference,
+        cv_url,
+        deans_letter_url,
+        immunization_note,
+        personal_statement
+      } = body;
+
+      if (!full_name || !email || !medical_school || !personal_statement) {
+        return NextResponse.json(
+          { error: "Full name, email, medical school, and personal statement are mandatory." },
+          { status: 400 }
+        );
+      }
+
+      const existing = await db.getStudentRotationApplication(session.id, session.email);
+      if (existing) {
+        // Update existing application
+        const updated = await db.updateRotationApplication(existing.id, {
+          applicant_name: full_name,
+          applicant_phone: phone,
+          medical_school,
+          graduation_year,
+          usmle_status,
+          specialty_interest,
+          timing_preference,
+          cv_url,
+          deans_letter_url,
+          immunization_note,
+          personal_statement,
+          status: "Under Review"
+        });
+        return NextResponse.json({ success: true, application: updated });
+      }
+
+      const newApp = await db.createRotationApplication({
+        student_id: session.id,
+        applicant_name: full_name,
+        applicant_email: email || session.email,
+        applicant_phone: phone,
+        medical_school,
+        graduation_year,
+        usmle_status,
+        specialty_interest,
+        timing_preference,
+        cv_url,
+        deans_letter_url,
+        immunization_note,
+        personal_statement
+      });
+
+      return NextResponse.json({ success: true, application: newApp });
+    }
+
+    // 2. Process Tuition Payment & Activate Seat
     if (action === "pay_tuition") {
-      const app = (memoryStore.rotation_applications || []).find(a => a.student_id === session.id || a.applicant_email === session.email);
-      if (app) {
-        app.status = "Approved - Paid";
+      const app = await db.getStudentRotationApplication(session.id, session.email);
+      if (!app) {
+        return NextResponse.json({ error: "No active application found to pay for." }, { status: 404 });
       }
 
-      let enr = (memoryStore.rotation_enrollments || []).find(r => r.student_id === session.id);
-      if (!enr) {
-        enr = {
-          id: `rot_enr_${Date.now()}`,
-          student_id: session.id,
-          rotation_program_id: "rot_prog_tele",
-          start_date: "2026-10-01",
-          end_date: "2026-11-15",
-          current_week: 1,
-          total_weeks: 6,
-          physician: "Dr. Janardhan Mydam, MD, FAAP",
-          hospital_site: "JVA Tele-Neonatology Clinical Network",
-          schedule_summary: "Tuesdays & Thursdays 18:00–19:30 CST on Microsoft Teams",
-          evaluation_status: "Active Trainee - Seat Confirmed",
-          payment_status: "Paid",
-          certificate_issued: false
-        };
-        memoryStore.rotation_enrollments.push(enr);
-      } else {
+      const updated = await db.updateRotationApplication(app.id, {
+        status: "Approved - Paid",
+        payment_status: "Paid",
+        paid_at: new Date().toISOString()
+      });
+
+      // Ensure main enrollments store has active record
+      let enr = (memoryStore.enrollments || []).find(e => e.student_id === session.id && e.program_id === "prog_tele_rotation");
+      if (enr) {
+        enr.enrollment_status = "Active";
         enr.payment_status = "Paid";
-        enr.evaluation_status = "Active Trainee - Seat Confirmed";
-      }
-
-      // Also ensure standard enrollments store has active record
-      const mainEnr = (memoryStore.enrollments || []).find(e => e.student_id === session.id && e.program_id === "prog_tele_rotation");
-      if (mainEnr) {
-        mainEnr.payment_status = "Paid";
-        mainEnr.enrollment_status = "Active";
       } else {
+        if (!memoryStore.enrollments) memoryStore.enrollments = [];
         memoryStore.enrollments.push({
           id: `enr_${Date.now()}`,
           student_id: session.id,
@@ -94,38 +236,15 @@ export async function POST(request) {
           access_expiry_date: null,
           enrollment_status: "Active",
           payment_status: "Paid",
-          created_at: new Date().toISOString(),
-          last_accessed_at: new Date().toISOString()
+          created_at: new Date().toISOString()
         });
       }
 
       return NextResponse.json({
         success: true,
-        message: "Payment confirmed! You are now fully active in the Tele-Rotation cohort.",
-        enrollment: enr
+        message: "Tuition payment processed successfully! Your clinical rotation seat is now confirmed.",
+        application: updated
       });
-    }
-
-    // 2. Submit Tele-Rotation Application
-    if (action === "apply") {
-      const { name, email, phone, document_url, message, preferred_time } = body;
-      const newApp = {
-        id: `rot_app_${Date.now()}`,
-        student_id: session.id,
-        applicant_name: name || session.name || "Candidate",
-        applicant_email: email || session.email,
-        applicant_phone: phone || "",
-        document_url: document_url || "",
-        notes: message || "New Tele-Rotation candidate application",
-        status: "Submitted",
-        preferred_start: "2026-10-01",
-        timing_preference: preferred_time || "Evenings CST",
-        applied_at: new Date().toISOString()
-      };
-      if (!memoryStore.rotation_applications) memoryStore.rotation_applications = [];
-      memoryStore.rotation_applications.unshift(newApp);
-
-      return NextResponse.json({ success: true, application: newApp });
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });

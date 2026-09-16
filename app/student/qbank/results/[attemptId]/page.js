@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
+import QuestionTutorModal from "@/components/QuestionTutorModal";
 
 export default function QBankResultsPage({ params }) {
   const resolvedParams = use(params);
@@ -10,6 +11,7 @@ export default function QBankResultsPage({ params }) {
   const [attempt, setAttempt] = useState(null);
   const [loading, setLoading] = useState(true);
   const [bookmarkedQuestions, setBookmarkedQuestions] = useState({});
+  const [activeDiscussionQuestion, setActiveDiscussionQuestion] = useState(null);
 
   useEffect(() => {
     async function loadResults() {
@@ -324,10 +326,52 @@ export default function QBankResultsPage({ params }) {
                   </div>
                 )}
               </div>
+
+              {/* Question Action Strip (Debate / AI Preceptor) */}
+              <div style={{ marginTop: "14px", paddingTop: "12px", borderTop: "1px solid #e2e8f0", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+                <button
+                  onClick={() =>
+                    setActiveDiscussionQuestion({
+                      question: q,
+                      selectedOption: `${userSelectedLetter}. ${q.options?.[ans.selected_index] || "None"}`,
+                      correctOption: `${correctLetter}. ${q.options?.[q.correct_index] || ""}`,
+                      rationale: `${ans.explanation_correct || q.explanation_correct || ""} ${ans.explanation_incorrect || ""}`,
+                    })
+                  }
+                  style={{
+                    backgroundColor: "#0F766E",
+                    color: "#FFFFFF",
+                    border: "none",
+                    padding: "8px 16px",
+                    borderRadius: "6px",
+                    fontSize: "12.5px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    boxShadow: "0 2px 6px rgba(15,118,110,0.2)",
+                  }}
+                >
+                  <span>💬 Debate / Discuss with AI Preceptor</span>
+                </button>
+              </div>
             </div>
           );
         })}
       </div>
+
+      {/* Interactive AI Clinical Preceptor Modal */}
+      {activeDiscussionQuestion && (
+        <QuestionTutorModal
+          isOpen={Boolean(activeDiscussionQuestion)}
+          onClose={() => setActiveDiscussionQuestion(null)}
+          question={activeDiscussionQuestion.question}
+          selectedOption={activeDiscussionQuestion.selectedOption}
+          correctOption={activeDiscussionQuestion.correctOption}
+          rationale={activeDiscussionQuestion.rationale}
+        />
+      )}
     </div>
   );
 }

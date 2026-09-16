@@ -64,50 +64,58 @@ export async function POST(request) {
     const body = await request.json();
     const { action } = body;
 
-    // 1. Update Application Status
+    // 1. Update Application Status (Approve as Free or Paid with Custom Fee)
     if (action === "update_app_status") {
-      const { applicationId, status, notes } = body;
+      const { applicationId, status, notes, tier_type = "paid", tuition_fee = 1250 } = body;
       const app = (memoryStore.rotation_applications || []).find(a => a.id === applicationId);
       if (!app) return NextResponse.json({ error: "Application not found" }, { status: 404 });
 
       app.status = status;
+      app.tier_type = tier_type;
+      app.tuition_fee = Number(tuition_fee);
+      if (tier_type === "free") {
+        app.payment_status = "Free Access";
+      }
       if (notes) app.notes = notes;
 
-      // If Approved, ensure student has an active enrollment
-      if (status === "Approved" && !app.student_id) {
-        const newUserId = `usr_${Date.now()}`;
-        const names = (app.applicant_name || "Applicant").split(" ");
-        memoryStore.users.push({
-          id: newUserId,
-          email: app.applicant_email,
-          first_name: names[0] || "Learner",
-          last_name: names.slice(1).join(" ") || "Doctor",
-          role: "student",
-          medical_school: app.medical_school,
-          graduation_year: app.graduation_year,
-          usmle_stage: app.usmle_stage
-        });
-        app.student_id = newUserId;
-
-        // Create tele_rotation enrollment
-        const newEnrId = `rot_enr_${Date.now()}`;
-        memoryStore.rotation_enrollments.push({
-          id: newEnrId,
-          student_id: newUserId,
-          rotation_program_id: "rot_prog_tele",
-          start_date: app.preferred_start || "2026-10-01",
-          end_date: "2026-11-15",
-          current_week: 1,
-          total_weeks: 6,
-          physician: "Dr. Janardhan Mydam, MD, FAAP",
-          hospital_site: "JVA Tele-Neonatology Clinical Network",
-          schedule_summary: "Live rounds & clinical examine calls via Microsoft Teams",
-          evaluation_status: "Enrolled - Orientation Pending",
-          certificate_issued: false
-        });
+      // If Approved and Free, activate seat immediately
+      if (status === "Approved" && tier_type === "free" && app.student_id) {
+        let enr = (memoryStore.enrollments || []).find(e => e.student_id === app.student_id && e.program_id === "prog_tele_rotation");
+        if (enr) {
+          enr.enrollment_status = "Active";
+          enr.payment_status = "Paid";
+        } else {
+          if (!memoryStore.enrollments) memoryStore.enrollments = [];
+          memoryStore.enrollments.push({
+            id: `enr_${Date.now()}`,
+            student_id: app.student_id,
+            program_id: "prog_tele_rotation",
+            plan: "Free Scholarship Tele-Rotation",
+            access_start_date: new Date().toISOString(),
+            access_expiry_date: null,
+            enrollment_status: "Active",
+            payment_status: "Paid",
+            created_at: new Date().toISOString()
+          });
+        }
       }
 
       return NextResponse.json({ success: true, application: app });
+    }
+
+    // 1b. Add / Manage Recorded Session Links
+    if (action === "add_recorded_session") {
+      const { title, date, duration, preceptor, video_url, notes, tags } = body;
+      const newSession = await db.addRecordedSession({
+        title,
+        date,
+        duration,
+        preceptor,
+        video_url,
+        notes,
+        tags
+      });
+      return NextResponse.json({ success: true, recorded_session: newSession });
     }
 
     // 2. Request Documents (triggers status Documents Required)

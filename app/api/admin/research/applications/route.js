@@ -24,13 +24,13 @@ export async function PUT(req) {
     }
 
     const body = await req.json();
-    const { id, status, assigned_group_id, notes } = body;
+    const { id, status, assigned_group_id, notes, tier_type = "free", fee = 0 } = body;
 
     if (!id || !status) {
       return NextResponse.json({ error: "Application ID and status are required." }, { status: 400 });
     }
 
-    const updated = await db.updateResearchApplicationStatus(id, status, assigned_group_id, notes);
+    const updated = await db.updateResearchApplicationStatus(id, status, assigned_group_id, notes, tier_type, fee);
     if (!updated) {
       return NextResponse.json({ error: "Application not found." }, { status: 404 });
     }

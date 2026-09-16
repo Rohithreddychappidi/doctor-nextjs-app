@@ -5,42 +5,54 @@ import { createToken } from "@/lib/auth";
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { credential, demoEmail, role = "student" } = body;
+    const { credential, role = "student" } = body;
 
-    let email = role === "guest" ? "guest@jvmmedicalservices.com" : "student@jvmmedicalservices.com";
-    let fullName = role === "guest" ? "Guest User" : "Medical Student";
+    if (!credential) {
+      return NextResponse.json({ error: "Google sign-in token was not provided." }, { status: 400 });
+    }
+
+    let email = null;
+    let fullName = "Medical Trainee";
+    let firstName = "Student";
+    let lastName = "";
     let avatarUrl = null;
 
-    // Decode Google JWT payload if provided
-    if (credential) {
-      try {
-        const parts = credential.split(".");
-        if (parts.length === 3) {
-          const payloadStr = Buffer.from(parts[1], "base64").toString("utf-8");
-          const payload = JSON.parse(payloadStr);
-          if (payload.email) {
-            email = payload.email.toLowerCase().trim();
-            fullName = payload.name || `${payload.given_name || ""} ${payload.family_name || ""}`.trim() || email;
-            avatarUrl = payload.picture || null;
-          }
+    // Decode Google JWT payload safely
+    try {
+      const parts = credential.split(".");
+      if (parts.length === 3) {
+        const payloadStr = Buffer.from(parts[1], "base64").toString("utf-8");
+        const payload = JSON.parse(payloadStr);
+        if (payload.email) {
+          email = payload.email.toLowerCase().trim();
+          fullName = payload.name || `${payload.given_name || ""} ${payload.family_name || ""}`.trim() || email.split("@")[0];
+          firstName = payload.given_name || fullName.split(" ")[0] || "Student";
+          lastName = payload.family_name || fullName.split(" ").slice(1).join(" ") || "";
+          avatarUrl = payload.picture || null;
         }
-      } catch (decodeErr) {
-        console.warn("Could not decode Google credential JWT, using default profile:", decodeErr);
       }
-    } else if (demoEmail) {
-      email = demoEmail.toLowerCase().trim();
+    } catch (decodeErr) {
+      console.error("Failed to decode Google credential token:", decodeErr);
+      return NextResponse.json({ error: "Invalid Google credential format." }, { status: 400 });
+    }
+
+    if (!email) {
+      return NextResponse.json({ error: "Could not retrieve email from Google credential." }, { status: 400 });
     }
 
     const assignedRole = role === "guest" ? "guest" : "student";
 
-    // Look up or auto-provision profile
+    // Look up or auto-provision genuine profile
     let user = await db.findUserByEmail(email);
     if (!user) {
       user = await db.createUser({
         id: `usr_google_${Date.now().toString(36)}`,
         email,
         full_name: fullName,
+        first_name: firstName,
+        last_name: lastName,
         role: assignedRole,
+        avatar_url: avatarUrl,
         password_hash: "google_oauth_managed",
         specialty: assignedRole === "guest" ? "Community Visitor" : "Medical Student",
         description: "Authenticated via Google Single Sign-On."

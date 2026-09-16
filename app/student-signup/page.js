@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import MandatoryStar from "@/components/MandatoryStar";
@@ -24,31 +24,73 @@ export default function StudentSignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleGoogleSignup = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch("/api/auth/google", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          role,
-          demoEmail: role === "guest" ? "guest@jvmmedicalservices.com" : "student@jvmmedicalservices.com",
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Google sign-up failed");
+  useEffect(() => {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
 
-      if (role === "guest") {
-        router.push("/research");
-      } else {
-        router.push("/student/dashboard");
+    function initGoogle() {
+      if (window.google?.accounts?.id) {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: async (response) => {
+            if (response.credential) {
+              setLoading(true);
+              setError("");
+              try {
+                const res = await fetch("/api/auth/google", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ credential: response.credential, role }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Google sign-up failed");
+
+                if (role === "guest") {
+                  router.push("/research");
+                } else {
+                  router.push("/student/dashboard");
+                }
+                router.refresh();
+              } catch (err) {
+                setError(err.message);
+              } finally {
+                setLoading(false);
+              }
+            }
+          },
+        });
+
+        const btn = document.getElementById("google-signup-btn-container");
+        if (btn) {
+          btn.innerHTML = "";
+          window.google.accounts.id.renderButton(btn, {
+            theme: "outline",
+            size: "large",
+            width: "360",
+            text: "signup_with",
+            shape: "rectangular",
+          });
+        }
       }
-      router.refresh();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    }
+
+    if (window.google?.accounts?.id) {
+      initGoogle();
+    } else {
+      const script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = initGoogle;
+      document.body.appendChild(script);
+    }
+  }, [router, role]);
+
+  const handleGoogleSignup = () => {
+    if (window.google?.accounts?.id) {
+      window.google.accounts.id.prompt();
+    } else {
+      setError("Google authentication service is initializing. Please retry in a moment or fill out the registration form below.");
     }
   };
 
@@ -198,36 +240,38 @@ export default function StudentSignupPage() {
 
           {/* Google 1-Click Onboarding */}
           <div style={{ marginBottom: 28, textAlign: "center" }}>
-            <button
-              type="button"
-              onClick={handleGoogleSignup}
-              disabled={loading}
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "12px",
-                padding: "13px 20px",
-                backgroundColor: "#FFFFFF",
-                border: "1px solid #CBD5E1",
-                borderRadius: "8px",
-                fontSize: "15px",
-                fontWeight: 600,
-                color: "#1E293B",
-                cursor: "pointer",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.04)",
-                transition: "all 0.15s ease",
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 18 18">
-                <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.616z"/>
-                <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
-                <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.347 2.825.957 4.039l3.007-2.332z"/>
-                <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/>
-              </svg>
-              Continue with Google ({role === "student" ? "as Student" : "as Guest"})
-            </button>
+            <div id="google-signup-btn-container" style={{ minHeight: "44px", width: "100%", display: "flex", justifyContent: "center" }}>
+              <button
+                type="button"
+                onClick={handleGoogleSignup}
+                disabled={loading}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "12px",
+                  padding: "13px 20px",
+                  backgroundColor: "#FFFFFF",
+                  border: "1px solid #CBD5E1",
+                  borderRadius: "8px",
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  color: "#1E293B",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.04)",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18">
+                  <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.616z"/>
+                  <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
+                  <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.347 2.825.957 4.039l3.007-2.332z"/>
+                  <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/>
+                </svg>
+                Continue with Google ({role === "student" ? "as Student" : "as Guest"})
+              </button>
+            </div>
             <div style={{ display: "flex", alignItems: "center", margin: "22px 0" }}>
               <div style={{ flex: 1, height: "1px", backgroundColor: "#E2E8F0" }}></div>
               <span style={{ padding: "0 16px", fontSize: "12px", color: "#94A3B8", fontWeight: 600, textTransform: "uppercase" }}>

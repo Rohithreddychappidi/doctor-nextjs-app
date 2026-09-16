@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import QuestionTutorModal from "@/components/QuestionTutorModal";
 
 export default function TakeQBankTestPage({ params }) {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function TakeQBankTestPage({ params }) {
   const [secondsRemaining, setSecondsRemaining] = useState(600); // 10 mins default
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [tutorModalOpen, setTutorModalOpen] = useState(false);
 
   useEffect(() => {
     async function loadAttempt() {
@@ -247,11 +249,50 @@ export default function TakeQBankTestPage({ params }) {
                 <div style={{ fontSize: "12px", color: "#4B505C", whiteSpace: "pre-line", lineHeight: 1.5, borderTop: "1px solid #E6E2D8", paddingTop: "8px" }}>
                   {currentQ.explanation_incorrect}
                 </div>
+                <div style={{ marginTop: "14px", paddingTop: "12px", borderTop: "1px solid #E6E2D8", display: "flex", justifyContent: "flex-end" }}>
+                  <button
+                    onClick={() => setTutorModalOpen(true)}
+                    style={{
+                      backgroundColor: "#0F766E",
+                      color: "#FFFFFF",
+                      border: "none",
+                      padding: "8px 16px",
+                      borderRadius: "6px",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      boxShadow: "0 2px 6px rgba(15,118,110,0.25)",
+                    }}
+                  >
+                    <span>🩺 Debate / Discuss with AI Preceptor</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
         )}
       </div>
+
+      {/* Interactive AI Clinical Preceptor Modal */}
+      <QuestionTutorModal
+        isOpen={tutorModalOpen}
+        onClose={() => setTutorModalOpen(false)}
+        question={currentQ}
+        selectedOption={
+          selectedAnswers[currentQ.id] !== undefined
+            ? `${String.fromCharCode(65 + selectedAnswers[currentQ.id])}. ${currentQ.options[selectedAnswers[currentQ.id]]}`
+            : "Not answered yet"
+        }
+        correctOption={
+          currentQ.correct_index !== undefined
+            ? `${String.fromCharCode(65 + currentQ.correct_index)}. ${currentQ.options[currentQ.correct_index]}`
+            : ""
+        }
+        rationale={`${currentQ.explanation_correct || ""} ${currentQ.explanation_incorrect || ""}`}
+      />
 
       {/* Bottom Navigation Toolbar */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", backgroundColor: "#FFFFFF", padding: "16px 24px", borderRadius: "8px", border: "1px solid #E6E2D8", flexWrap: "wrap", gap: "12px" }}>

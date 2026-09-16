@@ -2,291 +2,372 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import EnrollmentGate from "@/components/EnrollmentGate";
-import SectionDisclaimer from "@/components/SectionDisclaimer";
 
 export default function StudentQBankPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activePillar, setActivePillar] = useState("pillar_neonatology");
+  const [unlocking, setUnlocking] = useState(null);
+  const [message, setMessage] = useState("");
+
+  const loadQBank = async () => {
+    try {
+      const res = await fetch("/api/student/qbank");
+      if (res.ok) {
+        const json = await res.json();
+        setData(json);
+      }
+    } catch (err) {
+      console.error("QBank load error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function loadQBank() {
-      try {
-        const res = await fetch("/api/student/qbank");
-        if (res.ok) {
-          const json = await res.json();
-          setData(json);
-        }
-      } catch (err) {
-        console.error("QBank load error:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
     loadQBank();
   }, []);
 
+  const handleUnlock = async (moduleId) => {
+    setUnlocking(moduleId);
+    setMessage("");
+    try {
+      const res = await fetch("/api/student/qbank", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "unlock_module", module_id: moduleId }),
+      });
+      const resJson = await res.json();
+      if (!res.ok) throw new Error(resJson.error || "Unlock failed");
+
+      setMessage(resJson.message || "Module unlocked successfully!");
+      await loadQBank();
+    } catch (err) {
+      alert("Unlock error: " + err.message);
+    } finally {
+      setUnlocking(null);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[350px] text-slate-500">
-        <div className="w-8 h-8 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mb-3" />
-        <p className="text-xs font-semibold">Loading Question Bank...</p>
+      <div style={{ padding: "60px 20px", textAlign: "center", color: "#64748B" }}>
+        <div style={{ width: 36, height: 36, border: "4px solid #0B1E36", borderTopColor: "transparent", borderRadius: "50%", margin: "0 auto 16px", animation: "spin 0.8s linear infinite" }} />
+        <p style={{ fontSize: "14px", fontWeight: 600 }}>Loading Question Bank tiers &amp; clinical modules...</p>
+        <style jsx>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
-  const isEnrolled = !!data?.is_enrolled;
-  const questions = data?.questions || [];
-  const recent_attempts = data?.recent_attempts || [];
-  const bookmarks = data?.bookmarks || [];
-
-  const lastAttempt = recent_attempts[0];
+  const pillars = data?.pillars || [];
+  const currentPillar = pillars.find((p) => p.id === activePillar) || pillars[0];
+  const hasFullBundle = data?.has_full_bundle;
 
   return (
-    <EnrollmentGate
-      isEnrolled={isEnrolled}
-      programKey="qbank"
-      programTitle="Board-Style Clinical Question Bank"
-      programDescription="Comprehensive clinical question bank covering USMLE Step 1, Step 2 CK, and Pediatric Shelf exams with dual-level rationales authored by Dr. Janardhan Mydam."
-      icon="academic"
-    >
-      <div className="max-w-6xl mx-auto space-y-8 pb-12">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+    <div style={{ maxWidth: 1060, margin: "0 auto", padding: "24px 16px 60px" }}>
+      {/* Header */}
+      <div style={{ marginBottom: 26, display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: 16 }}>
+        <div>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "3px 10px", borderRadius: 12, backgroundColor: "#EEF2F6", color: "#0B1E36", fontSize: "11.5px", fontWeight: 700, textTransform: "uppercase", marginBottom: 8 }}>
+            📝 Board Examination Preparation
+          </div>
+          <h1 style={{ fontSize: "26px", fontWeight: 800, color: "#0B1E36", margin: "0 0 4px" }}>
+            Clinical Question Bank Hub
+          </h1>
+          <p style={{ color: "#64748B", fontSize: "14px", margin: 0 }}>
+            Master clinical decision-making with USMLE Step 2 CK &amp; Shelf formatted clinical vignettes authored by Dr. Janardhan Mydam.
+          </p>
+        </div>
+
+        <Link
+          href="/student/qbank/create"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "10px 20px",
+            backgroundColor: "#0B1E36",
+            color: "#FFFFFF",
+            borderRadius: 8,
+            fontSize: "13.5px",
+            fontWeight: 700,
+            textDecoration: "none",
+            boxShadow: "0 2px 8px rgba(11,30,54,0.15)",
+          }}
+        >
+          <span>⚡</span> Quick Custom Test Block
+        </Link>
+      </div>
+
+      {message && (
+        <div style={{ padding: "12px 18px", backgroundColor: "#F0FDF4", border: "1px solid #BBF7D0", color: "#166534", borderRadius: 8, fontSize: "14px", fontWeight: 600, marginBottom: 20 }}>
+          ✓ {message}
+        </div>
+      )}
+
+      {/* SECTION I: 2 MAIN TIER CARDS (FREE VS PAID) */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 20, marginBottom: 32 }}>
+        {/* CARD 1: FREE PRACTICE TIER */}
+        <div
+          style={{
+            backgroundColor: "#FFFFFF",
+            borderRadius: 14,
+            border: "1px solid #E2E8F0",
+            padding: "24px 22px",
+            boxShadow: "0 4px 18px rgba(0,0,0,0.03)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
           <div>
-            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-200 mb-1.5">
-              <span>📝</span> Board Exam Preparation
+            <div style={{ display: "inline-block", padding: "3px 10px", backgroundColor: "#EEF2F6", color: "#0B1E36", fontSize: "11px", fontWeight: 800, borderRadius: 12, textTransform: "uppercase", marginBottom: 12 }}>
+              Free Diagnostic Tier
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-              Clinical Question Bank Hub
-            </h1>
-            <p className="text-slate-600 text-xs sm:text-sm mt-0.5">
-              Master clinical decision-making with USMLE-formatted clinical vignettes and detailed explanations.
+            <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#0B1E36", margin: "0 0 6px" }}>
+              Diagnostic &amp; Core Practice
+            </h2>
+            <p style={{ color: "#64748B", fontSize: "13px", lineHeight: 1.5, margin: "0 0 16px" }}>
+              Included for all medical students. Test your foundational clinical reasoning across high-yield vignettes with instant explanations.
             </p>
+
+            <div style={{ backgroundColor: "#F8FAFC", borderRadius: 8, padding: "12px 14px", marginBottom: 18, fontSize: "12.5px", color: "#475569" }}>
+              <div style={{ fontWeight: 700, color: "#0B1E36", marginBottom: 6 }}>Included in Free Tier:</div>
+              <ul style={{ margin: 0, paddingLeft: 16, lineHeight: 1.7 }}>
+                <li>NRP 8th Edition &amp; Delivery Room Resuscitation Module</li>
+                <li>Pediatric Developmental Milestones Diagnostic Block</li>
+                <li>Biostatistics Diagnostic Accuracy (Sensitivity &amp; Specificity)</li>
+                <li>🩺 Interactive debate with Dr. Janardhan Mydam AI Preceptor</li>
+              </ul>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Link
-              href="/student/qbank/create"
-              className="px-5 py-2.5 rounded-xl bg-teal-600 text-white font-semibold text-xs hover:bg-teal-700 shadow-sm transition inline-flex items-center gap-1.5"
-            >
-              + Create Practice Block
-            </Link>
-          </div>
+          <Link
+            href="/student/qbank/test/mock_attempt_sample_1"
+            style={{
+              display: "block",
+              textAlign: "center",
+              padding: "11px 16px",
+              backgroundColor: "#EEF2F6",
+              color: "#0B1E36",
+              fontWeight: 700,
+              fontSize: "13.5px",
+              borderRadius: 8,
+              textDecoration: "none",
+              transition: "all 0.15s ease",
+            }}
+          >
+            Launch Free Diagnostic Block →
+          </Link>
         </div>
 
-        {/* Section Compliance Disclaimer (Admin Controlled) */}
-        <SectionDisclaimer sectionKey="question_bank" />
-
-        {/* SECTION I: QBank Home Hero Row (Continue Previous Test / Performance) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Continue / Resume Block */}
-          <div className="md:col-span-2 p-6 bg-gradient-to-r from-slate-900 to-teal-950 text-white rounded-2xl shadow-sm flex flex-col justify-between">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-teal-300">
-                Active Test Session
-              </span>
-              <h3 className="text-xl font-bold text-white mt-1">
-                {lastAttempt ? lastAttempt.title : "High-Yield Pediatric Shelf Block"}
-              </h3>
-              <p className="text-xs text-slate-300 mt-1 max-w-lg">
-                {lastAttempt
-                  ? `Completed ${lastAttempt.total_questions} questions in ${lastAttempt.mode} mode • Score: ${lastAttempt.score_percent}%`
-                  : "Ready to launch your next timed clinical reasoning practice session."}
-              </p>
+        {/* CARD 2: PREMIUM CLINICAL BOARD TIER */}
+        <div
+          style={{
+            background: "linear-gradient(135deg, #0B1E36 0%, #17375E 100%)",
+            color: "#FFFFFF",
+            borderRadius: 14,
+            padding: "24px 22px",
+            boxShadow: "0 8px 25px rgba(11,30,54,0.18)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
+          <div>
+            <div style={{ display: "inline-block", padding: "3px 10px", backgroundColor: "#B4832A", color: "#FFF", fontSize: "11px", fontWeight: 800, borderRadius: 12, textTransform: "uppercase", marginBottom: 12 }}>
+              ★ Premium Clinical Board Tier
             </div>
+            <h2 style={{ fontSize: "20px", fontWeight: 800, margin: "0 0 6px" }}>
+              Full High-Yield Board QBank
+            </h2>
+            <p style={{ color: "#CBD5E1", fontSize: "13px", lineHeight: 1.5, margin: "0 0 16px" }}>
+              Complete question pool for USMLE Step 2 CK, Pediatric Shelf, and Neonatal Fellowship In-Training Exams.
+            </p>
 
-            <div className="flex items-center gap-3 pt-6">
-              {lastAttempt ? (
-                <Link
-                  href={`/student/qbank/results/${lastAttempt.id}`}
-                  className="px-5 py-2.5 rounded-xl bg-teal-500 text-slate-950 font-bold text-xs hover:bg-teal-400 transition shadow-sm inline-flex items-center gap-1.5"
-                >
-                  Review Test Results →
-                </Link>
-              ) : null}
-              <Link
-                href="/student/qbank/create"
-                className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs transition border border-white/20"
-              >
-                Launch New Block
-              </Link>
+            <div style={{ backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 8, padding: "12px 14px", marginBottom: 18, fontSize: "12.5px", color: "#E2E8F0" }}>
+              <div style={{ fontWeight: 700, color: "#93C5FD", marginBottom: 6 }}>Full Tier Privileges:</div>
+              <ul style={{ margin: 0, paddingLeft: 16, lineHeight: 1.7 }}>
+                <li>350+ Board-Style Clinical Vignettes across all 3 Pillars</li>
+                <li>Dual-Level Explanations: Trainee Review &amp; Attending Pearl</li>
+                <li>Predictive Shelf Score Analytics &amp; Weak-Area Breakdown</li>
+                <li>Official Verifiable Certificate of Mastery upon completion</li>
+              </ul>
             </div>
           </div>
 
-          {/* Performance Overview Tile */}
-          <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-            <div>
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Overall QBank Metrics</span>
-              <div className="mt-3 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-600">Total Questions in Bank</span>
-                  <span className="text-sm font-bold text-slate-900">{questions.length}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-600">Completed Blocks</span>
-                  <span className="text-sm font-bold text-slate-900">{recent_attempts.length}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-600">Saved Bookmarks</span>
-                  <span className="text-sm font-bold text-amber-600">{bookmarks.length}</span>
-                </div>
-              </div>
+          {hasFullBundle ? (
+            <div style={{ textAlign: "center", padding: "11px", backgroundColor: "rgba(34,197,94,0.2)", border: "1px solid #22C55E", borderRadius: 8, color: "#86EFAC", fontWeight: 700, fontSize: "13.5px" }}>
+              ✓ Full Board Tier Unlocked &amp; Active
             </div>
-
-            <div className="pt-4 border-t border-slate-100">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase block mb-1">Identified Weak Areas:</span>
-              <span className="inline-block text-xs font-medium text-slate-600 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
-                {recent_attempts.length > 0 ? "Analyzing recent attempts..." : "No weak areas identified • Launch practice blocks to analyze"}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* SECTION: 3 Specializations Modules Selector */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-slate-900 text-base">Board Exam Specialization Pathways</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Choose your discipline to practice specific clinical modules and random 5–20 question batches.</p>
-            </div>
-            <Link
-              href="/student/qbank/create"
-              className="text-xs font-bold text-teal-700 hover:text-teal-800"
+          ) : (
+            <button
+              onClick={() => handleUnlock("bundle_all")}
+              disabled={unlocking === "bundle_all"}
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                backgroundColor: "#B4832A",
+                color: "#FFFFFF",
+                fontWeight: 700,
+                fontSize: "14px",
+                borderRadius: 8,
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(180,131,42,0.3)",
+              }}
             >
-              Configure Custom Block →
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link
-              href="/student/qbank/create"
-              className="p-4 rounded-xl border border-slate-200 hover:border-teal-500 bg-slate-50/50 hover:bg-teal-50/30 transition group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">👶</span>
-                  <h4 className="text-sm font-bold text-slate-900 group-hover:text-teal-700 transition">Neonatal-Perinatal Medicine</h4>
-                </div>
-                <p className="text-xs text-slate-600 line-clamp-2">Golden Hour resuscitation, RDS surfactant kinetics, PPHN, and extreme prematurity.</p>
-              </div>
-              <div className="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs font-semibold text-teal-700">
-                <span>10 Modules Available</span>
-                <span>Practice →</span>
-              </div>
-            </Link>
-
-            <Link
-              href="/student/qbank/create"
-              className="p-4 rounded-xl border border-slate-200 hover:border-teal-500 bg-slate-50/50 hover:bg-teal-50/30 transition group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">🩺</span>
-                  <h4 className="text-sm font-bold text-slate-900 group-hover:text-teal-700 transition">General Pediatrics</h4>
-                </div>
-                <p className="text-xs text-slate-600 line-clamp-2">Developmental milestones, immunization schedules, pediatric exanthems, and gastroenterology.</p>
-              </div>
-              <div className="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs font-semibold text-teal-700">
-                <span>10 Modules Available</span>
-                <span>Practice →</span>
-              </div>
-            </Link>
-
-            <Link
-              href="/student/qbank/create"
-              className="p-4 rounded-xl border border-slate-200 hover:border-teal-500 bg-slate-50/50 hover:bg-teal-50/30 transition group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">⚡</span>
-                  <h4 className="text-sm font-bold text-slate-900 group-hover:text-teal-700 transition">Critical Care &amp; Emergency</h4>
-                </div>
-                <p className="text-xs text-slate-600 line-clamp-2">PALS algorithms, pediatric septic shock, status epilepticus, and USMLE biostatistics.</p>
-              </div>
-              <div className="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs font-semibold text-teal-700">
-                <span>8 Modules Available</span>
-                <span>Practice →</span>
-              </div>
-            </Link>
-          </div>
-        </div>
-
-        {/* SECTION I: Recent Tests List & Detailed Rationales */}
-        {recent_attempts.length > 0 && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 text-base">Recent Practice Test Blocks</h3>
-              <span className="text-xs text-slate-500">{recent_attempts.length} blocks completed</span>
-            </div>
-
-            <div className="divide-y divide-slate-100">
-              {recent_attempts.map((att) => (
-                <div key={att.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <h4 className="font-bold text-slate-900 text-sm">{att.title}</h4>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Mode: <span className="font-medium text-slate-700">{att.mode}</span> • Total Questions: {att.total_questions}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <div className={`text-lg font-extrabold ${att.score_percent >= 70 ? "text-emerald-600" : "text-amber-600"}`}>
-                        {att.score_percent}%
-                      </div>
-                      <span className="text-[10px] text-slate-400 font-semibold uppercase">Score</span>
-                    </div>
-
-                    <Link
-                      href={`/student/qbank/results/${att.id}`}
-                      className="px-3.5 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200 transition"
-                    >
-                      Review Rationales →
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Question Bank Explorer & Bookmarks */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-slate-900 text-base">Featured Clinical Question Vignettes</h3>
-              <p className="text-xs text-slate-500">Practice questions with in-depth explanations for why correct choices are right and distractors are wrong.</p>
-            </div>
-            <Link
-              href="/student/qbank/create"
-              className="text-xs font-semibold text-teal-700 hover:underline"
-            >
-              Test Mode →
-            </Link>
-          </div>
-
-          <div className="space-y-3">
-            {questions.map((q, idx) => (
-              <div key={q.id} className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded bg-teal-100 text-teal-800 font-bold text-[10px]">
-                      {q.subject}
-                    </span>
-                    <span className="text-slate-500 font-medium">System: {q.system}</span>
-                  </div>
-                  <span className="text-slate-400 text-[11px]">{q.exam}</span>
-                </div>
-
-                <p className="text-xs sm:text-sm text-slate-900 font-medium leading-relaxed">
-                  <strong>Question {idx + 1}:</strong> {q.stem}
-                </p>
-              </div>
-            ))}
-          </div>
+              {unlocking === "bundle_all" ? "Unlocking Complete Access..." : "Unlock All 3 Pillars (All-Access $99) →"}
+            </button>
+          )}
         </div>
       </div>
-    </EnrollmentGate>
+
+      {/* SECTION II: 3 MAIN SUBJECT PILLARS */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ fontSize: "12px", fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 10 }}>
+          Select Clinical Subject Pillar:
+        </div>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {pillars.map((pillar) => (
+            <button
+              key={pillar.id}
+              onClick={() => setActivePillar(pillar.id)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 18px",
+                borderRadius: 10,
+                border: activePillar === pillar.id ? "2px solid #0B1E36" : "1px solid #CBD5E1",
+                backgroundColor: activePillar === pillar.id ? "#0B1E36" : "#FFFFFF",
+                color: activePillar === pillar.id ? "#FFFFFF" : "#334155",
+                fontWeight: 700,
+                fontSize: "13.5px",
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <span style={{ fontSize: "16px" }}>{pillar.icon}</span>
+              <span>{pillar.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Pillar Header */}
+      <div style={{ backgroundColor: "#F8FAFC", borderRadius: 10, border: "1px solid #E2E8F0", padding: "14px 18px", marginBottom: 20 }}>
+        <div style={{ fontWeight: 800, color: "#0B1E36", fontSize: "15px" }}>
+          {currentPillar.name}
+        </div>
+        <div style={{ fontSize: "13px", color: "#64748B", marginTop: 2 }}>
+          {currentPillar.description}
+        </div>
+      </div>
+
+      {/* Modular Cards Under Selected Pillar */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 18 }}>
+        {currentPillar.modules?.map((mod) => (
+          <div
+            key={mod.id}
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: 12,
+              border: mod.is_free ? "1px solid #CBD5E1" : "1px solid #E2E8F0",
+              padding: "20px 18px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <span
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: 800,
+                    padding: "2px 8px",
+                    borderRadius: 4,
+                    backgroundColor: mod.is_free ? "#DCFCE7" : "#FEF3C7",
+                    color: mod.is_free ? "#166534" : "#92400E",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {mod.is_free ? "FREE MODULE" : `PAID TIER · $${mod.price}`}
+                </span>
+                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: 600 }}>
+                  {mod.question_count} Questions
+                </span>
+              </div>
+
+              <h3 style={{ fontSize: "15.5px", fontWeight: 800, color: "#0B1E36", margin: "0 0 6px", lineHeight: 1.4 }}>
+                {mod.title}
+              </h3>
+              <div style={{ fontSize: "12px", color: "#64748B", marginBottom: 14 }}>
+                🎯 Focus: {mod.exam_focus}
+              </div>
+            </div>
+
+            {mod.is_unlocked || mod.is_free ? (
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <Link
+                  href={`/student/qbank/test/mock_attempt_sample_1?mode=tutor&module=${mod.id}`}
+                  style={{
+                    flex: 1,
+                    textAlign: "center",
+                    padding: "9px 10px",
+                    backgroundColor: "#0B1E36",
+                    color: "#FFF",
+                    borderRadius: 6,
+                    fontSize: "12.5px",
+                    fontWeight: 700,
+                    textDecoration: "none",
+                  }}
+                >
+                  🩺 Tutor Mode
+                </Link>
+                <Link
+                  href={`/student/qbank/test/mock_attempt_sample_1?mode=timed&module=${mod.id}`}
+                  style={{
+                    flex: 1,
+                    textAlign: "center",
+                    padding: "9px 10px",
+                    backgroundColor: "#EEF2F6",
+                    color: "#0B1E36",
+                    borderRadius: 6,
+                    fontSize: "12.5px",
+                    fontWeight: 700,
+                    textDecoration: "none",
+                  }}
+                >
+                  ⏱️ Timed Mode
+                </Link>
+              </div>
+            ) : (
+              <button
+                onClick={() => handleUnlock(mod.id)}
+                disabled={unlocking === mod.id}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  marginTop: 10,
+                  backgroundColor: "#B4832A",
+                  color: "#FFF",
+                  borderRadius: 6,
+                  border: "none",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  boxShadow: "0 2px 6px rgba(180,131,42,0.25)",
+                }}
+              >
+                {unlocking === mod.id ? "Unlocking..." : `💳 Unlock Module ($${mod.price})`}
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

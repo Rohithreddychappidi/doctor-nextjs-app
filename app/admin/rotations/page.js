@@ -16,8 +16,21 @@ export default function AdminRotationsPage() {
   const [applications, setApplications] = useState([]);
   const [meetings, setMeetings] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
+  const [recordedSessions, setRecordedSessions] = useState([]);
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
+
+  // Recorded Session Form
+  const [newRecording, setNewRecording] = useState({
+    title: "",
+    date: new Date().toISOString().split("T")[0],
+    duration: "1 hr 15 min",
+    preceptor: "Dr. Janardhan Mydam, MD, FAAP",
+    video_url: "",
+    notes: "",
+    tags: "NRP, Neonatology, Bedside Rounds"
+  });
+  const [addingRecording, setAddingRecording] = useState(false);
 
   // Filters
   const [appFilter, setAppFilter] = useState("ALL");
@@ -78,10 +91,52 @@ export default function AdminRotationsPage() {
         setEnrollments(json.enrollments || []);
         setStats(json.stats || {});
       }
+      const rotRes = await fetch("/api/student/rotations");
+      if (rotRes.ok) {
+        const rotJson = await rotRes.json();
+        setRecordedSessions(rotJson.recorded_sessions || []);
+      }
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleAddRecording(e) {
+    e.preventDefault();
+    if (!newRecording.title || !newRecording.video_url) {
+      alert("Recording Title and Video URL are required.");
+      return;
+    }
+    setAddingRecording(true);
+    try {
+      const res = await fetch("/api/admin/rotations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "add_recorded_session",
+          ...newRecording,
+          tags: newRecording.tags.split(",").map((t) => t.trim()).filter(Boolean),
+        }),
+      });
+      if (res.ok) {
+        notify("Recorded clinical session link published successfully!");
+        setNewRecording({
+          title: "",
+          date: new Date().toISOString().split("T")[0],
+          duration: "1 hr",
+          preceptor: "Dr. Janardhan Mydam, MD, FAAP",
+          video_url: "",
+          notes: "",
+          tags: "NRP, NICU, Rounds",
+        });
+        loadData();
+      }
+    } catch (err) {
+      alert("Error adding recording: " + err.message);
+    } finally {
+      setAddingRecording(false);
     }
   }
 
@@ -91,15 +146,21 @@ export default function AdminRotationsPage() {
   }
 
   // Application Actions
-  async function handleAppStatus(appId, newStatus) {
+  async function handleAppStatus(appId, newStatus, tierType = "paid", tuitionFee = 1250) {
     try {
       const res = await fetch("/api/admin/rotations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "update_app_status", applicationId: appId, status: newStatus }),
+        body: JSON.stringify({
+          action: "update_app_status",
+          applicationId: appId,
+          status: newStatus,
+          tier_type: tierType,
+          tuition_fee: tuitionFee
+        }),
       });
       if (res.ok) {
-        notify(`Application marked as ${newStatus}`);
+        notify(`Application marked as ${newStatus} (${tierType === "free" ? "Free Scholarship" : `Paid Tuition $${tuitionFee}`})`);
         loadData();
       }
     } catch (e) {
@@ -287,6 +348,7 @@ export default function AdminRotationsPage() {
           {[
             { id: "applications", label: "📋 Inbound Applications Queue", count: applications.length },
             { id: "schedule", label: "📅 Flexible Meeting Scheduler", count: meetings.length },
+            { id: "recordings", label: "🎥 Recorded Clinical Sessions", count: recordedSessions.length },
             { id: "examine", label: "⚖️ Graded Examine Calls", count: meetings.filter(m => m.meeting_type === "Examine Call").length },
             { id: "deliverables", label: "📁 Deliverables & Documents", count: enrollments.length },
             { id: "certificates", label: "🎓 Completion & Certificates", count: enrollments.filter(e => e.certificate_issued).length },
@@ -442,12 +504,22 @@ export default function AdminRotationsPage() {
                                 Request Docs ✉️
                               </button>
                               {app.status !== "Approved" && (
-                                <button
-                                  onClick={() => handleAppStatus(app.id, "Approved")}
-                                  style={{ padding: "4px 10px", borderRadius: "5px", backgroundColor: "#10B981", color: "#FFFFFF", border: "none", fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
-                                >
-                                  Approve &amp; Enroll ✓
-                                </button>
+                                <>
+                                  <button
+                                    onClick={() => handleAppStatus(app.id, "Approved", "free", 0)}
+                                    style={{ padding: "4px 8px", borderRadius: "5px", backgroundColor: "#ECFDF5", color: "#065F46", border: "1px solid #A7F3D0", fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
+                                    title="Approve without charging tuition"
+                                  >
+                                    ✓ Approve (Free)
+                                  </button>
+                                  <button
+                                    onClick={() => handleAppStatus(app.id, "Approved", "paid", 1250)}
+                                    style={{ padding: "4px 8px", borderRadius: "5px", backgroundColor: "#047857", color: "#FFFFFF", border: "none", fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
+                                    title="Approve requiring $1,250 tuition payment before entering rotation"
+                                  >
+                                    💳 Approve (Paid $1,250)
+                                  </button>
+                                </>
                               )}
                               {app.status !== "Rejected" && (
                                 <button
@@ -772,6 +844,152 @@ export default function AdminRotationsPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 6: RECORDED SESSIONS ARCHIVE (MANUAL ENTRY) */}
+        {activeTab === "recordings" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            {/* Add Recording Card */}
+            <div style={{ backgroundColor: "#FFFFFF", borderRadius: "12px", border: "1px solid #E2E8F0", padding: "22px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+              <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#12203B", margin: "0 0 4px" }}>
+                + Add / Publish Clinical Lecture Recording
+              </h3>
+              <p style={{ fontSize: "12.5px", color: "#64748B", margin: "0 0 16px" }}>
+                Enter Microsoft Teams or cloud video recording links manually. Students in the clinical rotation will immediately see these in their Recorded Sessions tab.
+              </p>
+
+              <form onSubmit={handleAddRecording}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "14px", marginBottom: "14px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>
+                      Session Title *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Week 2: LISA Surfactant Technique & RDS Case Discussion"
+                      value={newRecording.title}
+                      onChange={(e) => setNewRecording({ ...newRecording, title: e.target.value })}
+                      style={{ width: "100%", padding: "9px 12px", borderRadius: "6px", border: "1px solid #CBD5E1", fontSize: "13px", boxSizing: "border-box" }}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>
+                      Video Recording URL (Teams / Drive / Stream) *
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://teams.microsoft.com/l/recording/..."
+                      value={newRecording.video_url}
+                      onChange={(e) => setNewRecording({ ...newRecording, video_url: e.target.value })}
+                      style={{ width: "100%", padding: "9px 12px", borderRadius: "6px", border: "1px solid #CBD5E1", fontSize: "13px", boxSizing: "border-box" }}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "14px", marginBottom: "14px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>
+                      Date Recorded
+                    </label>
+                    <input
+                      type="date"
+                      value={newRecording.date}
+                      onChange={(e) => setNewRecording({ ...newRecording, date: e.target.value })}
+                      style={{ width: "100%", padding: "9px 12px", borderRadius: "6px", border: "1px solid #CBD5E1", fontSize: "13px", boxSizing: "border-box" }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>
+                      Duration
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="1 hr 25 min"
+                      value={newRecording.duration}
+                      onChange={(e) => setNewRecording({ ...newRecording, duration: e.target.value })}
+                      style={{ width: "100%", padding: "9px 12px", borderRadius: "6px", border: "1px solid #CBD5E1", fontSize: "13px", boxSizing: "border-box" }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>
+                      Tags (comma separated)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="NRP, NICU, Rounds"
+                      value={newRecording.tags}
+                      onChange={(e) => setNewRecording({ ...newRecording, tags: e.target.value })}
+                      style={{ width: "100%", padding: "9px 12px", borderRadius: "6px", border: "1px solid #CBD5E1", fontSize: "13px", boxSizing: "border-box" }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: "14px" }}>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>
+                    Clinical Notes &amp; Teaching Pearls Summary
+                  </label>
+                  <textarea
+                    rows={2}
+                    placeholder="Briefly describe key cases presented, algorithms reviewed, or guidance given..."
+                    value={newRecording.notes}
+                    onChange={(e) => setNewRecording({ ...newRecording, notes: e.target.value })}
+                    style={{ width: "100%", padding: "9px 12px", borderRadius: "6px", border: "1px solid #CBD5E1", fontSize: "13px", boxSizing: "border-box" }}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={addingRecording}
+                  style={{
+                    padding: "9px 20px",
+                    backgroundColor: "#12203B",
+                    color: "#FFFFFF",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    borderRadius: "6px",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  {addingRecording ? "Publishing..." : "Publish Recording Link to Students →"}
+                </button>
+              </form>
+            </div>
+
+            {/* List of Published Recordings */}
+            <div style={{ backgroundColor: "#FFFFFF", borderRadius: "12px", border: "1px solid #E2E8F0", padding: "20px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+              <h3 style={{ fontSize: "15px", fontWeight: 800, color: "#12203B", margin: "0 0 12px" }}>
+                Active Published Recordings ({recordedSessions.length})
+              </h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                {recordedSessions.map((rec) => (
+                  <div key={rec.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", backgroundColor: "#F8FAFC", borderRadius: "8px", border: "1px solid #E2E8F0", flexWrap: "wrap", gap: "10px" }}>
+                    <div>
+                      <div style={{ fontWeight: 700, color: "#0F172A", fontSize: "14px" }}>{rec.title}</div>
+                      <div style={{ fontSize: "12px", color: "#64748B", marginTop: "2px" }}>
+                        🗓️ {rec.date} • ⏱️ {rec.duration} • Preceptor: {rec.preceptor}
+                      </div>
+                      {rec.notes && <div style={{ fontSize: "12px", color: "#475569", marginTop: "4px" }}>{rec.notes}</div>}
+                    </div>
+
+                    <a
+                      href={rec.video_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ padding: "6px 14px", backgroundColor: "#7C3AED", color: "#FFF", borderRadius: "6px", fontSize: "12px", fontWeight: 700, textDecoration: "none" }}
+                    >
+                      ▶ Open Video Link
+                    </a>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
