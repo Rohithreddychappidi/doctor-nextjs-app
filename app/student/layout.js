@@ -224,7 +224,7 @@ export default function StudentLayout({ children }) {
           {/* Nav List */}
           <div style={{ flex: 1, overflowY: "auto", padding: "16px 12px" }}>
             <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", color: "#8E98B0", padding: "0 8px 8px", fontWeight: 700 }}>
-              Enrolled Modules
+              Clinical Programs &amp; Training
             </div>
 
             {navItems.map((item) => {
@@ -232,7 +232,29 @@ export default function StudentLayout({ children }) {
               const isEnrolled = isDashboard || (item.requiredKey && item.requiredKey.some((k) => activeKeys.includes(k)));
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
 
-              if (!isEnrolled) return null; // Only show enrolled modules in primary nav!
+              let tagLabel = null;
+              let tagBg = "transparent";
+              let tagColor = "#CBD2E1";
+
+              if (!isDashboard) {
+                if (isEnrolled) {
+                  tagLabel = "Active";
+                  tagBg = "rgba(74, 222, 128, 0.15)";
+                  tagColor = "#4ADE80";
+                } else if (item.href === "/student/rotations" || item.href === "/student/research") {
+                  tagLabel = "Apply";
+                  tagBg = "rgba(147, 197, 253, 0.18)";
+                  tagColor = "#93C5FD";
+                } else if (item.href === "/student/qbank") {
+                  tagLabel = "Free/Pro";
+                  tagBg = "rgba(233, 201, 137, 0.18)";
+                  tagColor = "#E9C989";
+                } else if (item.href === "/student/live-learning") {
+                  tagLabel = "Live";
+                  tagBg = "rgba(244, 114, 182, 0.18)";
+                  tagColor = "#F472B6";
+                }
+              }
 
               return (
                 <Link
@@ -256,6 +278,11 @@ export default function StudentLayout({ children }) {
                 >
                   <span style={{ fontSize: "16px" }}>{item.icon}</span>
                   <span style={{ flex: 1 }}>{item.label}</span>
+                  {tagLabel && (
+                    <span style={{ fontSize: "10px", padding: "1px 6px", borderRadius: "10px", backgroundColor: tagBg, color: tagColor, fontWeight: 700, letterSpacing: "0.3px" }}>
+                      {tagLabel}
+                    </span>
+                  )}
                   {isActive && <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#E9C989" }}></span>}
                 </Link>
               );

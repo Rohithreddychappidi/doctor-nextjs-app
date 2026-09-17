@@ -13,153 +13,33 @@ export async function GET(request) {
     const userUnlocks = memoryStore.student_qbank_unlocks.filter((u) => u.student_id === session.id);
     const hasFullBundle = userUnlocks.some((u) => u.module_id === "bundle_all") || session.role === "admin";
 
-    // 3 Main Subject Pillars with Modular Free / Paid Tiers
-    const pillars = [
-      {
-        id: "pillar_neonatology",
-        name: "Neonatology & Perinatal Medicine",
-        icon: "👶",
-        description: "NICU protocols, neonatal resuscitation, prematurity pathophysiology, and AAP guidelines.",
-        modules: [
-          {
-            id: "mod_neo_nrp",
-            title: "NRP 8th Edition & Delivery Room Resuscitation",
-            category: "Neonatology",
-            is_free: true,
-            price: 0,
-            question_count: 15,
-            is_unlocked: true,
-            exam_focus: "NRP / NICU In-Training"
-          },
-          {
-            id: "mod_neo_rds",
-            title: "Respiratory Distress Syndrome & Surfactant (LISA vs INSURE)",
-            category: "Neonatology",
-            is_free: false,
-            price: 29,
-            question_count: 45,
-            is_unlocked: hasFullBundle || userUnlocks.some((u) => u.module_id === "mod_neo_rds"),
-            exam_focus: "Pediatric Shelf / USMLE Step 2 CK"
-          },
-          {
-            id: "mod_neo_jaundice",
-            title: "Neonatal Hyperbilirubinemia & 2022 AAP Clinical Practice Guidelines",
-            category: "Neonatology",
-            is_free: false,
-            price: 29,
-            question_count: 35,
-            is_unlocked: hasFullBundle || userUnlocks.some((u) => u.module_id === "mod_neo_jaundice"),
-            exam_focus: "USMLE Step 2 CK / Board Prep"
-          },
-          {
-            id: "mod_neo_extreme_preterm",
-            title: "Extreme Prematurity: IVH, NEC, BPD & PDA Hemodynamics",
-            category: "Neonatology",
-            is_free: false,
-            price: 39,
-            question_count: 50,
-            is_unlocked: hasFullBundle || userUnlocks.some((u) => u.module_id === "mod_neo_extreme_preterm"),
-            exam_focus: "Fellowship & Board Certification"
-          }
-        ]
-      },
-      {
-        id: "pillar_pediatrics",
-        name: "General Pediatrics & Shelf Review",
-        icon: "🩺",
-        description: "USMLE Step 2 CK & Pediatric Shelf high-yield cases, development, and emergencies.",
-        modules: [
-          {
-            id: "mod_ped_development",
-            title: "Developmental Milestones & Well-Child Checks",
-            category: "Pediatrics",
-            is_free: true,
-            price: 0,
-            question_count: 20,
-            is_unlocked: true,
-            exam_focus: "Pediatric Shelf / USMLE Step 2 CK"
-          },
-          {
-            id: "mod_ped_infectious",
-            title: "Pediatric Infectious Diseases, Exanthems & Vaccinations",
-            category: "Pediatrics",
-            is_free: false,
-            price: 29,
-            question_count: 40,
-            is_unlocked: hasFullBundle || userUnlocks.some((u) => u.module_id === "mod_ped_infectious"),
-            exam_focus: "USMLE Step 2 CK"
-          },
-          {
-            id: "mod_ped_cardio",
-            title: "Congenital Heart Defects & Pediatric Murmurs",
-            category: "Pediatrics",
-            is_free: false,
-            price: 29,
-            question_count: 35,
-            is_unlocked: hasFullBundle || userUnlocks.some((u) => u.module_id === "mod_ped_cardio"),
-            exam_focus: "USMLE Step 2 CK / Shelf"
-          },
-          {
-            id: "mod_ped_emergency",
-            title: "Pediatric Emergencies, Dehydration & Critical Resuscitation",
-            category: "Pediatrics",
-            is_free: false,
-            price: 39,
-            question_count: 45,
-            is_unlocked: hasFullBundle || userUnlocks.some((u) => u.module_id === "mod_ped_emergency"),
-            exam_focus: "Shelf & Clinical Clerkship"
-          }
-        ]
-      },
-      {
-        id: "pillar_biostats",
-        name: "Biostatistics & Medical Epidemiology",
-        icon: "📊",
-        description: "Diagnostic test metrics, clinical trial analysis, odds ratio, and board statistics.",
-        modules: [
-          {
-            id: "mod_bio_diagnostic",
-            title: "Sensitivity, Specificity, PPV, NPV & Likelihood Ratios",
-            category: "Biostatistics",
-            is_free: true,
-            price: 0,
-            question_count: 15,
-            is_unlocked: true,
-            exam_focus: "USMLE Step 1 / Step 2 CK Core"
-          },
-          {
-            id: "mod_bio_study_designs",
-            title: "Cohort vs Case-Control: Odds Ratio, Relative Risk & NNT",
-            category: "Biostatistics",
-            is_free: false,
-            price: 29,
-            question_count: 30,
-            is_unlocked: hasFullBundle || userUnlocks.some((u) => u.module_id === "mod_bio_study_designs"),
-            exam_focus: "USMLE Step 2 CK Board Vignettes"
-          },
-          {
-            id: "mod_bio_hypo_testing",
-            title: "Hypothesis Testing: Type I/II Errors, Power & P-Values",
-            category: "Biostatistics",
-            is_free: false,
-            price: 29,
-            question_count: 25,
-            is_unlocked: hasFullBundle || userUnlocks.some((u) => u.module_id === "mod_bio_hypo_testing"),
-            exam_focus: "USMLE Step 1 & Step 2 CK"
-          },
-          {
-            id: "mod_bio_clinical_trials",
-            title: "Clinical Trial Analysis, Forest Plots & Bias Control",
-            category: "Biostatistics",
-            is_free: false,
-            price: 35,
-            question_count: 30,
-            is_unlocked: hasFullBundle || userUnlocks.some((u) => u.module_id === "mod_bio_clinical_trials"),
-            exam_focus: "Board Exam Abstract Questions"
-          }
-        ]
-      }
-    ];
+    // Dynamic 3 Pillars from DB
+    const specs = await db.getSpecializations();
+    const allModules = await db.getQBankModules();
+
+    const pillars = specs.map((spec) => {
+      const specModules = allModules
+        .filter((m) => m.specialization_id === spec.id)
+        .map((mod) => ({
+          id: mod.id,
+          title: mod.name,
+          category: spec.name,
+          is_free: mod.is_free,
+          price: mod.price || 0,
+          question_count: mod.question_count || 0,
+          is_unlocked: mod.is_free || hasFullBundle || userUnlocks.some((u) => u.module_id === mod.id),
+          exam_focus: mod.description || "Board Review / Clinical Mastery"
+        }));
+
+      return {
+        id: spec.id,
+        code: spec.code,
+        name: spec.name,
+        icon: spec.icon,
+        description: spec.description,
+        modules: specModules
+      };
+    });
 
     const attempts = (memoryStore.test_attempts || []).filter((a) => a.student_id === session.id);
     const bookmarks = (memoryStore.bookmarks || []).filter((b) => b.student_id === session.id);
@@ -184,9 +64,10 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { action, module_id } = body;
+    const { action, module_id, payment_details } = body;
 
     if (!memoryStore.student_qbank_unlocks) memoryStore.student_qbank_unlocks = [];
+    if (!memoryStore.payment_transactions) memoryStore.payment_transactions = [];
 
     // Unlock Module or Full Bundle
     if (action === "unlock_module" || action === "unlock_bundle") {
@@ -202,12 +83,26 @@ export async function POST(request) {
           module_id: targetId,
           unlocked_at: new Date().toISOString()
         });
+
+        // Record payment transaction
+        memoryStore.payment_transactions.push({
+          id: `tx_qb_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          student_id: session.id,
+          student_name: session.name || "Enrolled Trainee",
+          student_email: session.email,
+          item_type: targetId === "bundle_all" ? "qbank_bundle" : "qbank_module",
+          item_id: targetId,
+          amount: targetId === "bundle_all" ? 99 : (payment_details?.amount || 29),
+          payment_method: payment_details?.payment_method || "Credit Card (Verified Sandbox)",
+          status: "succeeded",
+          created_at: new Date().toISOString()
+        });
       }
 
       return NextResponse.json({
         success: true,
         message: targetId === "bundle_all"
-          ? "Full High-Yield Board QBank Unlocked!"
+          ? "Full High-Yield Board QBank Unlocked! You now have lifetime access to all clinical modules."
           : "Question Module unlocked successfully! You can now practice in Tutor or Timed mode."
       });
     }

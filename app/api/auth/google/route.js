@@ -40,13 +40,32 @@ export async function POST(request) {
       return NextResponse.json({ error: "Could not retrieve email from Google credential." }, { status: 400 });
     }
 
-    const assignedRole = role === "guest" ? "guest" : "student";
+    const configuredAdminEmail = (process.env.ADMIN_EMAIL || "").toLowerCase().trim();
+    const assistantEmails = [
+      process.env.ASSISTANT_EMAIL_1,
+      process.env.ASSISTANT_EMAIL_2,
+      ...(process.env.ASSISTANT_EMAILS ? process.env.ASSISTANT_EMAILS.split(",") : []),
+    ]
+      .filter(Boolean)
+      .map((e) => e.toLowerCase().trim());
+
+    const isSuperAdmin = Boolean(configuredAdminEmail && email === configuredAdminEmail);
+    const isAssistantAdmin = assistantEmails.includes(email);
+    const isStaffAdmin = isSuperAdmin || isAssistantAdmin;
+
+    const assignedRole = isSuperAdmin
+      ? "super_admin"
+      : isAssistantAdmin
+      ? "sub_admin"
+      : role === "guest"
+      ? "guest"
+      : "student";
 
     // Look up or auto-provision genuine profile
     let user = await db.findUserByEmail(email);
     if (!user) {
       user = await db.createUser({
-        id: `usr_google_${Date.now().toString(36)}`,
+        id: isSuperAdmin ? "usr_admin_jvm" : `usr_google_${Date.now().toString(36)}`,
         email,
         full_name: fullName,
         first_name: firstName,
@@ -54,25 +73,45 @@ export async function POST(request) {
         role: assignedRole,
         avatar_url: avatarUrl,
         password_hash: "google_oauth_managed",
-        specialty: assignedRole === "guest" ? "Community Visitor" : "Medical Student",
-        description: "Authenticated via Google Single Sign-On."
+        specialty: isSuperAdmin
+          ? "Pediatrics & Neonatal-Perinatal Medicine"
+          : isAssistantAdmin
+          ? "Clinical Assistant / Sub-Administrator"
+          : assignedRole === "guest"
+          ? "Community Visitor"
+          : "Medical Student",
+        description: isSuperAdmin
+          ? "Super-Administrator & Supervising Attending"
+          : isAssistantAdmin
+          ? "Assistant Administrator & Clinical Coordinator"
+          : "Authenticated via Google Single Sign-On.",
       });
     }
 
     const profile = await db.getStudentProfile(user.id);
     const roles = await db.getUserRoles(user.id);
-    const primaryRole = roles.includes("admin")
+    const primaryRole = isSuperAdmin
+      ? "super_admin"
+      : isAssistantAdmin
+      ? "sub_admin"
+      : roles.includes("admin")
       ? "admin"
       : roles.includes("guest")
       ? "guest"
       : "student";
+
+    const effectiveRoles = isSuperAdmin
+      ? Array.from(new Set([...roles, "super_admin", "admin", "physician"]))
+      : isAssistantAdmin
+      ? Array.from(new Set([...roles, "sub_admin", "admin"]))
+      : roles;
 
     const tokenPayload = {
       id: user.id,
       email: user.email,
       name: profile ? `${profile.first_name} ${profile.last_name}`.trim() : fullName,
       role: primaryRole,
-      roles,
+      roles: effectiveRoles,
       auth_provider: "google",
       specialty: profile?.specialty_interest || (primaryRole === "guest" ? "Community Visitor" : "General Medicine"),
     };

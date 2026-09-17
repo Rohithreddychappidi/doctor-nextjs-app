@@ -9,7 +9,7 @@ export async function POST(request) {
     let email = "student@jvmmedicalservices.com";
     if (persona === "student" || persona === "student_jvm") email = "student@jvmmedicalservices.com";
     else if (persona === "physician" || persona === "dr_mydam" || persona === "mydam") email = "dr.mydam@jvmmedicalservices.com";
-    else if (persona === "admin" || persona === "admin_jvm") email = "admin@jvmmedicalservices.com";
+    else if (persona === "admin" || persona === "admin_jvm") email = process.env.ADMIN_EMAIL || "admin@mydam-medical.com";
     else if (persona === "student_a" || persona === "A") email = "student.a@example.com";
     else if (persona === "student_b" || persona === "B") email = "student.b@example.com";
     else if (persona === "student_c" || persona === "C") email = "student.c@example.com";

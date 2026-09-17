@@ -197,6 +197,105 @@ export default function StudentDashboardPage() {
 
       {/* SECTION I & APPENDIX: Dynamic Enrolled Widget Assembly (Ordered by recent activity) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Un-enrolled Clinical Rotation Card if not active in tele_rotation */}
+        {!active_keys.includes("tele_rotation") && !active_keys.includes("physical_rotation") && (
+          <div className="lg:col-span-2 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 sm:p-7 text-white shadow-md border border-indigo-900/60 relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
+              <div className="space-y-3 max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-xs font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  US Clinical Experience · Credential Verification Open
+                </div>
+                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+                  Virtual Neonatal &amp; Pediatric Clinical Rotation
+                </h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Join <strong>Dr. Janardhan Mydam, MD, FAAP</strong> for live bedside tele-rounds on Microsoft Teams, neonatal resuscitation (NRP) algorithms, and clinical case presentations. Complete your credential verification to apply for faculty review.
+                </p>
+                <div className="flex flex-wrap gap-4 pt-1 text-xs text-slate-300">
+                  <span className="flex items-center gap-1.5 font-medium">✓ 6-Week Cohort</span>
+                  <span className="flex items-center gap-1.5 font-medium">✓ Microsoft Teams Live Rounds</span>
+                  <span className="flex items-center gap-1.5 font-medium">✓ Merit Faculty LOR Eligibility</span>
+                  <span className="flex items-center gap-1.5 font-medium">✓ Free Scholarship &amp; Paid Options</span>
+                </div>
+              </div>
+              <div className="shrink-0 flex flex-col gap-2.5 sm:items-end">
+                <Link
+                  href="/student/rotations"
+                  className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold text-sm transition shadow-lg text-center flex items-center justify-center gap-2"
+                >
+                  <span>🩺</span>
+                  <span>Apply for Clinical Rotation →</span>
+                </Link>
+                <Link
+                  href="/education-training/tele-rotations"
+                  className="text-xs text-indigo-300 hover:text-white underline text-center sm:text-right transition"
+                >
+                  View Curriculum &amp; Syllabus
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Un-enrolled QBank Quick Card */}
+        {!active_keys.includes("qbank") && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-2xl">📝</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                  Free Practice Available
+                </span>
+              </div>
+              <h4 className="text-base font-bold text-slate-900">
+                USMLE &amp; Pediatric Board Question Bank
+              </h4>
+              <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                Test your clinical judgment on high-yield neonatal, pediatric, and biostatistics vignettes with Dr. Janardhan Mydam&apos;s AI debate preceptor.
+              </p>
+            </div>
+            <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-600">3 Core Subject Pillars</span>
+              <Link
+                href="/student/qbank"
+                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition"
+              >
+                Launch QBank →
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Un-enrolled Research Quick Card */}
+        {!active_keys.includes("research") && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-2xl">🔬</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
+                  Proposals Accepted
+                </span>
+              </div>
+              <h4 className="text-base font-bold text-slate-900">
+                Clinical Research Mentorship &amp; Publications
+              </h4>
+              <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                Collaborate with Dr. Mydam on neonatal clinical studies, retrospective audits, and IRB protocols targeting PubMed-indexed publications.
+              </p>
+            </div>
+            <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-600">Faculty Cohort Syncs</span>
+              <Link
+                href="/student/research"
+                className="px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs transition"
+              >
+                Submit Proposal →
+              </Link>
+            </div>
+          </div>
+        )}
+
         {widgets.map((widget) => {
           // 1. Clinical Rotation Widget (Student A, D, F)
           if (widget.type === "rotation") {

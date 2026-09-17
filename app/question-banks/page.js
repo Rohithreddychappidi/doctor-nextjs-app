@@ -38,14 +38,15 @@ export default function QuestionBanksPage() {
               Every question is accompanied by exhaustive explanations of why the correct answer is right — and why each distractor is wrong.
             </p>
             <div className="hero-actions">
-              <Link href="#availableTests" className="btn btn-primary">Take Free Mock Test</Link>
-              <Link href="/student-signup" className="btn btn-outline">Register for Free Access</Link>
+              <Link href="/student/qbank" className="btn btn-primary">Open Student QBank &rarr;</Link>
+              <Link href="#availableTests" className="btn btn-gold">Take Sample Test</Link>
+              <Link href="/consultation" className="btn btn-outline">Faculty Consultation</Link>
             </div>
           </div>
           <div className="hero-card">
             <span className="tag">Platform Snapshot</span>
             {[
-              ["Practice Model", "100% Free During Initial Launch"],
+              ["Curriculum Model", "Attending Faculty Authored"],
               ["Question Format", "Single-Best-Answer Vignettes"],
               ["Answer Rationales", "Complete Right & Wrong Explanations"],
               ["Testing Engine", "Timed Mode, Flagging, Instant Analytics"],
@@ -66,7 +67,7 @@ export default function QuestionBanksPage() {
           <div className="section-head">
             <div>
               <div className="eyebrow">Live Mock Examinations</div>
-              <h2>Take a Free Board-Style Mock Exam Today</h2>
+              <h2>Take a Board-Style Clinical Mock Exam</h2>
             </div>
             <p className="lede">
               Experience the quality of Dr. Janardhan Mydam&apos;s testing platform. Designed for medical students, IMGs, and residents preparing for clinical examinations.
@@ -83,7 +84,7 @@ export default function QuestionBanksPage() {
                 <div key={t.id} className="card" style={{ borderTop: "4px solid var(--accent)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                   <div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                      <span className="pill accent">{t.is_free ? "FREE PRACTICE" : "PREMIUM"}</span>
+                      <span className="pill accent">CLINICAL VIGNETTE</span>
                       <span style={{ fontSize: 13, color: "var(--muted)", fontFamily: "var(--font-mono)" }}>
                         {t.duration_minutes} Mins · Pass {t.passing_score}%
                       </span>

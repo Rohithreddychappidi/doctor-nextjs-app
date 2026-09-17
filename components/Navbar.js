@@ -32,12 +32,42 @@ const NAV_ITEMS = [
       },
     ],
   },
-  { key: "education", label: "Education & Training", href: "/education-training" },
-  { key: "question-banks", label: "Question Banks", href: "/question-banks" },
-  { key: "research", label: "Research", href: "/research" },
+  {
+    key: "education",
+    label: "Education & Training",
+    href: "/education-training",
+    isDropdown: true,
+    children: [
+      {
+        label: "Live Clinical Classes & Seminars",
+        href: "/education-training/live-learning",
+        badge: "Weekly Live",
+        desc: "Weekly clinical grand rounds, webinar lectures & seminar notes",
+      },
+      {
+        label: "Virtual NICU & Tele-Rotations",
+        href: "/education-training/tele-rotations",
+        badge: "USCE Preceptor",
+        desc: "6-week structured US clinical tele-rotations with attending LOR",
+      },
+      {
+        label: "Clinical Question Banks",
+        href: "/education-training/question-banks",
+        badge: "Boards & USMLE",
+        desc: "Neonatology, Pediatrics & Biostatistics vignettes with rationales",
+      },
+      {
+        label: "Research Mentorship & Publications",
+        href: "/research",
+        badge: "IRB & Cohorts",
+        desc: "Clinical study authorship, protocol vault & collaborative mentoring",
+      },
+    ],
+  },
   { key: "clinical", label: "Clinical Guidance", href: "/clinical-services" },
   { key: "newborn-care", label: "Newborn Care Programs", href: "/advisory-services" },
   { key: "community", label: "Community Health", href: "/community-impact" },
+  { key: "consultation", label: "General Consultation", href: "/consultation" },
   { key: "contact", label: "Contact", href: "/contact" },
 ];
 
@@ -45,14 +75,14 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
   const [user, setUser] = useState(null);
   const headerRef = useRef(null);
   const dropdownTimeoutRef = useRef(null);
 
   useEffect(() => {
     setOpen(false);
-    setDropdownOpen(false);
+    setActiveDropdown(null);
     // Check authentication status
     async function checkAuth() {
       try {
@@ -81,15 +111,19 @@ export default function Navbar() {
     return () => window.removeEventListener("resize", setHeaderHeight);
   }, []);
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = (key) => {
     if (dropdownTimeoutRef.current) clearTimeout(dropdownTimeoutRef.current);
-    setDropdownOpen(true);
+    setActiveDropdown(key);
   };
 
   const handleMouseLeave = () => {
     dropdownTimeoutRef.current = setTimeout(() => {
-      setDropdownOpen(false);
-    }, 200);
+      setActiveDropdown(null);
+    }, 250);
+  };
+
+  const toggleDropdown = (key) => {
+    setActiveDropdown((prev) => (prev === key ? null : key));
   };
 
   const handleLogout = async () => {
@@ -104,53 +138,91 @@ export default function Navbar() {
   };
 
   const isActive = (href) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
-  const isAboutActive =
-    pathname.startsWith("/about") || pathname === "/doctor-portfolio";
+  const isAboutActive = pathname.startsWith("/about") || pathname === "/doctor-portfolio";
+  const isEducationActive =
+    pathname.startsWith("/education-training") ||
+    pathname.startsWith("/question-banks") ||
+    pathname.startsWith("/research");
 
   return (
     <header className="site-header" ref={headerRef}>
       <div className="nav-wrap">
-        <Link href="/" className="brand">
-          <span className="mark">JVM</span>
-          <span>
-            jvmmedicalservices
-            <small>JVM Medical Services · Neonatology, Pediatrics &amp; USCE Training</small>
+        <Link href="/" className="brand" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
+          <span
+            className="mark"
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: "50%",
+              background: "#12203B",
+              color: "#E9C989",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: 800,
+              fontSize: "15px",
+              flexShrink: 0,
+              border: "1.5px solid #B4832A",
+              boxShadow: "0 2px 6px rgba(18,32,59,0.15)",
+            }}
+          >
+            JVM
           </span>
+          <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.15 }}>
+            <span
+              style={{
+                fontSize: "1.2rem",
+                fontWeight: 800,
+                color: "#0F172A",
+                letterSpacing: "-0.02em",
+                fontFamily: "var(--font-display)",
+              }}
+            >
+              JVM Medical Services
+            </span>
+            <span style={{ fontSize: "10.5px", color: "#64748B", fontWeight: 600, letterSpacing: "0.02em", marginTop: "2px" }}>
+              Dr. Janardhan Mydam · Academic &amp; Clinical Excellence
+            </span>
+          </div>
         </Link>
 
         <nav className={`nav-links${open ? " open" : ""}`} id="navLinks">
           {NAV_ITEMS.map((item) => {
             if (item.isDropdown) {
+              const isGroupActive = item.key === "about" ? isAboutActive : isEducationActive;
+              const isMenuOpen = activeDropdown === item.key;
+
               return (
                 <div
                   key={item.key}
                   className="nav-item-dropdown"
-                  onMouseEnter={handleMouseEnter}
+                  onMouseEnter={() => handleMouseEnter(item.key)}
                   onMouseLeave={handleMouseLeave}
                   style={{ position: "relative" }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                     <Link
                       href={item.href}
-                      className={isAboutActive ? "active" : ""}
+                      className={isGroupActive ? "active" : ""}
                       onClick={() => setOpen(false)}
+                      style={{ fontWeight: isGroupActive ? 700 : 500 }}
                     >
                       {item.label}
                     </Link>
                     <button
                       type="button"
-                      aria-label="Toggle About submenu"
+                      aria-label={`Toggle ${item.label} submenu`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        setDropdownOpen((prev) => !prev);
+                        toggleDropdown(item.key);
                       }}
                       style={{
                         background: "none",
                         border: "none",
                         cursor: "pointer",
                         padding: "4px 2px",
-                        fontSize: "10px",
-                        color: isAboutActive ? "var(--accent)" : "var(--ink-soft)",
+                        fontSize: "11px",
+                        color: isGroupActive ? "var(--accent)" : "var(--ink-soft)",
                         display: "flex",
                         alignItems: "center",
                       }}
@@ -160,18 +232,18 @@ export default function Navbar() {
                   </div>
 
                   {/* Desktop / Mobile Dropdown Menu */}
-                  {dropdownOpen && (
+                  {isMenuOpen && (
                     <div
                       className="nav-dropdown-menu"
                       style={{
                         position: "absolute",
                         top: "100%",
-                        left: "-20px",
+                        left: "-10px",
                         backgroundColor: "#FFFFFF",
-                        minWidth: "280px",
+                        minWidth: "300px",
                         padding: "8px 0",
-                        borderRadius: "10px",
-                        boxShadow: "0 14px 35px rgba(14,24,42,0.14), 0 2px 6px rgba(0,0,0,0.06)",
+                        borderRadius: "12px",
+                        boxShadow: "0 14px 35px rgba(14,24,42,0.16), 0 2px 8px rgba(0,0,0,0.06)",
                         border: "1px solid #E2E8F0",
                         zIndex: 1000,
                         marginTop: "8px",
@@ -184,22 +256,22 @@ export default function Navbar() {
                             key={subItem.href}
                             href={subItem.href}
                             onClick={() => {
-                              setDropdownOpen(false);
+                              setActiveDropdown(null);
                               setOpen(false);
                             }}
                             style={{
                               display: "block",
-                              padding: "10px 18px",
+                              padding: "11px 18px",
                               textDecoration: "none",
                               backgroundColor: isSubActive ? "rgba(180,131,42,0.08)" : "transparent",
                               borderLeft: isSubActive ? "3px solid #B4832A" : "3px solid transparent",
                               transition: "all 0.15s ease",
                             }}
                           >
-                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2px" }}>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "3px" }}>
                               <span
                                 style={{
-                                  fontSize: "13px",
+                                  fontSize: "13.5px",
                                   fontWeight: 600,
                                   color: isSubActive ? "var(--accent)" : "#1E293B",
                                 }}
@@ -210,10 +282,10 @@ export default function Navbar() {
                                 <span
                                   style={{
                                     fontSize: "9.5px",
-                                    padding: "1px 6px",
+                                    padding: "2px 6px",
                                     borderRadius: "4px",
-                                    backgroundColor: "#F1F5F9",
-                                    color: "#64748B",
+                                    backgroundColor: isSubActive ? "#FDF2E9" : "#F1F5F9",
+                                    color: isSubActive ? "#B4832A" : "#64748B",
                                     fontWeight: 700,
                                   }}
                                 >
@@ -221,7 +293,7 @@ export default function Navbar() {
                                 </span>
                               )}
                             </div>
-                            <div style={{ fontSize: "11.5px", color: "#64748B", lineHeight: 1.3 }}>
+                            <div style={{ fontSize: "11.5px", color: "#64748B", lineHeight: 1.35 }}>
                               {subItem.desc}
                             </div>
                           </Link>
@@ -259,11 +331,11 @@ export default function Navbar() {
             </>
           ) : (
             <Link href="/student-login" className={`nav-login-mobile${isActive("/student-login") ? " active" : ""}`}>
-              Portal Sign In
+              Student Sign In
             </Link>
           )}
-          <Link href="/question-banks" className="nav-cta-mobile" style={{ background: "var(--accent)", color: "#fff" }}>
-            Free Mock Tests
+          <Link href="/consultation" className="nav-cta-mobile" style={{ background: "var(--gold)", color: "#fff" }}>
+            Book Consultation
           </Link>
           <Link href="/clinical-services" className="nav-cta-mobile">
             Clinical Guidance
@@ -271,8 +343,8 @@ export default function Navbar() {
         </nav>
 
         <div className="nav-cta" style={{ gap: 8 }}>
-          <Link href="/question-banks" className="btn btn-gold btn-sm" style={{ fontWeight: 600 }}>
-            Free Mock Tests
+          <Link href="/consultation" className="btn btn-gold btn-sm" style={{ fontWeight: 700 }}>
+            Book Consultation
           </Link>
           {user ? (
             <>

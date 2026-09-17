@@ -11,18 +11,48 @@ export async function POST(request) {
     }
 
     const cleanEmail = email.toLowerCase().trim();
-    const user = await db.findUserByEmail(cleanEmail);
+    let user = await db.findUserByEmail(cleanEmail);
+
+    const configuredAdminEmail = (process.env.ADMIN_EMAIL || "").toLowerCase().trim();
+    const configuredAdminPassword = process.env.ADMIN_PASSWORD;
+    const assistantEmails = [
+      process.env.ASSISTANT_EMAIL_1,
+      process.env.ASSISTANT_EMAIL_2,
+      ...(process.env.ASSISTANT_EMAILS ? process.env.ASSISTANT_EMAILS.split(",") : []),
+    ]
+      .filter(Boolean)
+      .map((e) => e.toLowerCase().trim());
+
+    const isSuperAdmin = Boolean(configuredAdminEmail && cleanEmail === configuredAdminEmail);
+    const isAssistantAdmin = assistantEmails.includes(cleanEmail);
 
     let isValid = false;
-    if (user) {
+
+    // Direct environment-configured admin authentication
+    if (isSuperAdmin || isAssistantAdmin) {
+      if (configuredAdminPassword && password === configuredAdminPassword) {
+        isValid = true;
+      } else if (user && user.password_hash) {
+        isValid = await comparePassword(password, user.password_hash);
+      }
+
+      if (isValid && !user) {
+        user = await db.createUser({
+          id: isSuperAdmin ? "usr_admin_jvm" : `usr_asst_${Date.now().toString(36)}`,
+          email: cleanEmail,
+          full_name: isSuperAdmin ? "Dr. Janardhan Mydam, MD, FAAP" : "Assistant Administrator",
+          first_name: isSuperAdmin ? "Janardhan" : "Assistant",
+          last_name: isSuperAdmin ? "Mydam" : "Coordinator",
+          role: isSuperAdmin ? "super_admin" : "sub_admin",
+          password_hash: "env_managed",
+          specialty: isSuperAdmin ? "Pediatrics & Neonatal-Perinatal Medicine" : "Clinical Administration",
+          description: isSuperAdmin ? "Executive Medical Administrator" : "Authorized Assistant Administrator",
+          two_factor_enabled: true,
+          two_factor_secret: process.env.ADMIN_2FA_SECRET || "JVM2FASECUREMYDAM2026",
+        });
+      }
+    } else if (user) {
       isValid = await comparePassword(password, user.password_hash);
-      // Fallback for predefined demo accounts
-      if (!isValid && (cleanEmail === "admin@jvmmedicalservices.com" || cleanEmail === "admin@jva-medical.com") && (password === "Admin@2026" || password === "Pass@2026" || password === "Admin@2026!" || password === "admin123")) {
-        isValid = true;
-      }
-      if (!isValid && (cleanEmail === "dr.mydam@jvmmedicalservices.com") && (password === "Admin@2026" || password === "Doctor@2026" || password === "Pass@2026" || password === "admin123")) {
-        isValid = true;
-      }
       if (!isValid && (cleanEmail === "student@jvmmedicalservices.com" || cleanEmail === "student.test@jvmmedicalservices.com" || cleanEmail === "student@example.com") && (password === "Student@2026" || password === "Pass@2026" || password === "student123")) {
         isValid = true;
       }

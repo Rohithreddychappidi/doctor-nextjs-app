@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSiteData } from "@/lib/DataContext";
 import SectionDisclaimer from "@/components/SectionDisclaimer";
@@ -8,36 +7,6 @@ import SectionDisclaimer from "@/components/SectionDisclaimer";
 export default function TeleRotationsPage() {
   const { content } = useSiteData();
   const C = content.teleRotations;
-
-  const [livePricing, setLivePricing] = useState({
-    pricing_type: "Paid",
-    price: "$1,200",
-    pricing_note: "per 6-week cohort"
-  });
-
-  useEffect(() => {
-    async function fetchPricing() {
-      try {
-        const res = await fetch("/api/programs");
-        if (res.ok) {
-          const json = await res.json();
-          const tele = (json.programs || []).find(p => p.key === "tele_rotation");
-          if (tele) {
-            setLivePricing({
-              pricing_type: tele.pricing_type || (tele.price === "Free" ? "Free" : "Paid"),
-              price: tele.price || "$1,200",
-              pricing_note: tele.pricing_note || "per 6-week cohort"
-            });
-          }
-        }
-      } catch (e) {
-        console.error("Pricing fetch error:", e);
-      }
-    }
-    fetchPricing();
-  }, []);
-
-  const isFree = livePricing.pricing_type === "Free" || livePricing.price === "Free";
 
   return (
     <>
@@ -48,7 +17,7 @@ export default function TeleRotationsPage() {
               <span>{C.eyebrow}</span>
               <span
                 style={{
-                  backgroundColor: isFree ? "#2E7D3A" : "#B4832A",
+                  backgroundColor: "#B4832A",
                   color: "#FFFFFF",
                   fontSize: "12px",
                   fontWeight: 700,
@@ -57,30 +26,32 @@ export default function TeleRotationsPage() {
                   letterSpacing: "0.5px"
                 }}
               >
-                {isFree ? "Free Program" : `Tuition: ${livePricing.price}`}
+                Attending Preceptorship · USCE Accredited
               </span>
             </div>
             <h1>{C.heading}</h1>
             <p className="lede">{C.body}</p>
             <div className="hero-actions">
-              <Link href="/education-training/tele-rotations/apply" className="btn btn-primary">
-                Apply for Tele-Rotation {isFree ? "(Free)" : `(${livePricing.price})`}
+              <Link href="/student/rotations" className="btn btn-primary">
+                Apply in Student Portal &rarr;
               </Link>
-              <Link href="/student-dashboard" className="btn btn-gold">Student Portal &rarr;</Link>
+              <Link href="/consultation" className="btn btn-gold">
+                Book Consultation Call
+              </Link>
               <Link href="/education-training/physical-rotations" className="btn btn-outline">Physical Rotations</Link>
             </div>
           </div>
           <div className="hero-card">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
               <span className="tag">Program Overview</span>
-              <span style={{ fontSize: 13, fontWeight: 700, color: isFree ? "#4ADE80" : "#E9C989" }}>
-                {isFree ? "Free Enrollment" : `${livePricing.price}`}
+              <span style={{ fontSize: 13, fontWeight: 700, color: "#E9C989" }}>
+                Dr. Janardhan Mydam Preceptor
               </span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.14)", fontSize: 14 }}>
               <span style={{ color: "rgba(255,255,255,0.6)" }}>Tuition &amp; Fees</span>
-              <span style={{ fontWeight: 700, color: isFree ? "#4ADE80" : "#FFFFFF" }}>
-                {isFree ? "Free (No Fee)" : `${livePricing.price} (${livePricing.pricing_note})`}
+              <span style={{ fontWeight: 700, color: "#FFFFFF", textAlign: "right" }}>
+                Evaluated upon Intake Review
               </span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.14)", fontSize: 14 }}>
@@ -134,11 +105,10 @@ export default function TeleRotationsPage() {
               <div className="eyebrow">Learning Hub</div>
               <h2>Your 6-week program, module by module</h2>
             </div>
-            <p className="lede">Each module unlocks its live session link automatically as
-              the date approaches — no manual scheduling on your end.</p>
+            <p className="lede">Each module unlocks its live session link automatically inside your verified student portal as the cohort date approaches.</p>
           </div>
           <div className="grid grid-2">
-            {C.schedule.map((w, idx) => (
+            {C.schedule.map((w) => (
               <div className="card" key={w.week}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
                   <div className="pill accent">{w.week}</div>
@@ -146,11 +116,9 @@ export default function TeleRotationsPage() {
                 </div>
                 <h3 style={{ marginBottom: 8 }}>{w.focus}</h3>
                 <p style={{ marginBottom: 14 }}><strong style={{ color: "var(--ink)" }}>Products: </strong>{w.products}</p>
-                {w.joinLink ? (
-                  <a href={w.joinLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm">Join Live Session</a>
-                ) : (
-                  <span className="pill muted">Session link auto-generates closer to the date</span>
-                )}
+                <Link href="/student/rotations" className="btn btn-primary btn-sm">
+                  Access in Student Portal &rarr;
+                </Link>
               </div>
             ))}
           </div>
@@ -202,7 +170,13 @@ export default function TeleRotationsPage() {
         <div className="container">
           <div className="eyebrow" style={{ justifyContent: "center" }}>Ready to apply?</div>
           <h2 style={{ marginBottom: 16 }}>Check eligibility and apply for the next cohort</h2>
-          <Link href="/education-training/tele-rotations/apply" className="btn btn-primary">Apply Now</Link>
+          <p style={{ maxWidth: 580, margin: "0 auto 20px", color: "var(--ink-soft)", fontSize: "15px" }}>
+            Submit your medical school credentials and CV for attending faculty review in the Student Portal.
+          </p>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+            <Link href="/student/rotations" className="btn btn-primary">Apply in Student Portal</Link>
+            <Link href="/consultation" className="btn btn-outline">Schedule Faculty Call</Link>
+          </div>
         </div>
       </section>
     </>

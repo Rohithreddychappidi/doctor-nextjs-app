@@ -188,13 +188,13 @@ export default function MeetingCard({ meeting = {} }) {
               fontWeight: 800,
               textTransform: "uppercase",
               letterSpacing: "0.5px",
-              backgroundColor: isFree ? "#ECFDF5" : "#EEF2FF",
-              color: isFree ? "#047857" : "#4338CA",
-              border: isFree ? "1.5px solid #A7F3D0" : "1.5px solid #C7D2FE",
+              backgroundColor: "#EEF2FF",
+              color: "#4338CA",
+              border: "1.5px solid #C7D2FE",
               boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
             }}
           >
-            {isFree ? "✓ FREE" : `PAID · $${price || 25}`}
+            LIVE ROUNDS
           </span>
         </div>
         <div className="meeting-body" style={{ paddingBottom: 0 }}>
@@ -205,10 +205,10 @@ export default function MeetingCard({ meeting = {} }) {
                 fontWeight: 700,
                 textTransform: "uppercase",
                 letterSpacing: "0.6px",
-                color: isFree ? "#059669" : "#4F46E5",
+                color: "#4F46E5",
               }}
             >
-              {isFree ? "Open Community Grand Rounds" : "Specialized Masterclass"}
+              Academic Clinical Seminar
             </span>
           </div>
           <h3 style={{ fontSize: "16px", marginBottom: "8px" }}>{title}</h3>

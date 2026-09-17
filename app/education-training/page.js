@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSiteData } from "@/lib/DataContext";
 
@@ -8,33 +7,11 @@ export default function EducationTrainingPage() {
   const { content } = useSiteData();
   const c = content.educationTraining;
 
-  const [programsMap, setProgramsMap] = useState({});
-
-  useEffect(() => {
-    async function fetchPricing() {
-      try {
-        const res = await fetch("/api/programs");
-        if (res.ok) {
-          const json = await res.json();
-          const map = {};
-          (json.programs || []).forEach(p => {
-            map[p.key] = p;
-          });
-          setProgramsMap(map);
-        }
-      } catch (e) {
-        console.error("Hub pricing fetch error:", e);
-      }
-    }
-    fetchPricing();
-  }, []);
-
-  // Map subpage href to program key
-  const hrefKeyMap = {
-    "/education-training/live-learning": "live_learning",
-    "/education-training/question-banks": "qbank",
-    "/education-training/tele-rotations": "tele_rotation",
-    "/education-training/physical-rotations": "physical_rotation",
+  const academicBadges = {
+    "/education-training/live-learning": "Weekly Grand Rounds",
+    "/education-training/question-banks": "High-Yield USMLE & Shelf",
+    "/education-training/tele-rotations": "6-Week USCE Preceptorship",
+    "/education-training/physical-rotations": "Hospital Clinical Elective",
   };
 
   return (
@@ -51,31 +28,26 @@ export default function EducationTrainingPage() {
         <div className="container">
           <div className="grid grid-2">
             {c.subpages.map((sub) => {
-              const progKey = hrefKeyMap[sub.href];
-              const prog = programsMap[progKey];
-              const isFree = prog ? (prog.pricing_type === "Free" || prog.price === "Free") : false;
-              const priceDisplay = prog ? (isFree ? "Free" : prog.price) : null;
+              const badge = academicBadges[sub.href] || "Faculty Moderated";
 
               return (
                 <Link href={sub.href} key={sub.href} className="card" style={{ display: "block", position: "relative" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
                     <h3 style={{ margin: 0 }}>{sub.label}</h3>
-                    {priceDisplay && (
-                      <span
-                        style={{
-                          fontSize: "11px",
-                          fontWeight: 700,
-                          padding: "2px 8px",
-                          borderRadius: "999px",
-                          backgroundColor: isFree ? "rgba(46,125,58,0.12)" : "rgba(180,131,42,0.14)",
-                          color: isFree ? "#2E7D3A" : "#B4832A",
-                          border: isFree ? "1px solid rgba(46,125,58,0.3)" : "1px solid rgba(180,131,42,0.3)",
-                          whiteSpace: "nowrap"
-                        }}
-                      >
-                        {isFree ? "Free Program" : priceDisplay}
-                      </span>
-                    )}
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        padding: "3px 9px",
+                        borderRadius: "999px",
+                        backgroundColor: "#FDF2E9",
+                        color: "#B4832A",
+                        border: "1px solid rgba(180,131,42,0.3)",
+                        whiteSpace: "nowrap"
+                      }}
+                    >
+                      {badge}
+                    </span>
                   </div>
                   <p>{sub.blurb}</p>
                   <span style={{ display: "inline-block", marginTop: 14, fontSize: 13, fontWeight: 600, color: "var(--accent)" }}>
@@ -90,9 +62,15 @@ export default function EducationTrainingPage() {
 
       <section className="section soft center">
         <div className="container">
-          <div className="eyebrow" style={{ justifyContent: "center" }}>Already enrolled?</div>
-          <h2 style={{ marginBottom: 16 }}>Log in to your student dashboard</h2>
-          <Link href="/student-login" className="btn btn-primary">Student Login</Link>
+          <div className="eyebrow" style={{ justifyContent: "center" }}>Candidate Access</div>
+          <h2 style={{ marginBottom: 16 }}>Apply &amp; Access Through Your Student Portal</h2>
+          <p style={{ maxWidth: 600, margin: "0 auto 24px", color: "var(--ink-soft)", fontSize: "15px" }}>
+            All clinical rotations, live seminar admissions, and question bank modules are evaluated directly by Dr. Janardhan Mydam. Sign in or register to submit your credentials.
+          </p>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+            <Link href="/student-login" className="btn btn-primary">Student Portal Login</Link>
+            <Link href="/consultation" className="btn btn-outline">Book Faculty Consultation</Link>
+          </div>
         </div>
       </section>
     </>

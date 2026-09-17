@@ -463,7 +463,22 @@ export default function AdminTestsPage() {
 
           {/* Modules Grid */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 16 }}>
-            {filteredModules.map((mod) => {
+            {filteredModules.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "40px 20px", backgroundColor: "#fff", borderRadius: 12, border: "1px dashed #cbd5e1", gridColumn: "1 / -1" }}>
+                <div style={{ fontSize: "32px", marginBottom: 8 }}>📁</div>
+                <h4 style={{ fontSize: 16, fontWeight: 700, color: "#1e293b", marginBottom: 4 }}>No Modules in this Discipline Yet (0 Modules)</h4>
+                <p style={{ color: "#64748b", fontSize: 13, maxWidth: 460, margin: "0 auto 16px" }}>
+                  Click &ldquo;+ Create New Module&rdquo; above to author the first clinical block under this Subject Pillar. It will immediately reflect in the Student Portal.
+                </p>
+                <button
+                  onClick={() => setCreatingModule(true)}
+                  style={{ backgroundColor: "#0f766e", color: "#fff", padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, border: "none", cursor: "pointer" }}
+                >
+                  + Create First Module
+                </button>
+              </div>
+            ) : (
+              filteredModules.map((mod) => {
               const spec = specializations.find(s => s.id === mod.specialization_id);
               return (
                 <div
@@ -527,7 +542,7 @@ export default function AdminTestsPage() {
                   </div>
                 </div>
               );
-            })}
+            }))}
           </div>
         </div>
       )}

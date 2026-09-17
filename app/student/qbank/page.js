@@ -267,7 +267,18 @@ export default function StudentQBankPage() {
 
       {/* Modular Cards Under Selected Pillar */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 18 }}>
-        {currentPillar.modules?.map((mod) => (
+        {(!currentPillar.modules || currentPillar.modules.length === 0) ? (
+          <div style={{ textAlign: "center", padding: "48px 24px", backgroundColor: "#FFFFFF", borderRadius: 12, border: "1px dashed #CBD5E1", gridColumn: "1 / -1" }}>
+            <div style={{ fontSize: "36px", marginBottom: 10 }}>{currentPillar.icon}</div>
+            <h4 style={{ fontSize: "16px", fontWeight: 700, color: "#0B1E36", margin: "0 0 6px" }}>
+              No Modules Published Yet in {currentPillar.name}
+            </h4>
+            <p style={{ color: "#64748B", fontSize: "13.5px", maxWidth: 520, margin: "0 auto 16px" }}>
+              Dr. Janardhan Mydam is preparing initial board vignettes for this discipline. When new modules are authored in the Admin Panel, they will appear here immediately for practice.
+            </p>
+          </div>
+        ) : (
+          currentPillar.modules.map((mod) => (
           <div
             key={mod.id}
             style={{
@@ -366,7 +377,8 @@ export default function StudentQBankPage() {
               </button>
             )}
           </div>
-        ))}
+        ))
+      )}
       </div>
     </div>
   );

@@ -86,6 +86,21 @@ const SIMPLE_FIELDS = {
     { key: "heading", label: "Heading", type: "input" },
     { key: "body", label: "Intro paragraph", type: "textarea" },
   ],
+  about: [
+    { key: "eyebrow", label: "Eyebrow label", type: "input" },
+    { key: "heading", label: "Heading / Doctor Name", type: "input" },
+    { key: "tagline", label: "Tagline", type: "input" },
+    { key: "photoUrl", label: "Doctor photo URL", type: "input" },
+    { key: "intro", label: "Doctor Bio introduction", type: "textarea" },
+    { key: "note", label: "Credentials overview note", type: "textarea" },
+  ],
+  consultation: [
+    { key: "eyebrow", label: "Eyebrow label", type: "input" },
+    { key: "heading", label: "Heading", type: "input" },
+    { key: "body", label: "Intro paragraph", type: "textarea" },
+    { key: "supervisingDoctor", label: "Supervising Doctor title", type: "input" },
+    { key: "formatNote", label: "Meeting format note", type: "input" },
+  ],
   testimonials: [
     { key: "eyebrow", label: "Eyebrow label", type: "input" },
     { key: "heading", label: "Heading", type: "input" },
@@ -279,20 +294,22 @@ function HomeHeroBannerEditor() {
 // Each entry: { key, label, extra: [React nodes rendered after the flat-field panel] }
 function usePageGroups() {
   return [
-    { key: "home", label: "Home", extra: ["hero-banner-editor", "home-banner", "home-cards"] },
-    { key: "educationTraining", label: "Education & Training (hub)", extra: ["education-subpages"] },
-    { key: "liveLearning", label: "Live Learning" },
-    { key: "questionBanks", label: "Question Banks", extra: ["question-topics"] },
-    { key: "teleRotations", label: "Tele-Rotations", extra: ["tele-purpose", "tele-outcomes", "tele-schedule", "tele-assessment", "tele-completion", "tele-safety"] },
-    { key: "physicalRotations", label: "Physical Rotations", extra: ["physical-tracks", "physical-expect"] },
-    { key: "clinicalServices", label: "Clinical Services", extra: ["clinical-features"] },
-    { key: "advisoryServices", label: "Advisory Services (hub)", extra: ["advisory-subpages"] },
-    { key: "nicuDevelopment", label: "NICU Development & Expansion", extra: ["nicu-services"] },
-    { key: "curriculumDevelopment", label: "Curriculum Development", extra: ["curriculum-services"] },
-    { key: "communityImpact", label: "Community Impact", extra: ["community-initiatives"] },
-    { key: "research", label: "Research", extra: ["research-ongoing", "research-publications"] },
-    { key: "testimonials", label: "Testimonials (intro text)" },
-    { key: "contact", label: "Contact" },
+    { key: "home", label: "1. Home Page", extra: ["hero-banner-editor", "home-banner", "home-cards"] },
+    { key: "about", label: "2. About Dr. Mydam & Company (Doctor Portfolio & Bio)" },
+    { key: "educationTraining", label: "3. Education & Training (Hub Overview)", extra: ["education-subpages"] },
+    { key: "liveLearning", label: "3.1 Live Clinical Classes & Grand Rounds" },
+    { key: "teleRotations", label: "3.2 Virtual NICU & Tele-Rotations (USCE)", extra: ["tele-purpose", "tele-outcomes", "tele-schedule", "tele-assessment", "tele-completion", "tele-safety"] },
+    { key: "questionBanks", label: "3.3 Clinical Question Banks & Boards", extra: ["question-topics"] },
+    { key: "research", label: "3.4 Research Mentorship & Publications", extra: ["research-ongoing", "research-publications"] },
+    { key: "physicalRotations", label: "3.5 Physical In-Person Rotations", extra: ["physical-tracks", "physical-expect"] },
+    { key: "clinicalServices", label: "4. Clinical Guidance (Parent & Patient Consultations)", extra: ["clinical-features"] },
+    { key: "advisoryServices", label: "5. Newborn Care Programs (Hub)", extra: ["advisory-subpages"] },
+    { key: "nicuDevelopment", label: "5.1 Hospital NICU Development & Expansion", extra: ["nicu-services"] },
+    { key: "curriculumDevelopment", label: "5.2 Medical Curriculum Development", extra: ["curriculum-services"] },
+    { key: "communityImpact", label: "6. Community Health & Maternal Outreach", extra: ["community-initiatives"] },
+    { key: "consultation", label: "7. General Consultation (Pre-Enrollment Call Page)" },
+    { key: "contact", label: "8. Contact & Online Inquiries" },
+    { key: "testimonials", label: "Public Testimonials (Intro Text)" },
   ];
 }
 

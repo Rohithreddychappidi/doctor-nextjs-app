@@ -436,10 +436,11 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "18px" }}>
+          <div className="clinical-gallery-grid">
             {CLINICAL_GALLERY.map((item, idx) => (
               <div
                 key={idx}
+                className="clinical-gallery-card"
                 onClick={() => setActivePhoto(item)}
                 style={{
                   backgroundColor: "rgba(255,255,255,0.05)",
@@ -450,22 +451,22 @@ export default function HomePage() {
                   transition: "transform 0.2s ease, border-color 0.2s ease",
                 }}
               >
-                <div style={{ width: "100%", height: "clamp(180px, 28vw, 230px)", overflow: "hidden", position: "relative" }}>
+                <div style={{ width: "100%", height: "clamp(120px, 24vw, 230px)", overflow: "hidden", position: "relative" }}>
                   <img
                     src={item.imageUrl}
                     alt={item.title}
                     style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.3s ease" }}
                   />
-                  <div style={{ position: "absolute", top: "12px", right: "12px", padding: "3px 10px", borderRadius: "12px", backgroundColor: "rgba(14,24,42,0.85)", border: "1px solid rgba(233,201,137,0.4)", color: "#E9C989", fontSize: "10.5px", fontWeight: 700 }}>
+                  <div style={{ position: "absolute", top: "8px", right: "8px", padding: "2px 8px", borderRadius: "12px", backgroundColor: "rgba(14,24,42,0.85)", border: "1px solid rgba(233,201,137,0.4)", color: "#E9C989", fontSize: "9.5px", fontWeight: 700 }}>
                     {item.category}
                   </div>
                 </div>
 
-                <div style={{ padding: "18px 20px" }}>
-                  <h4 style={{ color: "#FFFFFF", fontSize: "16px", fontWeight: 700, marginBottom: "6px" }}>
+                <div style={{ padding: "12px 14px" }}>
+                  <h4 style={{ color: "#FFFFFF", fontSize: "14px", fontWeight: 700, marginBottom: "4px" }}>
                     {item.title}
                   </h4>
-                  <p style={{ color: "rgba(255,255,255,0.65)", fontSize: "12.5px", lineHeight: 1.5, margin: 0 }}>
+                  <p style={{ color: "rgba(255,255,255,0.65)", fontSize: "11.5px", lineHeight: 1.4, margin: 0 }}>
                     {item.subtitle}
                   </p>
                 </div>

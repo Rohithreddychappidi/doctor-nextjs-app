@@ -202,7 +202,7 @@ export default function AdminResearchPage() {
     setCreatingGroup(true);
     try {
       const members = [
-        { id: "usr_admin", name: "Dr. Janardhan Mydam, MD, FAAP", email: "admin@jvmmedicalservices.com", role: "doctor" },
+        { id: "usr_admin", name: "Dr. Janardhan Mydam, MD, FAAP", email: "dr.mydam@mydam-medical.com", role: "doctor" },
       ];
       if (newGroupForm.initial_member_email) {
         members.push({

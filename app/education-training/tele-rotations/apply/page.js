@@ -93,7 +93,7 @@ export default function TeleRotationApplyPage() {
           <div className="eyebrow">Education &amp; Training · Learning Hub · Apply</div>
           <h1 style={{ maxWidth: 700 }}>Apply for the Virtual Neonatal &amp; Pediatric Tele-Rotation</h1>
           <p className="lede" style={{ marginTop: 16 }}>
-            Cohorts run 6–12 learners at a time under the direct preceptorship of Dr. Janardhan Mydam, MD, FAAP. Submit your details below &mdash; once reviewed and approved by faculty, you will be invited to complete tuition payment and activate your live Microsoft Teams cohort seat.
+            Cohorts run 6–12 learners at a time under the direct preceptorship of Dr. Janardhan Mydam, MD, FAAP. Submit your details below &mdash; once reviewed and approved by Dr. Mydam in your Student Portal, your cohort schedule and live Microsoft Teams access will activate.
           </p>
         </div>
       </section>
@@ -191,7 +191,7 @@ export default function TeleRotationApplyPage() {
                 </div>
                 <h3 style={{ marginBottom: 12, fontSize: 20, color: "#0f172a" }}>Application Submitted Successfully!</h3>
                 <p style={{ fontSize: 14, color: "#475569", lineHeight: 1.6, maxWidth: 440, margin: "0 auto" }}>
-                  Thank you, <strong>{form.name}</strong>. Your clinical background and credentials have been submitted for faculty review by Dr. Janardhan Mydam. Once approved, you will be invited to complete tuition payment and unlock your live cohort schedule.
+                  Thank you, <strong>{form.name}</strong>. Your clinical background and credentials have been submitted for faculty review by Dr. Janardhan Mydam. Once approved, your student portal enrollment will unlock your live cohort schedule.
                 </p>
                 <div style={{ marginTop: 24, display: "flex", justifyContent: "center", gap: 12 }}>
                   <Link href="/student/rotations" className="btn btn-primary btn-sm">
@@ -214,12 +214,12 @@ export default function TeleRotationApplyPage() {
                   <span style={{ fontSize: 12.5, color: "#64748b" }}>Provide medical school details, phone, CV/transcript document, and statement.</span>
                 </div>
                 <div>
-                  <strong style={{ color: "#0f172a", display: "block" }}>2. Faculty Review &amp; Approval</strong>
-                  <span style={{ fontSize: 12.5, color: "#64748b" }}>Admin reviews submission in the rotations queue and marks status as &ldquo;Approved &mdash; Payment Pending&rdquo;.</span>
+                  <strong style={{ color: "#0f172a", display: "block" }}>2. Faculty Review &amp; Evaluation</strong>
+                  <span style={{ fontSize: 12.5, color: "#64748b" }}>Dr. Mydam evaluates submission in the portal queue for merit placement or scholarship grants.</span>
                 </div>
                 <div>
-                  <strong style={{ color: "#0f172a", display: "block" }}>3. Tuition Payment Confirmation</strong>
-                  <span style={{ fontSize: 12.5, color: "#64748b" }}>Complete tuition checkout ($1,250) in your Student Portal to confirm your seat in the cohort.</span>
+                  <strong style={{ color: "#0f172a", display: "block" }}>3. Portal Verification Confirmation</strong>
+                  <span style={{ fontSize: 12.5, color: "#64748b" }}>Access the Student Portal to review your approval decision and finalize cohort placement.</span>
                 </div>
                 <div>
                   <strong style={{ color: "#0f172a", display: "block" }}>4. Cohort Live Access &amp; Teams Pro</strong>

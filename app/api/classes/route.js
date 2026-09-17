@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, memoryStore } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 
 export async function GET() {
   try {
     const classes = await db.getClasses();
-    return NextResponse.json({ classes });
+    const registrations = (memoryStore.student_class_registrations || []).map((r) => ({
+      ...r,
+      registered_at: r.registered_at || new Date().toISOString()
+    }));
+    return NextResponse.json({ classes, registrations });
   } catch (err) {
     console.error("Fetch classes error:", err);
     return NextResponse.json({ error: "Failed to fetch classes" }, { status: 500 });

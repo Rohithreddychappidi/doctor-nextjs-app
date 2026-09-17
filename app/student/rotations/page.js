@@ -501,6 +501,15 @@ export default function StudentRotationsPage() {
           >
             {paying ? "Confirming Seat & Activating Cohort..." : `💳 Confirm Seat & Pay Tuition ($${app.tuition_fee || 1250}) →`}
           </button>
+
+          <div style={{ marginTop: 16 }}>
+            <button
+              onClick={() => setShowEditForm(true)}
+              style={{ background: "none", border: "none", color: "#64748B", fontSize: "13px", textDecoration: "underline", cursor: "pointer" }}
+            >
+              ✏️ Review or Edit Submitted Credential Verification Details
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -531,7 +540,25 @@ export default function StudentRotationsPage() {
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <button
+            onClick={() => setShowEditForm(true)}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "10px 16px",
+              borderRadius: 8,
+              border: "1px solid rgba(255,255,255,0.25)",
+              backgroundColor: "rgba(255,255,255,0.1)",
+              color: "#FFFFFF",
+              fontSize: "13px",
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            📋 Credential Form Details
+          </button>
           <a
             href={weeklyMeetings[0]?.teams_url || "https://teams.microsoft.com"}
             target="_blank"

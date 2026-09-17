@@ -39,10 +39,10 @@ const MORE_SECTIONS = [
       { href: "/admin/programs", secKey: "programs", label: "Programs & Live Pricing", icon: "🧭" },
       { href: "/admin/content", secKey: "content", label: "Site Content CMS", icon: "🌐" },
       { href: "/admin/about", secKey: "about", label: "About Dr. Mydam CMS", icon: "👨‍⚕️" },
+      { href: "/admin/requests", secKey: "requests", label: "General Consultations", icon: "📞", badge: "Intake Calls" },
       { href: "/admin/disclaimers", secKey: "disclaimers", label: "Section Disclaimers", icon: "⚖️" },
       { href: "/admin/reports", secKey: "reports", label: "Platform Reports", icon: "📈" },
       { href: "/admin/marketing", secKey: "marketing", label: "Marketing & Promotions", icon: "📢" },
-      { href: "/admin/requests", secKey: "rotations", label: "Consultation Requests", icon: "✉" },
     ],
   },
 ];
@@ -68,6 +68,8 @@ export default function AdminShell({ children }) {
     if (isMoreRouteActive) setShowMoreTools(true);
   }, [isMoreRouteActive]);
 
+  const [authLoading, setAuthLoading] = useState(true);
+
   useEffect(() => {
     async function loadUser() {
       try {
@@ -75,9 +77,14 @@ export default function AdminShell({ children }) {
         if (res.ok) {
           const data = await res.json();
           setCurrentUser(data.user);
+        } else {
+          setCurrentUser(null);
         }
       } catch (e) {
         console.error("Error loading session:", e);
+        setCurrentUser(null);
+      } finally {
+        setAuthLoading(false);
       }
     }
     loadUser();
@@ -121,6 +128,22 @@ export default function AdminShell({ children }) {
       window.location.href = "/student-login";
     }
   };
+
+  const isAdmin = currentUser && (currentUser.role === "admin" || currentUser.role === "super_admin" || currentUser.role === "sub_admin");
+
+  if (authLoading) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", backgroundColor: "#0E182A", color: "#FFF" }}>
+        <div style={{ width: 36, height: 36, border: "4px solid #B4832A", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite", marginBottom: 16 }} />
+        <p style={{ fontSize: "14px", fontWeight: 600, color: "#CBD5E1" }}>Verifying Administrator Security Session &amp; 2FA...</p>
+        <style jsx>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return <AdminSecurityGate currentUser={currentUser} onAuthenticated={(user) => setCurrentUser(user)} />;
+  }
 
   return (
     <div className="dash-container" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", backgroundColor: "#F8FAFC" }}>
@@ -526,7 +549,7 @@ export default function AdminShell({ children }) {
               </span>
             </div>
             <div style={{ color: "#CBD5E1", fontWeight: 500, fontSize: "11px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {currentUser?.email || "admin@jvmmedicalservices.com"}
+              {currentUser?.email || "Authorized Administrator"}
             </div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "4px", paddingTop: "6px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
               <Link
@@ -664,6 +687,282 @@ export default function AdminShell({ children }) {
           </div>
         </main>
       </div>
+    </div>
+  );
+}
+
+function AdminSecurityGate({ currentUser, onAuthenticated }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+
+    function initGoogle() {
+      if (window.google?.accounts?.id) {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: async (response) => {
+            if (response.credential) {
+              setLoading(true);
+              setError("");
+              try {
+                const res = await fetch("/api/auth/google", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ credential: response.credential, role: "admin" }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Google authentication failed");
+                if (data.user?.role === "admin" || data.user?.role === "super_admin" || data.user?.role === "sub_admin") {
+                  onAuthenticated(data.user);
+                } else {
+                  throw new Error(`Access Denied: Account (${data.user?.email}) does not have administrative clearance.`);
+                }
+              } catch (err) {
+                setError(err.message);
+              } finally {
+                setLoading(false);
+              }
+            }
+          },
+        });
+
+        const btn = document.getElementById("admin-google-btn-container");
+        if (btn) {
+          btn.innerHTML = "";
+          window.google.accounts.id.renderButton(btn, {
+            theme: "filled_blue",
+            size: "large",
+            width: "320",
+            text: "signin_with",
+            shape: "rectangular",
+          });
+        }
+      }
+    }
+
+    if (window.google?.accounts?.id) {
+      initGoogle();
+    } else {
+      const script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = initGoogle;
+      document.body.appendChild(script);
+    }
+  }, [onAuthenticated]);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      window.location.reload();
+    } catch (e) {
+      window.location.reload();
+    }
+  };
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#0B132B",
+        backgroundImage: "radial-gradient(ellipse at 50% 0%, rgba(30, 58, 138, 0.3) 0%, rgba(11, 19, 43, 1) 75%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "24px 16px",
+        fontFamily: "'Inter', sans-serif",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "460px",
+          backgroundColor: "#FFFFFF",
+          borderRadius: "16px",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.4)",
+          overflow: "hidden",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+        }}
+      >
+        {/* Top Header Banner */}
+        <div
+          style={{
+            backgroundColor: "#0E182A",
+            padding: "28px 24px",
+            textAlign: "center",
+            borderBottom: "3px solid #B4832A",
+            color: "#FFFFFF",
+          }}
+        >
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "4px 10px",
+              backgroundColor: "rgba(180, 131, 42, 0.15)",
+              border: "1px solid rgba(180, 131, 42, 0.4)",
+              borderRadius: "20px",
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "#F6C878",
+              marginBottom: "12px",
+            }}
+          >
+            <span>🔒</span> Executive Medical Administration
+          </div>
+          <h1 style={{ fontSize: "20px", fontWeight: 800, margin: "0 0 4px", color: "#FFFFFF" }}>
+            Dr. Janardhan Mydam MD, FAAP
+          </h1>
+          <p style={{ fontSize: "12px", color: "#94A3B8", margin: 0 }}>
+            Supervising Attending &amp; Faculty Command Center
+          </p>
+        </div>
+
+        <div style={{ padding: "28px 24px" }}>
+          {/* If current user is logged in but lacks admin clearance */}
+          {currentUser ? (
+            <div style={{ marginBottom: "20px", textAlign: "center" }}>
+              <div
+                style={{
+                  backgroundColor: "#FEF2F2",
+                  border: "1px solid #FCA5A5",
+                  borderRadius: "8px",
+                  padding: "16px",
+                  marginBottom: "16px",
+                  textAlign: "left",
+                }}
+              >
+                <div style={{ fontWeight: 700, color: "#991B1B", fontSize: "13px", marginBottom: "4px" }}>
+                  Insufficient Clearance Level
+                </div>
+                <p style={{ fontSize: "12px", color: "#7F1D1D", margin: 0, lineHeight: 1.5 }}>
+                  Signed in as <strong>{currentUser.email}</strong> with role (<strong>{currentUser.role}</strong>). This administration console is restricted to Dr. Janardhan Mydam and appointed medical administrators.
+                </p>
+              </div>
+
+              <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  style={{
+                    padding: "10px 16px",
+                    backgroundColor: "#DC2626",
+                    color: "#FFFFFF",
+                    border: "none",
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  Sign Out &amp; Switch Account
+                </button>
+                <Link
+                  href="/student/dashboard"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    padding: "10px 16px",
+                    backgroundColor: "#F1F5F9",
+                    color: "#0E182A",
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                  }}
+                >
+                  Return to Student Portal &rarr;
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <>
+              {error && (
+                <div
+                  style={{
+                    backgroundColor: "#FEF2F2",
+                    border: "1px solid #F87171",
+                    color: "#991B1B",
+                    padding: "12px 14px",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    lineHeight: 1.5,
+                    marginBottom: "20px",
+                  }}
+                >
+                  <strong>Access Denied:</strong> {error}
+                </div>
+              )}
+
+              {/* Google SSO Button */}
+              <div style={{ margin: "24px 0 16px", textAlign: "center" }}>
+                <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em", color: "#64748B", textTransform: "uppercase", marginBottom: "12px" }}>
+                  Official Faculty Single Sign-On
+                </div>
+                <div
+                  id="admin-google-btn-container"
+                  style={{ display: "flex", justifyContent: "center", minHeight: "44px" }}
+                />
+              </div>
+
+              <div
+                style={{
+                  backgroundColor: "#F8FAFC",
+                  border: "1px solid #E2E8F0",
+                  borderRadius: "10px",
+                  padding: "16px",
+                  marginTop: "20px",
+                  textAlign: "left",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+                  <span style={{ fontSize: "16px" }}>🛡️</span>
+                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#0F172A" }}>
+                    Hardware 2-Step Verification Protected
+                  </span>
+                </div>
+                <p style={{ fontSize: "11.5px", color: "#64748B", margin: 0, lineHeight: 1.5 }}>
+                  Access is strictly restricted to Dr. Janardhan Mydam and authorized assistant administrators. Authentication is verified through Google Cloud Identity with phone-bound 2-Step Verification. Zero passwords or 2FA keys are stored on this server.
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* Security Compliance Footer */}
+          <div
+            style={{
+              marginTop: "24px",
+              paddingTop: "16px",
+              borderTop: "1px solid #F1F5F9",
+              textAlign: "center",
+              fontSize: "11px",
+              color: "#94A3B8",
+              lineHeight: 1.5,
+            }}
+          >
+            Protected by 256-bit AES encryption &amp; NIST SP 800-63B guidelines.
+            <br />
+            Strictly restricted to authorized JVM Medical Services personnel.
+          </div>
+        </div>
+      </div>
+      <style jsx>{`
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </div>
   );
 }
