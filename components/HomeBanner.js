@@ -148,7 +148,7 @@ export default function HomeBanner() {
             {hero.secondaryBtnText || "Doctor Portfolio & Bio"}
           </Link>
           <Link
-            href="/question-banks"
+            href="/consultation"
             className="btn btn-ghost-light banner-btn"
             style={{
               padding: "11px 18px",
@@ -156,12 +156,15 @@ export default function HomeBanner() {
               fontWeight: 600,
             }}
           >
-            Free Mock Tests
+            Book Consultation
           </Link>
         </div>
       </div>
 
       <style jsx>{`
+        .home-hero-banner {
+          animation: mobileFadeInUp 0.5s ease-out both;
+        }
         .banner-content-box {
           padding: 54px 44px;
         }
@@ -181,16 +184,20 @@ export default function HomeBanner() {
             display: block !important;
           }
           .home-hero-banner {
-            min-height: 380px !important;
+            min-height: 290px !important;
             padding: 0 !important;
             border-radius: 12px !important;
           }
           .banner-content-box {
-            padding: 24px 16px !important;
+            padding: 20px 14px !important;
+          }
+          .banner-btn-group {
+            gap: 6px !important;
           }
           .banner-btn {
-            padding: 9px 16px !important;
-            font-size: 12.5px !important;
+            padding: 7px 13px !important;
+            font-size: 11.5px !important;
+            border-radius: 18px !important;
           }
         }
       `}</style>

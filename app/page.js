@@ -79,6 +79,7 @@ export default function HomePage() {
                 />
               </div>
               <div
+                className="doctor-exp-badge"
                 style={{
                   position: "absolute",
                   bottom: "-14px",
@@ -91,8 +92,8 @@ export default function HomePage() {
                   border: "1px solid #B4832A",
                 }}
               >
-                <div style={{ fontSize: "10.5px", fontWeight: 700, color: "#E9C989", textTransform: "uppercase" }}>25+ Years Experience</div>
-                <div style={{ fontSize: "14px", fontWeight: 800 }}>Dr. Janardhan Mydam, MD, FAAP</div>
+                <div className="badge-subtitle" style={{ fontSize: "10.5px", fontWeight: 700, color: "#E9C989", textTransform: "uppercase" }}>25+ Years Experience</div>
+                <div className="badge-title" style={{ fontSize: "14px", fontWeight: 800 }}>Dr. Janardhan Mydam, MD, FAAP</div>
               </div>
             </div>
 
