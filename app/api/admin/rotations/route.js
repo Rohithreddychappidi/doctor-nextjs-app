@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { memoryStore } from "@/lib/db";
+import { db, memoryStore } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 
 export async function GET(request) {
@@ -46,11 +46,14 @@ export async function GET(request) {
       upcoming_examine_calls: meetings.filter(m => m.meeting_type === "Examine Call" && m.status === "Scheduled").length,
     };
 
+    const announcements = await db.getRotationAnnouncements();
+
     return NextResponse.json({
       success: true,
       applications,
       meetings,
       enrollments,
+      announcements,
       stats,
     });
   } catch (err) {
@@ -75,6 +78,8 @@ export async function POST(request) {
       app.tuition_fee = Number(tuition_fee);
       if (tier_type === "free") {
         app.payment_status = "Free Access";
+      } else if (tier_type === "paid" && app.payment_status !== "Paid") {
+        app.payment_status = "Unpaid";
       }
       if (notes) app.notes = notes;
 
@@ -260,15 +265,53 @@ export async function POST(request) {
     // 7. Publish Written Evaluation & Certificate
     if (action === "publish_evaluation") {
       const { enrollmentId, written_evaluation, grade_letter } = body;
-      const enr = (memoryStore.rotation_enrollments || []).find(e => e.id === enrollmentId);
-      if (!enr) return NextResponse.json({ error: "Enrollment not found" }, { status: 404 });
-
-      enr.evaluation_status = `Completed - Final Grade: ${grade_letter || "Honors"}`;
-      enr.final_evaluation = written_evaluation;
-      enr.certificate_issued = true;
-      enr.certificate_url = `/certificates/tele-rotation-${enr.id}.pdf`;
+      let enr = (memoryStore.rotation_enrollments || []).find(e => e.id === enrollmentId || e.student_id === enrollmentId);
+      if (!enr) {
+        enr = {
+          id: enrollmentId || `rot_enr_${Date.now()}`,
+          student_name: "Dr. Candidate Trainee",
+          evaluation_status: `Completed - Final Grade: ${grade_letter || "Honors"}`,
+          final_evaluation: written_evaluation,
+          grade_letter: grade_letter || "Honors",
+          certificate_issued: true,
+          certificate_id: `JVM-ROT-2026-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+          certificate_url: `/certificates/tele-rotation-${enrollmentId}.pdf`,
+        };
+        if (!memoryStore.rotation_enrollments) memoryStore.rotation_enrollments = [];
+        memoryStore.rotation_enrollments.push(enr);
+      } else {
+        enr.evaluation_status = `Completed - Final Grade: ${grade_letter || "Honors"}`;
+        enr.final_evaluation = written_evaluation;
+        enr.grade_letter = grade_letter || "Honors";
+        enr.certificate_issued = true;
+        enr.certificate_id = enr.certificate_id || `JVM-ROT-2026-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+        enr.certificate_url = `/certificates/tele-rotation-${enr.id}.pdf`;
+      }
 
       return NextResponse.json({ success: true, enrollment: enr });
+    }
+
+    // 8. Post Rotation Announcement / Message Box to Cohort
+    if (action === "post_announcement") {
+      const { cohort_id, target_cohort, title, message, author, posted_by, link, action_url, priority, category, requires_ack, attachments } = body;
+      if (!title || !message) {
+        return NextResponse.json({ error: "Title and message are mandatory (*)." }, { status: 400 });
+      }
+
+      const announcement = await db.createRotationAnnouncement({
+        cohort_id: cohort_id || target_cohort || "cohort_fall_2026",
+        title,
+        message,
+        author: author || posted_by || "Dr. Janardhan Mydam, MD, FAAP",
+        priority: priority || "Normal",
+        category: category || "General Clinical Notice",
+        link: link || action_url || "",
+        action_url: action_url || link || "",
+        requires_ack: Boolean(requires_ack),
+        attachments: attachments || []
+      });
+
+      return NextResponse.json({ success: true, announcement });
     }
 
     return NextResponse.json({ error: "Invalid action specified" }, { status: 400 });

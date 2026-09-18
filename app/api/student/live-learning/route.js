@@ -70,7 +70,35 @@ export async function GET() {
       ];
     }
 
-    const classes = memoryStore.live_classes_catalog.map((c) => {
+    const adminClasses = await db.getClasses();
+    const publishedAdminClasses = adminClasses
+      .filter((c) => c.is_published !== false && c.is_active !== false)
+      .map((c) => ({
+        id: c.id,
+        title: c.title,
+        preceptor: c.doctor_name || c.instructor || "Dr. Janardhan Mydam, MD, FAAP",
+        scheduled_time: c.date_time,
+        duration: `${c.duration_minutes || 60} Minutes`,
+        is_free: c.is_free ?? true,
+        price: c.price || 0,
+        description: c.description,
+        teams_url: c.meeting_link || "https://teams.microsoft.com",
+        meeting_id: c.teams_meeting_id || "904 812 7730",
+        passcode: c.meeting_passcode || "NICU2026",
+        assignment_title: c.assignment_title || "",
+        assignment_description: c.assignment_description || "",
+        assignment_due_date: c.assignment_due_date || null,
+        tags: ["Live Grand Rounds", `Week ${c.week_number || 1}`],
+      }));
+
+    const combinedCatalog = [...(memoryStore.live_classes_catalog || [])];
+    for (const ac of publishedAdminClasses) {
+      if (!combinedCatalog.some((c) => c.id === ac.id)) {
+        combinedCatalog.unshift(ac);
+      }
+    }
+
+    const classes = combinedCatalog.map((c) => {
       const reg = userRegs.find((r) => r.class_id === c.id);
       return {
         ...c,
@@ -130,8 +158,19 @@ export async function POST(request) {
     if (!memoryStore.student_class_registrations) memoryStore.student_class_registrations = [];
     if (!memoryStore.payment_transactions) memoryStore.payment_transactions = [];
 
-    const liveCatalog = memoryStore.live_classes_catalog || [];
-    const targetClass = liveCatalog.find((c) => c.id === class_id);
+    const adminClasses = await db.getClasses();
+    const allKnownClasses = [
+      ...(memoryStore.live_classes_catalog || []),
+      ...adminClasses.map((c) => ({
+        id: c.id,
+        title: c.title,
+        scheduled_time: c.date_time,
+        is_free: c.is_free ?? true,
+        price: c.price || 0,
+      })),
+    ];
+
+    const targetClass = allKnownClasses.find((c) => c.id === class_id);
     if (!targetClass) {
       return NextResponse.json({ error: "Class not found in active catalog." }, { status: 404 });
     }

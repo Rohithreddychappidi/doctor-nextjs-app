@@ -36,48 +36,44 @@ export async function GET() {
       ]
     };
 
-    // Weekly meetings & live learnings
-    const weeklyMeetings = [
-      {
-        week: 1,
-        title: "Neonatal Resuscitation & Golden Hour Delivery Protocol",
-        schedule: "Tuesday & Thursday 18:00–19:30 CST",
-        teams_url: application?.teams_meeting_url || "https://teams.microsoft.com/l/meetup-join/jva-tele-neonatology-fall2026",
-        passcode: "NICU2026",
-        meeting_id: "904 812 7730",
+    // Attending Physician Announcements / Message Box
+    const announcements = await db.getRotationAnnouncements(application?.cohort_id || "cohort_fall_2026");
+
+    // Dynamic rotation meetings & live learnings (filtered for this student or cohort-wide)
+    const allRotationMeetings = memoryStore.rotation_meetings || [];
+    const studentMeetings = allRotationMeetings
+      .filter((m) => {
+        if (m.attendee_scope === "cohort") return true;
+        if (m.attendee_scope === "individual") {
+          return m.student_id === session.id || m.student_id === "usr_student_jvm";
+        }
+        return false;
+      })
+      .map((m, idx) => ({
+        id: m.id,
+        week: idx + 1,
+        title: m.title,
+        meeting_type: m.meeting_type || "Live Teaching Session",
+        schedule: new Date(m.scheduled_at).toLocaleString(),
+        scheduled_at: m.scheduled_at,
+        duration_minutes: m.duration_minutes || 60,
+        physician: m.physician || "Dr. Janardhan Mydam, MD, FAAP",
+        attendee_scope: m.attendee_scope || "cohort",
+        teams_url: m.teams_join_url || "https://teams.microsoft.com",
+        meeting_id: m.teams_meeting_id || "904 812 7730",
+        passcode: m.teams_passcode || "NICU2026",
+        recording_url: m.recording_url || "",
+        ai_summary: m.ai_summary || "",
+        status: m.status || "Scheduled",
+        score: m.score,
+        pass_fail: m.pass_fail,
+        grader_notes: m.grader_notes,
         learning_points: [
-          "T-piece resuscitator vs self-inflating bag titration",
-          "Delayed cord clamping vs umbilical cord milking (PREMOD2 trial context)",
-          "Target pre-ductal SpO2 milestones from 1 to 10 minutes of life"
+          m.notes || "Interactive clinical case analysis and bedside decision-making.",
+          "Differential diagnosis formulation using SBAR clinical framework.",
+          "AAP & NRP evidence-based management review."
         ]
-      },
-      {
-        week: 2,
-        title: "Respiratory Distress Syndrome (RDS) & Surfactant Replacement (LISA vs INSURE)",
-        schedule: "Tuesday & Thursday 18:00–19:30 CST",
-        teams_url: application?.teams_meeting_url || "https://teams.microsoft.com/l/meetup-join/jva-tele-neonatology-fall2026",
-        passcode: "NICU2026",
-        meeting_id: "904 812 7730",
-        learning_points: [
-          "Non-invasive surfactant administration (LISA) mechanics",
-          "Early bubble CPAP titration to avoid ventilator-induced lung injury",
-          "Blood gas interpretation in extreme prematurity"
-        ]
-      },
-      {
-        week: 3,
-        title: "Neonatal Sepsis, Meningitis & Lumbar Puncture Decision Trees",
-        schedule: "Tuesday & Thursday 18:00–19:30 CST",
-        teams_url: application?.teams_meeting_url || "https://teams.microsoft.com/l/meetup-join/jva-tele-neonatology-fall2026",
-        passcode: "NICU2026",
-        meeting_id: "904 812 7730",
-        learning_points: [
-          "Early-onset vs late-onset GBS risk stratification",
-          "Kaiser Permanente Sepsis Calculator clinical application",
-          "Empiric ampicillin + gentamicin dosing adjustments in renal immaturity"
-        ]
-      }
-    ];
+      }));
 
     // Clinical Notes Vault
     const clinicalNotes = [
@@ -101,10 +97,12 @@ export async function GET() {
       }
     ];
 
-    // Examination & OSCE Evaluation
+    // Examination and OSCE materials
     const examination = {
-      osce_status: isEnrolled ? "Scheduled (Week 6)" : "Locked",
-      lor_eligibility: application?.lor_status || "Eligible upon completion of active rounds & final evaluation",
+      title: "Exit Clinical OSCE & High-Yield Oral Case Simulation",
+      examiner: "Dr. Janardhan Mydam, MD, FAAP",
+      format: "One-on-one virtual oral exam over Microsoft Teams (30 Minutes)",
+      rubric_url: "/docs/tele_rotation_osce_rubric.pdf",
       grading_rubric: [
         { component: "Clinical Rounds Attendance & Punctuality", weight: "25%", status: "In Progress" },
         { component: "Vignette Case Presentation & SBAR Communication", weight: "25%", status: "In Progress" },
@@ -119,12 +117,18 @@ export async function GET() {
       }
     };
 
+    const enrollment = (memoryStore.rotation_enrollments || []).find(
+      (e) => e.student_id === session.id || e.student_email === session.email || e.id === "rot_enr_a"
+    ) || null;
+
     return NextResponse.json({
       success: true,
       is_enrolled: isEnrolled,
       application: application || null,
+      enrollment: enrollment,
+      announcements: announcements || [],
       orientation,
-      weekly_meetings: weeklyMeetings,
+      weekly_meetings: studentMeetings,
       clinical_notes: clinicalNotes,
       examination,
       recorded_sessions: recordedSessions

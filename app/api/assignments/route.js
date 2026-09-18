@@ -18,7 +18,7 @@ export async function POST(request) {
   try {
     const user = await getSessionUser();
     const data = await request.json();
-    const { class_id, submission_text, file_url } = data;
+    const { class_id, submission_text, file_url, submission_type, group_members } = data;
 
     if (!class_id || (!submission_text && !file_url)) {
       return NextResponse.json(
@@ -35,6 +35,8 @@ export async function POST(request) {
       class_id,
       student_id: studentId,
       student_name: studentName,
+      submission_type: submission_type || "individual",
+      group_members: Array.isArray(group_members) ? group_members : (group_members ? [group_members] : []),
       submission_text: submission_text?.trim() || "",
       file_url: file_url?.trim() || "",
       submitted_at: new Date().toISOString(),

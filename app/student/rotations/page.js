@@ -523,11 +523,12 @@ export default function StudentRotationsPage() {
   const clinicalNotes = data?.clinical_notes || [];
   const examination = data?.examination;
   const recordedSessions = data?.recorded_sessions || [];
+  const announcements = data?.announcements || [];
 
   return (
     <div style={{ maxWidth: 1040, margin: "0 auto", padding: "24px 16px 60px" }}>
       {/* Header Banner */}
-      <div style={{ backgroundColor: "#0B1E36", borderRadius: 14, padding: "26px 28px", color: "#FFFFFF", marginBottom: 24, display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
+      <div style={{ backgroundColor: "#0B1E36", borderRadius: 14, padding: "26px 28px", color: "#FFFFFF", marginBottom: 20, display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
         <div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "3px 10px", borderRadius: 12, backgroundColor: "rgba(255,255,255,0.12)", color: "#93C5FD", fontSize: "11.5px", fontWeight: 700, textTransform: "uppercase", marginBottom: 8 }}>
             ● Active Clinical Experience Cohort
@@ -581,6 +582,60 @@ export default function StudentRotationsPage() {
           </a>
         </div>
       </div>
+
+      {/* Attending Physician Announcements / Message Box */}
+      {announcements.length > 0 && (
+        <div style={{ marginBottom: 24, display: "flex", flexDirection: "column", gap: 10 }}>
+          {announcements.slice(0, 3).map((item) => {
+            const isHigh = item.priority?.includes("High") || item.priority?.includes("Urgent");
+            return (
+              <div
+                key={item.id}
+                style={{
+                  backgroundColor: isHigh ? "#FEF2F2" : "#EFF6FF",
+                  border: isHigh ? "1px solid #FCA5A5" : "1px solid #BFDBFE",
+                  borderLeft: isHigh ? "5px solid #DC2626" : "5px solid #2563EB",
+                  borderRadius: 10,
+                  padding: "14px 18px",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, marginBottom: 4, flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: "16px" }}>{isHigh ? "🚨" : "📢"}</span>
+                    <strong style={{ color: isHigh ? "#991B1B" : "#1E40AF", fontSize: "14px" }}>
+                      {item.title}
+                    </strong>
+                    <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 7px", borderRadius: 4, backgroundColor: isHigh ? "#FEE2E2" : "#DBEAFE", color: isHigh ? "#B91C1C" : "#1D4ED8" }}>
+                      {item.priority || "Normal"}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: "11.5px", color: isHigh ? "#B91C1C" : "#3B82F6", fontWeight: 600 }}>
+                    {item.posted_by || "Dr. Janardhan Mydam"} • {item.created_at ? new Date(item.created_at).toLocaleDateString() : "Active Notice"}
+                  </span>
+                </div>
+
+                <p style={{ margin: "4px 0 6px", fontSize: "13.5px", color: "#334155", lineHeight: 1.5, whiteSpace: "pre-line" }}>
+                  {item.message}
+                </p>
+
+                {item.action_url && (
+                  <div style={{ marginTop: 6 }}>
+                    <a
+                      href={item.action_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: "12px", fontWeight: 700, color: "#1D4ED8", textDecoration: "underline" }}
+                    >
+                      📎 Access Attached Reference Material &rarr;
+                    </a>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Navigation Sub-sections (Tabs) */}
       <div style={{ display: "flex", gap: 6, borderBottom: "2px solid #E2E8F0", paddingBottom: 0, marginBottom: 24, overflowX: "auto" }}>
@@ -671,41 +726,107 @@ export default function StudentRotationsPage() {
       {/* TAB 2: WEEKLY MEETINGS & LIVE LEARNINGS */}
       {activeTab === "meetings" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {weeklyMeetings.map((m) => (
-            <div key={m.week} style={{ backgroundColor: "#FFFFFF", borderRadius: 12, border: "1px solid #E2E8F0", padding: "22px 24px", boxShadow: "0 2px 10px rgba(0,0,0,0.03)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 12 }}>
-                <div>
-                  <div style={{ display: "inline-block", padding: "2px 8px", backgroundColor: "#EEF2F6", color: "#0B1E36", fontSize: "11px", fontWeight: 700, borderRadius: 4, marginBottom: 6 }}>
-                    WEEK {m.week}
-                  </div>
-                  <h3 style={{ fontSize: "17px", fontWeight: 800, color: "#0B1E36", margin: "0 0 4px" }}>
-                    {m.title}
-                  </h3>
-                  <div style={{ fontSize: "13px", color: "#64748B" }}>
-                    🗓️ Schedule: <strong>{m.schedule}</strong>
-                  </div>
-                </div>
-
-                <a
-                  href={m.teams_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "9px 16px", backgroundColor: "#2563EB", color: "#FFF", fontSize: "13px", fontWeight: 700, borderRadius: 6, textDecoration: "none" }}
-                >
-                  Join Teams Session
-                </a>
-              </div>
-
-              <div style={{ backgroundColor: "#F8FAFC", borderRadius: 8, padding: "12px 16px", fontSize: "13px", color: "#334155" }}>
-                <div style={{ fontWeight: 700, color: "#0B1E36", marginBottom: 6 }}>Key Clinical Discussion Milestones:</div>
-                <ul style={{ margin: 0, paddingLeft: 16, lineHeight: 1.6 }}>
-                  {m.learning_points?.map((pt, i) => (
-                    <li key={i}>{pt}</li>
-                  ))}
-                </ul>
-              </div>
+          {weeklyMeetings.length === 0 ? (
+            <div style={{ backgroundColor: "#FFFFFF", borderRadius: 12, border: "1px solid #E2E8F0", padding: "40px 24px", textAlign: "center", color: "#64748B" }}>
+              <p style={{ margin: 0, fontSize: "15px", fontWeight: 600 }}>No scheduled meetings found for your cohort yet.</p>
+              <p style={{ margin: "6px 0 0", fontSize: "13px" }}>Check back soon or check Attending Announcements above.</p>
             </div>
-          ))}
+          ) : (
+            weeklyMeetings.map((m) => {
+              const isIndividual = m.attendee_scope === "individual";
+              const isExamine = m.meeting_type === "Examine Call";
+              return (
+                <div
+                  key={m.id || m.week}
+                  style={{
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: 12,
+                    border: isIndividual ? "1.5px solid #CBD5E1" : "1px solid #E2E8F0",
+                    borderLeft: isIndividual ? "5px solid #0D9488" : isExamine ? "5px solid #D97706" : "5px solid #2563EB",
+                    padding: "22px 24px",
+                    boxShadow: "0 2px 10px rgba(0,0,0,0.03)"
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 12 }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 6 }}>
+                        <span style={{ display: "inline-block", padding: "2px 8px", backgroundColor: "#EEF2F6", color: "#0B1E36", fontSize: "11px", fontWeight: 700, borderRadius: 4 }}>
+                          {m.week ? `WEEK ${m.week}` : "CLINICAL SESSION"}
+                        </span>
+                        {isIndividual ? (
+                          <span style={{ display: "inline-block", padding: "2px 8px", backgroundColor: "#F0FDFA", color: "#0F766E", fontSize: "11px", fontWeight: 700, borderRadius: 4, border: "1px solid #99F6E4" }}>
+                            👤 1-on-1 Individual Session with Dr. Mydam
+                          </span>
+                        ) : (
+                          <span style={{ display: "inline-block", padding: "2px 8px", backgroundColor: "#EFF6FF", color: "#1D4ED8", fontSize: "11px", fontWeight: 700, borderRadius: 4 }}>
+                            👥 Full Cohort Rounds
+                          </span>
+                        )}
+                        {m.meeting_type && (
+                          <span style={{ display: "inline-block", padding: "2px 8px", backgroundColor: isExamine ? "#FEF3C7" : "#F1F5F9", color: isExamine ? "#92400E" : "#475569", fontSize: "11px", fontWeight: 600, borderRadius: 4 }}>
+                            {m.meeting_type}
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 style={{ fontSize: "17px", fontWeight: 800, color: "#0B1E36", margin: "0 0 4px" }}>
+                        {m.title}
+                      </h3>
+                      <div style={{ fontSize: "13px", color: "#64748B" }}>
+                        🗓️ Schedule: <strong>{m.schedule}</strong> {m.duration_minutes ? `(${m.duration_minutes} mins)` : ""} • Preceptor: {m.physician || "Dr. Janardhan Mydam"}
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {m.recording_url && (
+                        <a
+                          href={m.recording_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 14px", backgroundColor: "#7C3AED", color: "#FFF", fontSize: "12.5px", fontWeight: 700, borderRadius: 6, textDecoration: "none" }}
+                        >
+                          ▶ Cloud Recording
+                        </a>
+                      )}
+                      <a
+                        href={m.teams_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "9px 16px", backgroundColor: "#2563EB", color: "#FFF", fontSize: "13px", fontWeight: 700, borderRadius: 6, textDecoration: "none" }}
+                      >
+                        Join Teams Session
+                      </a>
+                    </div>
+                  </div>
+
+                  {(m.teams_meeting_id || m.teams_passcode) && (
+                    <div style={{ display: "inline-flex", gap: 14, backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", padding: "6px 12px", borderRadius: 6, fontSize: "12px", color: "#475569", marginBottom: 12 }}>
+                      {m.teams_meeting_id && <span>Meeting ID: <strong>{m.teams_meeting_id}</strong></span>}
+                      {m.teams_passcode && <span>Passcode: <strong>{m.teams_passcode}</strong></span>}
+                    </div>
+                  )}
+
+                  {m.ai_summary && (
+                    <div style={{ backgroundColor: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 8, padding: "12px 14px", fontSize: "12.5px", color: "#166534", marginBottom: 10 }}>
+                      <div style={{ fontWeight: 800, marginBottom: 4 }}>🤖 Preceptor AI Synthesis &amp; Takeaways:</div>
+                      <div>{m.ai_summary}</div>
+                    </div>
+                  )}
+
+                  {m.learning_points && m.learning_points.length > 0 && (
+                    <div style={{ backgroundColor: "#F8FAFC", borderRadius: 8, padding: "12px 16px", fontSize: "13px", color: "#334155" }}>
+                      <div style={{ fontWeight: 700, color: "#0B1E36", marginBottom: 6 }}>Key Clinical Discussion Milestones:</div>
+                      <ul style={{ margin: 0, paddingLeft: 16, lineHeight: 1.6 }}>
+                        {m.learning_points.map((pt, i) => (
+                          <li key={i}>{pt}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
         </div>
       )}
 
@@ -769,10 +890,50 @@ export default function StudentRotationsPage() {
             </div>
           </div>
 
+          {/* Attending Evaluation & Certificate (if issued) */}
+          {data?.enrollment?.certificate_issued && (
+            <div style={{ marginBottom: 24, backgroundColor: "#FFFBEB", border: "1.5px solid #FCD34D", borderRadius: 12, padding: "20px 24px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: "24px" }}>🎓</span>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 800, color: "#78350F" }}>
+                      Official Rotation Certificate Issued &amp; Verified
+                    </h3>
+                    <span style={{ fontSize: "12px", color: "#92400E" }}>
+                      Issued by: Dr. Janardhan Mydam, MD, FAAP • ID: {data.enrollment.certificate_id || "JVM-ROT-2026-01"}
+                    </span>
+                  </div>
+                </div>
+                <span style={{ padding: "4px 12px", borderRadius: 20, backgroundColor: "#FEF3C7", color: "#B45309", fontWeight: 800, fontSize: "13px" }}>
+                  Grade: {data.enrollment.grade_letter || "Honors"}
+                </span>
+              </div>
+
+              {data.enrollment.written_evaluation && (
+                <div style={{ backgroundColor: "#FFFFFF", padding: "14px", borderRadius: 8, border: "1px solid #FDE68A", fontSize: "13px", color: "#451A03", lineHeight: 1.6, marginBottom: 12 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 4 }}>Preceptor Written Evaluation:</div>
+                  &ldquo;{data.enrollment.written_evaluation}&rdquo;
+                </div>
+              )}
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+                <a
+                  href={`/api/certificates/${data.enrollment.certificate_id || "jvm_cert"}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", backgroundColor: "#B45309", color: "#FFF", borderRadius: 6, fontWeight: 700, fontSize: "12.5px", textDecoration: "none" }}
+                >
+                  📜 View &amp; Print Certificate
+                </a>
+              </div>
+            </div>
+          )}
+
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", backgroundColor: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10 }}>
             <div>
               <div style={{ fontWeight: 800, color: "#166534", fontSize: "14.5px" }}>Attending Letter of Recommendation (LOR) Status</div>
-              <div style={{ fontSize: "13px", color: "#15803D" }}>{examination?.lor_eligibility}</div>
+              <div style={{ fontSize: "13px", color: "#15803D" }}>{examination?.lor_eligibility || "Eligible upon scoring >85% across clinical rounds & oral examine sessions."}</div>
             </div>
             <Link
               href="/student/qbank"

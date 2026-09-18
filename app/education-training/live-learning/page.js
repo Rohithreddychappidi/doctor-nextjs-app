@@ -1,13 +1,33 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import MeetingCard from "@/components/MeetingCard";
 import { useSiteData } from "@/lib/DataContext";
 import SectionDisclaimer from "@/components/SectionDisclaimer";
 
 export default function LiveLearningPage() {
-  const { meetings, content } = useSiteData();
+  const { content } = useSiteData();
   const c = content.liveLearning;
+  const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadPublicClasses() {
+      try {
+        const res = await fetch("/api/classes?public=true");
+        if (res.ok) {
+          const data = await res.json();
+          setClasses(data.classes || []);
+        }
+      } catch (err) {
+        console.error("Failed to load live classes:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadPublicClasses();
+  }, []);
+
   return (
     <>
       <section className="hero" style={{ paddingBottom: 40 }}>
@@ -30,12 +50,91 @@ export default function LiveLearningPage() {
         <div className="container">
           <SectionDisclaimer sectionKey="live_classes" />
 
-          {meetings.length === 0 ? (
-            <p>No sessions are scheduled right now — check back soon.</p>
+          <div style={{ marginBottom: 20 }}>
+            <div className="eyebrow">Upcoming Schedule</div>
+            <h2>Live Clinical Teaching &amp; Grand Rounds</h2>
+            <p style={{ color: "var(--ink-soft)", fontSize: "14.5px" }}>
+              Join Dr. Janardhan Mydam for interactive neonatal case conferences, delivery room resuscitation workshops, and board-style clinical decision simulations.
+            </p>
+          </div>
+
+          {loading ? (
+            <div style={{ padding: "40px 0", textAlign: "center", color: "var(--ink-soft)" }}>
+              Loading upcoming clinical seminars...
+            </div>
+          ) : classes.length === 0 ? (
+            <div style={{ padding: "30px 20px", backgroundColor: "#F8FAFC", borderRadius: 10, border: "1px solid #E2E8F0", textAlign: "center" }}>
+              <p style={{ margin: "0 0 12px", color: "var(--ink-soft)" }}>
+                No public sessions are currently scheduled. Next cohort sessions will be announced soon.
+              </p>
+              <Link href="/consultation" className="btn btn-primary btn-sm">
+                Request Individual Faculty Consultation
+              </Link>
+            </div>
           ) : (
             <div className="grid grid-3">
-              {meetings.map((m) => (
-                <MeetingCard key={m.id} meeting={m} />
+              {classes.map((cls) => (
+                <div
+                  key={cls.id}
+                  className="card"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    padding: 22,
+                    borderRadius: 12,
+                    border: "1px solid #E2E8F0",
+                    backgroundColor: "#FFFFFF",
+                    boxShadow: "0 2px 10px rgba(0,0,0,0.03)",
+                  }}
+                >
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexWrap: "wrap", gap: 6 }}>
+                      <span className="pill accent" style={{ fontSize: "11px" }}>
+                        Week {cls.week_number}
+                      </span>
+                      <span
+                        className="pill"
+                        style={{
+                          fontSize: "11px",
+                          backgroundColor: cls.is_free ? "#F0FDF4" : "#FEF3C7",
+                          color: cls.is_free ? "#166534" : "#92400E",
+                        }}
+                      >
+                        {cls.is_free ? "Free Attendance" : "Tuition Required"}
+                      </span>
+                    </div>
+
+                    <h3 style={{ fontSize: "17px", fontWeight: 800, margin: "0 0 8px", color: "var(--bg-navy)" }}>
+                      {cls.title}
+                    </h3>
+
+                    <div style={{ fontSize: "12.5px", color: "#475569", marginBottom: 6 }}>
+                      👨‍⚕️ <strong>{cls.doctor_name || "Dr. Janardhan Mydam, MD, FAAP"}</strong>
+                    </div>
+
+                    <div style={{ fontSize: "12.5px", color: "var(--muted)", fontFamily: "var(--font-mono)", marginBottom: 12 }}>
+                      🗓️ {cls.date_time} ({cls.duration_minutes} min)
+                    </div>
+
+                    <p style={{ fontSize: "13.5px", color: "var(--ink-soft)", lineHeight: 1.5, marginBottom: 16 }}>
+                      {cls.description}
+                    </p>
+                  </div>
+
+                  <div style={{ paddingTop: 14, borderTop: "1px solid #F1F5F9", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: "12px", color: "#64748B" }}>
+                      Platform: <strong>{cls.meeting_platform}</strong>
+                    </span>
+                    <Link
+                      href="/student/live-learning"
+                      className="btn btn-primary btn-sm"
+                      style={{ fontSize: "12px" }}
+                    >
+                      Register in Portal &rarr;
+                    </Link>
+                  </div>
+                </div>
               ))}
             </div>
           )}

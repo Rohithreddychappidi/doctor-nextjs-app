@@ -91,11 +91,30 @@ export default function AdminSubmissionsPage() {
               <div key={sub.id} className="dash-card">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12, flexWrap: "wrap", gap: 10 }}>
                   <div>
-                    <span className="pill accent">Week {cls?.week_number || "—"}</span>
+                    <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6 }}>
+                      <span className="pill accent">Week {cls?.week_number || "—"}</span>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 700,
+                          padding: "2px 8px",
+                          borderRadius: 4,
+                          backgroundColor: sub.submission_type === "group" ? "#FEF3C7" : "#EFF6FF",
+                          color: sub.submission_type === "group" ? "#B45309" : "#1D4ED8",
+                        }}
+                      >
+                        {sub.submission_type === "group" ? "👥 Group Assignment" : "👤 Individual Submission"}
+                      </span>
+                    </div>
                     <h3 style={{ margin: "6px 0 2px", fontSize: 18 }}>{cls?.assignment_title || cls?.title || "Clinical Assignment"}</h3>
                     <div style={{ fontSize: 13, color: "var(--ink-soft)" }}>
                       Submitted by: <strong>{sub.student_name}</strong> on {new Date(sub.submitted_at).toLocaleString()}
                     </div>
+                    {sub.group_members && sub.group_members.length > 0 && (
+                      <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>
+                        👥 <strong>Co-authors / Group:</strong> {sub.group_members.join(", ")}
+                      </div>
+                    )}
                   </div>
                   <div style={{ textAlign: "right" }}>
                     <span className="pill" style={{ background: sub.grade ? "var(--green)" : "var(--gold)", color: "#fff" }}>

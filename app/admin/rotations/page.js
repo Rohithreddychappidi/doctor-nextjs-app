@@ -17,8 +17,21 @@ export default function AdminRotationsPage() {
   const [meetings, setMeetings] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
   const [recordedSessions, setRecordedSessions] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
+
+  // Announcement Form
+  const [newAnnouncement, setNewAnnouncement] = useState({
+    title: "",
+    message: "",
+    category: "General Clinical Notice",
+    priority: "Normal",
+    requires_ack: false,
+    action_url: "",
+    target_cohort: "cohort_fall_2026",
+  });
+  const [postingAnnouncement, setPostingAnnouncement] = useState(false);
 
   // Recorded Session Form
   const [newRecording, setNewRecording] = useState({
@@ -54,6 +67,7 @@ export default function AdminRotationsPage() {
     duration_minutes: 60,
     physician: "Dr. Janardhan Mydam, MD, FAAP",
     attendee_scope: "cohort",
+    student_id: "",
     teams_join_url: "",
     teams_meeting_id: "",
     teams_passcode: "",
@@ -89,6 +103,7 @@ export default function AdminRotationsPage() {
         setApplications(json.applications || []);
         setMeetings(json.meetings || []);
         setEnrollments(json.enrollments || []);
+        setAnnouncements(json.announcements || []);
         setStats(json.stats || {});
       }
       const rotRes = await fetch("/api/student/rotations");
@@ -100,6 +115,42 @@ export default function AdminRotationsPage() {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handlePostAnnouncement(e) {
+    e.preventDefault();
+    if (!newAnnouncement.title || !newAnnouncement.message) {
+      alert("Title and message are required.");
+      return;
+    }
+    setPostingAnnouncement(true);
+    try {
+      const res = await fetch("/api/admin/rotations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "post_announcement",
+          ...newAnnouncement,
+        }),
+      });
+      if (res.ok) {
+        notify("📢 Clinical announcement posted to trainee portal!");
+        setNewAnnouncement({
+          title: "",
+          message: "",
+          category: "General Clinical Notice",
+          priority: "Normal",
+          requires_ack: false,
+          action_url: "",
+          target_cohort: "cohort_fall_2026",
+        });
+        loadData();
+      }
+    } catch (err) {
+      alert("Error posting announcement: " + err.message);
+    } finally {
+      setPostingAnnouncement(false);
     }
   }
 
@@ -347,6 +398,7 @@ export default function AdminRotationsPage() {
         <div style={{ display: "flex", gap: "8px", borderBottom: "2px solid #E2E8F0", marginBottom: "24px", overflowX: "auto" }}>
           {[
             { id: "applications", label: "📋 Inbound Applications Queue", count: applications.length },
+            { id: "announcements", label: "📢 Attending Announcements", count: announcements.length },
             { id: "schedule", label: "📅 Flexible Meeting Scheduler", count: meetings.length },
             { id: "recordings", label: "🎥 Recorded Clinical Sessions", count: recordedSessions.length },
             { id: "examine", label: "⚖️ Graded Examine Calls", count: meetings.filter(m => m.meeting_type === "Examine Call").length },
@@ -537,6 +589,194 @@ export default function AdminRotationsPage() {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: ATTENDING ANNOUNCEMENTS */}
+        {activeTab === "announcements" && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "24px" }}>
+            {/* Create Announcement Form */}
+            <div style={{ backgroundColor: "#FFFFFF", borderRadius: "12px", border: "1px solid #E2E8F0", padding: "20px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
+                <span style={{ fontSize: "20px" }}>📢</span>
+                <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 800, color: "#0F172A" }}>Post Attending Clinical Notice</h3>
+              </div>
+              <p style={{ fontSize: "12px", color: "#64748B", margin: "0 0 16px" }}>
+                Broadcast immediate clinical directives, patient case prep notes, or schedule alerts directly to enrolled rotation trainees.
+              </p>
+
+              <form onSubmit={handlePostAnnouncement}>
+                <div style={{ marginBottom: "14px" }}>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>Announcement Title</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. NICU Morning Rounds: Congenital Diaphragmatic Hernia Prep"
+                    value={newAnnouncement.title}
+                    onChange={(e) => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
+                    style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", boxSizing: "border-box" }}
+                  />
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "14px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>Category</label>
+                    <select
+                      value={newAnnouncement.category}
+                      onChange={(e) => setNewAnnouncement({ ...newAnnouncement, category: e.target.value })}
+                      style={{ width: "100%", padding: "9px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "12px", boxSizing: "border-box" }}
+                    >
+                      <option value="General Clinical Notice">General Clinical Notice</option>
+                      <option value="Ward Round Schedule">Ward Round Schedule</option>
+                      <option value="Case Prep & Articles">Case Prep & Articles</option>
+                      <option value="Examine Call Notice">Examine Call Notice</option>
+                      <option value="Urgent Preceptor Alert">Urgent Preceptor Alert</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>Priority Level</label>
+                    <select
+                      value={newAnnouncement.priority}
+                      onChange={(e) => setNewAnnouncement({ ...newAnnouncement, priority: e.target.value })}
+                      style={{ width: "100%", padding: "9px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "12px", boxSizing: "border-box" }}
+                    >
+                      <option value="Normal">Normal</option>
+                      <option value="Important">Important</option>
+                      <option value="High Priority">High Priority ⚠️</option>
+                      <option value="Urgent Action Required">Urgent Action Required 🚨</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: "14px" }}>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>Notice / Message Body</label>
+                  <textarea
+                    rows={4}
+                    required
+                    placeholder="Provide specific clinical instructions, required reading citations before tomorrow's ward rounds, or procedural reminders..."
+                    value={newAnnouncement.message}
+                    onChange={(e) => setNewAnnouncement({ ...newAnnouncement, message: e.target.value })}
+                    style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", boxSizing: "border-box" }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: "14px" }}>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>Action / Reading Material Link (Optional)</label>
+                  <input
+                    type="url"
+                    placeholder="https://..."
+                    value={newAnnouncement.action_url}
+                    onChange={(e) => setNewAnnouncement({ ...newAnnouncement, action_url: e.target.value })}
+                    style={{ width: "100%", padding: "9px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "12px", boxSizing: "border-box" }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <input
+                    type="checkbox"
+                    id="req_ack"
+                    checked={newAnnouncement.requires_ack}
+                    onChange={(e) => setNewAnnouncement({ ...newAnnouncement, requires_ack: e.target.checked })}
+                  />
+                  <label htmlFor="req_ack" style={{ fontSize: "12px", color: "#475569", cursor: "pointer" }}>
+                    Require student acknowledgment / sign-off in student portal
+                  </label>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={postingAnnouncement}
+                  style={{
+                    width: "100%",
+                    padding: "11px",
+                    borderRadius: "8px",
+                    background: "linear-gradient(135deg, #12203B 0%, #1E3A8A 100%)",
+                    color: "#FFFFFF",
+                    fontWeight: 700,
+                    fontSize: "13px",
+                    border: "none",
+                    cursor: postingAnnouncement ? "not-allowed" : "pointer"
+                  }}
+                >
+                  {postingAnnouncement ? "Publishing Notice..." : "📢 Publish Notice to Student Hub"}
+                </button>
+              </form>
+            </div>
+
+            {/* Announcement Feed */}
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#1E293B" }}>
+                  Live Broadcast Notices ({announcements.length})
+                </h3>
+                <span style={{ fontSize: "12px", color: "#64748B" }}>Visible to all enrolled students</span>
+              </div>
+
+              {announcements.length === 0 ? (
+                <div style={{ backgroundColor: "#FFFFFF", padding: "40px 20px", textAlign: "center", borderRadius: "12px", border: "1px solid #E2E8F0", color: "#64748B" }}>
+                  <p style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>No announcements published yet.</p>
+                  <p style={{ margin: "6px 0 0", fontSize: "12px" }}>Use the form to post case prep notes or rotation updates.</p>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  {announcements.map((item) => {
+                    const isHigh = item.priority?.includes("High") || item.priority?.includes("Urgent");
+                    return (
+                      <div
+                        key={item.id}
+                        style={{
+                          backgroundColor: "#FFFFFF",
+                          borderRadius: "10px",
+                          border: isHigh ? "1px solid #FCA5A5" : "1px solid #E2E8F0",
+                          borderLeft: isHigh ? "4px solid #DC2626" : "4px solid #2563EB",
+                          padding: "16px",
+                          boxShadow: "0 1px 2px rgba(0,0,0,0.03)"
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px", marginBottom: "6px" }}>
+                          <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: "#0F172A" }}>{item.title}</h4>
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              padding: "2px 8px",
+                              borderRadius: "4px",
+                              fontWeight: 700,
+                              backgroundColor: isHigh ? "#FEE2E2" : "#EFF6FF",
+                              color: isHigh ? "#B91C1C" : "#1D4ED8",
+                              whiteSpace: "nowrap"
+                            }}
+                          >
+                            {item.priority || "Normal"}
+                          </span>
+                        </div>
+
+                        <p style={{ margin: "0 0 10px", fontSize: "13px", color: "#334155", lineHeight: 1.5, whiteSpace: "pre-line" }}>
+                          {item.message}
+                        </p>
+
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11.5px", color: "#64748B", paddingTop: "8px", borderTop: "1px solid #F1F5F9" }}>
+                          <span>🏷️ {item.category} • ✍️ {item.posted_by || "Attending Physician"}</span>
+                          <span>🗓️ {item.created_at ? new Date(item.created_at).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "Recently"}</span>
+                        </div>
+
+                        {item.action_url && (
+                          <div style={{ marginTop: "8px" }}>
+                            <a
+                              href={item.action_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ fontSize: "11.5px", fontWeight: 700, color: "#2563EB", textDecoration: "none" }}
+                            >
+                              🔗 View Attached Reference Material &rarr;
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1028,6 +1268,57 @@ export default function AdminRotationsPage() {
                     onChange={(e) => setNewMeeting({ ...newMeeting, title: e.target.value })}
                     style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", boxSizing: "border-box" }}
                   />
+                </div>
+
+                {/* Attendee Audience Selector (Cohort vs Individual 1-on-1) */}
+                <div style={{ marginBottom: "14px", backgroundColor: "#F8FAFC", padding: "12px", borderRadius: "8px", border: "1px solid #E2E8F0" }}>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#0F172A", marginBottom: "6px" }}>
+                    🎯 Target Learner Audience
+                  </label>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: newMeeting.attendee_scope === "individual" ? "10px" : "0" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 600, color: "#334155", cursor: "pointer" }}>
+                      <input
+                        type="radio"
+                        name="attendee_scope"
+                        checked={newMeeting.attendee_scope === "cohort"}
+                        onChange={() => setNewMeeting({ ...newMeeting, attendee_scope: "cohort", student_id: "" })}
+                      />
+                      👥 Full Cohort (All Students)
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 600, color: "#334155", cursor: "pointer" }}>
+                      <input
+                        type="radio"
+                        name="attendee_scope"
+                        checked={newMeeting.attendee_scope === "individual"}
+                        onChange={() => setNewMeeting({ ...newMeeting, attendee_scope: "individual" })}
+                      />
+                      👤 1-on-1 Individual Trainee
+                    </label>
+                  </div>
+
+                  {newMeeting.attendee_scope === "individual" && (
+                    <div style={{ marginTop: "10px" }}>
+                      <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#475569", marginBottom: "4px" }}>
+                        Select Enrolled Trainee:
+                      </label>
+                      <select
+                        required
+                        value={newMeeting.student_id}
+                        onChange={(e) => setNewMeeting({ ...newMeeting, student_id: e.target.value })}
+                        style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #CBD5E1", fontSize: "12px" }}
+                      >
+                        <option value="">-- Choose student for private examine/advisory --</option>
+                        {applications.filter(a => a.status === "Approved").map(a => (
+                          <option key={a.id} value={a.student_id || a.applicant_email || a.id}>
+                            {a.applicant_name} ({a.applicant_email})
+                          </option>
+                        ))}
+                        {applications.filter(a => a.status === "Approved").length === 0 && (
+                          <option value="test_student">Dr. Trainee Candidate (Sample)</option>
+                        )}
+                      </select>
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "14px" }}>

@@ -20,6 +20,51 @@ export default function StudentLiveLearningPage() {
   const [billingName, setBillingName] = useState("Candidate Trainee");
   const [paying, setPaying] = useState(false);
 
+  // Assignment Submission State
+  const [submissionModalClass, setSubmissionModalClass] = useState(null);
+  const [subForm, setSubForm] = useState({
+    submission_type: "individual",
+    group_members: "",
+    submission_text: "",
+    file_url: "",
+  });
+  const [submittingAssignment, setSubmittingAssignment] = useState(false);
+  const [subSuccessMsg, setSubSuccessMsg] = useState("");
+
+  const handleSubmitAssignment = async (e) => {
+    e.preventDefault();
+    if (!subForm.submission_text && !subForm.file_url) {
+      alert("Please provide submission text or an attached document URL.");
+      return;
+    }
+    setSubmittingAssignment(true);
+    try {
+      const res = await fetch("/api/assignments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          class_id: submissionModalClass.id,
+          submission_type: subForm.submission_type,
+          group_members: subForm.group_members ? subForm.group_members.split(",").map(s => s.trim()).filter(Boolean) : [],
+          submission_text: subForm.submission_text,
+          file_url: subForm.file_url,
+        }),
+      });
+      const resJson = await res.json();
+      if (!res.ok) throw new Error(resJson.error || "Submission failed");
+      setSubSuccessMsg("Assignment submitted successfully to faculty for grading!");
+      setTimeout(() => {
+        setSubmissionModalClass(null);
+        setSubSuccessMsg("");
+        setSubForm({ submission_type: "individual", group_members: "", submission_text: "", file_url: "" });
+      }, 2000);
+    } catch (err) {
+      alert("Error: " + err.message);
+    } finally {
+      setSubmittingAssignment(false);
+    }
+  };
+
   const loadClasses = async () => {
     try {
       const res = await fetch("/api/student/live-learning");
@@ -284,6 +329,41 @@ export default function StudentLiveLearningPage() {
                       <span>🗓️ {scheduledDate.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })} at {scheduledDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                       <span>⏳ {cls.duration}</span>
                     </div>
+
+                    {cls.assignment_title && (
+                      <div style={{ marginTop: 12, padding: "12px 14px", backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 8 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8, marginBottom: 4 }}>
+                          <span style={{ fontSize: "12.5px", fontWeight: 700, color: "#0B1E36" }}>
+                            📝 Clinical Assignment: {cls.assignment_title}
+                          </span>
+                          <span style={{ fontSize: "11px", color: "#64748B", fontWeight: 600 }}>
+                            Due: {cls.assignment_due_date || "End of Module"}
+                          </span>
+                        </div>
+                        {cls.assignment_description && (
+                          <p style={{ fontSize: "12px", color: "#475569", margin: "0 0 8px", lineHeight: 1.4 }}>
+                            {cls.assignment_description}
+                          </p>
+                        )}
+                        {cls.is_registered && (
+                          <button
+                            onClick={() => setSubmissionModalClass(cls)}
+                            style={{
+                              padding: "6px 14px",
+                              backgroundColor: "#0B1E36",
+                              color: "#FFFFFF",
+                              border: "none",
+                              borderRadius: 6,
+                              fontSize: "11.5px",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                            }}
+                          >
+                            📤 Submit Writeup / Group Case Work
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* ACTION SECTION ACCORDING TO PAYMENT & 15-MIN LOCK */}
@@ -654,6 +734,126 @@ export default function StudentLiveLearningPage() {
                 🔒 256-Bit SSL Encrypted Payment · Receipt logged to Dr. Janardhan Mydam
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ASSIGNMENT SUBMISSION (INDIVIDUAL OR GROUP) */}
+      {submissionModalClass && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(15,23,42,0.6)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+          <div style={{ backgroundColor: "#FFFFFF", borderRadius: 14, width: "100%", maxWidth: 540, overflow: "hidden", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)" }}>
+            <div style={{ padding: "18px 24px", borderBottom: "1px solid #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center", backgroundColor: "#F8FAFC" }}>
+              <div>
+                <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#0F172A", margin: 0 }}>
+                  Submit Assignment
+                </h3>
+                <span style={{ fontSize: "12px", color: "#64748B" }}>
+                  {submissionModalClass.assignment_title}
+                </span>
+              </div>
+              <button onClick={() => setSubmissionModalClass(null)} style={{ border: "none", background: "none", fontSize: "18px", color: "#94A3B8", cursor: "pointer" }}>✕</button>
+            </div>
+
+            {subSuccessMsg ? (
+              <div style={{ padding: "32px 24px", textAlign: "center" }}>
+                <div style={{ fontSize: "32px", marginBottom: "10px" }}>🎉</div>
+                <h4 style={{ margin: "0 0 6px", fontSize: "16px", fontWeight: 800, color: "#166534" }}>Submission Received!</h4>
+                <p style={{ margin: 0, fontSize: "13px", color: "#475569" }}>{subSuccessMsg}</p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmitAssignment} style={{ padding: "20px 24px" }}>
+                {submissionModalClass.assignment_description && (
+                  <div style={{ padding: "10px 14px", backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 8, fontSize: "12px", color: "#334155", marginBottom: 14 }}>
+                    <strong>Prompt:</strong> {submissionModalClass.assignment_description}
+                  </div>
+                )}
+
+                {/* Submission Format Selector (Individual vs Group) */}
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: 6 }}>
+                    Submission Type
+                  </label>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "12px", fontWeight: 600, color: "#334155", padding: "8px 12px", borderRadius: 6, border: "1px solid #CBD5E1", cursor: "pointer", backgroundColor: subForm.submission_type === "individual" ? "#EFF6FF" : "#FFF" }}>
+                      <input
+                        type="radio"
+                        name="submission_type"
+                        checked={subForm.submission_type === "individual"}
+                        onChange={() => setSubForm({ ...subForm, submission_type: "individual" })}
+                      />
+                      👤 Individual Submission
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "12px", fontWeight: 600, color: "#334155", padding: "8px 12px", borderRadius: 6, border: "1px solid #CBD5E1", cursor: "pointer", backgroundColor: subForm.submission_type === "group" ? "#EFF6FF" : "#FFF" }}>
+                      <input
+                        type="radio"
+                        name="submission_type"
+                        checked={subForm.submission_type === "group"}
+                        onChange={() => setSubForm({ ...subForm, submission_type: "group" })}
+                      />
+                      👥 Group Assignment
+                    </label>
+                  </div>
+                </div>
+
+                {subForm.submission_type === "group" && (
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: 4 }}>
+                      Team Co-authors / Group Members (Names &amp; Emails)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Sarah Jenkins (sarah@med.edu), Alex Kumar (alex@med.edu)"
+                      value={subForm.group_members}
+                      onChange={(e) => setSubForm({ ...subForm, group_members: e.target.value })}
+                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #CBD5E1", fontSize: "12.5px", boxSizing: "border-box" }}
+                    />
+                  </div>
+                )}
+
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: 4 }}>
+                    Clinical Case Writeup / SBAR Response
+                  </label>
+                  <textarea
+                    rows={4}
+                    placeholder="Enter your clinical findings, differential diagnoses, or resuscitation plan..."
+                    value={subForm.submission_text}
+                    onChange={(e) => setSubForm({ ...subForm, submission_text: e.target.value })}
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #CBD5E1", fontSize: "12.5px", boxSizing: "border-box" }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: 18 }}>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: 4 }}>
+                    Attached File / Document URL (Google Docs, Drive, PDF)
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://docs.google.com/document/d/..."
+                    value={subForm.file_url}
+                    onChange={(e) => setSubForm({ ...subForm, file_url: e.target.value })}
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #CBD5E1", fontSize: "12.5px", boxSizing: "border-box" }}
+                  />
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, borderTop: "1px solid #E2E8F0", paddingTop: 14 }}>
+                  <button
+                    type="button"
+                    onClick={() => setSubmissionModalClass(null)}
+                    style={{ padding: "8px 14px", borderRadius: 6, border: "1px solid #CBD5E1", backgroundColor: "#FFF", cursor: "pointer", fontSize: "12.5px" }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submittingAssignment}
+                    style={{ padding: "8px 18px", borderRadius: 6, backgroundColor: "#0B1E36", color: "#FFF", fontWeight: 700, border: "none", cursor: "pointer", fontSize: "12.5px" }}
+                  >
+                    {submittingAssignment ? "Submitting..." : "Submit to Faculty ✓"}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
